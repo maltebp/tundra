@@ -1,0 +1,16 @@
+CompileFlags:
+    Add:      [ 
+        -ferror-limit=200,
+        -march=mips1,
+        -isystem, \Users\malte\tools\psn00bsdk\mipsel-none-elf\include\c++\12.3.0,
+        -isystem, \Users\malte\tools\psn00bsdk\mipsel-none-elf\include\c++\12.3.0\mipsel-none-elf\soft-float,
+        -isystem, \Users\malte\tools\psn00bsdk\lib\gcc\mipsel-none-elf\12.3.0\include,
+        -isystem, \Users\malte\tools\psn00bsdk\lib\gcc\mipsel-none-elf\12.3.0\include-fixed,
+        -isystem, \Users\malte\tools\psn00bsdk\lib\gcc\mipsel-none-elf\c++\12.3.0\include-fixed,
+        -isystem, \Users\malte\tools\psn00bsdk\mipsel-none-elf\include
+        
+    ]
+    Remove:   [ -march, -mno-llsc, -mdivide-breaks ]
+
+Diagnostics:
+    Suppress: "asm_unknown_register_name"
