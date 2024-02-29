@@ -91,6 +91,22 @@ namespace td::ac {
 					assert_input(false, "Ill-formated vertex (%s %s %s)", tokens[1].c_str(), tokens[2].c_str(), tokens[3].c_str());
 				}
 			}
+
+			if( tokens[0] == "vn" ) {
+				td::ac::assert_input(tokens.size() == 4, "Invalid normal format (only %d tokens)", tokens.size());
+
+				try {
+					Float3 normal{
+						std::stof(tokens[1]),
+						std::stof(tokens[2]),
+						std::stof(tokens[3])
+					};
+					model->normals.push_back(normal);
+				}
+				catch( std::invalid_argument& e ) {
+					assert_input(false, "Ill-formated normal (%s %s %s)", tokens[1].c_str(), tokens[2].c_str(), tokens[3].c_str());
+				}
+			}
 		}
 
 		return model;

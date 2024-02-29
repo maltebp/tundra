@@ -30,11 +30,17 @@ int main(int argc, const char* argv[]) try {
     td::ac::ObjParser obj_parser;
     td::ac::ObjModel* obj_model = obj_parser.parse(parsed_args.input_file_path);
 
+    std::cout << std::endl << "Vertices:" << std::endl;
     for( const td::Float3 vertex : obj_model->vertices ) {
-        std::cout << vertex << std::endl;
+        std::cout << '\t' << vertex << std::endl;
     }
 
-    std::cout << "Finished parsing model (vertices: " << obj_model->vertices.size() << ")" << std::endl;
+    std::cout << std::endl << "Normals:" << std::endl;
+    for( const td::Float3 normal : obj_model->normals ) {
+        std::cout << '\t' << normal << std::endl;
+    }
+
+    std::cout << "Finished parsing model (vertices: " << obj_model->vertices.size() << ", normals: " << obj_model->normals.size() ")" << std::endl;
 
     return 0;
 

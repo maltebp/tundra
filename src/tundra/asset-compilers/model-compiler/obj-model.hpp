@@ -12,6 +12,8 @@ namespace td::ac {
 
         std::vector<Float3> vertices;
 
+        std::vector<Float3> normals;
+
     };
 
 }
