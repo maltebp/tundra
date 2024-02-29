@@ -8,7 +8,7 @@ IF NOT "%~1"=="release" IF NOT "%~1"=="debug" (
 pushd %~dp0 || exit /b
 
 cmake --preset %~1 || goto done
-cmake --build %~dp0..\..\build\engine\%~1 || goto done
+cmake --build %~dp0..\..\build\model-compiler\%~1 || goto done
 
 :done
 popd

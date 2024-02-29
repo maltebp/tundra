@@ -1,0 +1,15 @@
+{
+
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "gdb",
+            "request": "launch",
+            "name": "Model Compiler Test",
+            "target": "build/model-compiler/debug/td-model-compiler.exe",
+            "arguments": "/Users/malte/Downloads/kenney_weapon-pack/Models/obj",
+            "cwd": "${workspaceRoot}",
+            "valuesFormatting": "parseText"
+        }
+    ]
+}
