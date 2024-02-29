@@ -5,9 +5,9 @@ namespace td {
     class Float2 {
     public:
 
-        constexpr Float() = default;
+        constexpr Float2() = default;
 
-        constexpr Float(float x, float y) : x(x), y(y), z(z) { }
+        constexpr Float2(float x, float y) : x(x), y(y) { }
 
         float x = 0;
         float y = 0;

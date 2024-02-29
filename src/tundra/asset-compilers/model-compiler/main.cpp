@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <stdexcept>
 
-#include "tundra/asset-compilers/model-compiler/assert.hpp"
+#include "tundra/asset-compilers/model-compiler/assert-input.hpp"
 #include "tundra/asset-compilers/model-compiler/obj-model.hpp"
 #include "tundra/asset-compilers/model-compiler/obj-parser.hpp"
 
@@ -14,10 +14,10 @@ namespace {
     };
 
     Arguments parse_args(int argc, const char* argv[]) {
-        td::ac::assert(argc == 2, "Invalid number of arguments (was %d)", argc);
+        td::ac::assert_input(argc == 2, "Invalid number of arguments (was %d)", argc);
 
         std::filesystem::path input_file_path { argv[1] };
-        td::ac::assert(std::filesystem::exists(input_file_path), "Path does not exit: '%s'", input_file_path.string().c_str());
+        td::ac::assert_input(std::filesystem::exists(input_file_path), "Path does not exit: '%s'", input_file_path.string().c_str());
 
         return { input_file_path };
     }
@@ -30,8 +30,7 @@ int main(int argc, const char* argv[]) try {
     td::ac::ObjParser obj_parser;
     td::ac::ObjModel* obj_model = obj_parser.parse(parsed_args.input_file_path);
 
-
-
+    std::cout << "Finished parsing model (vertices: " << obj_model->vertices.size() << ")" << std::endl;
 
     return 0;
 

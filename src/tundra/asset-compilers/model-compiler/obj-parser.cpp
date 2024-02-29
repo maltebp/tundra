@@ -4,9 +4,12 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <tuple>
 
 #include "tundra/core/assert.hpp"
 #include "tundra/asset-compilers/model-compiler/obj-model.hpp"
+#include "tundra/asset-compilers/model-compiler/float3.hpp"
+#include "tundra/asset-compilers/model-compiler/assert-input.hpp"
 
 std::vector<std::string> parse_line(std::ifstream& stream) {
 	TD_ASSERT(!stream.fail(), "Stream is in fail state");
@@ -68,10 +71,26 @@ namespace td::ac {
 			TD_ASSERT(!obj_file.fail(), "Stream has failed");
 
 			std::vector<std::string> tokens = parse_line(obj_file);
-			for( const std::string& token : tokens ) {
-				std::cout << token << " ";
+
+			if( tokens.size() == 0 ) {
+				continue;
 			}
 
+			if( tokens[0] == "v" ) {
+				td::ac::assert_input(tokens.size() == 4, "Invalid vertex format (only %d tokens)", tokens.size());
+
+				try {
+					Float3 vertex{
+						std::stof(tokens[1]),
+						std::stof(tokens[2]),
+						std::stof(tokens[3])
+					};
+					model->vertices.push_back(vertex);
+				}
+				catch( std::invalid_argument& e ) {
+					assert_input(false, "Ill-formated vertex (%s %s %s)", tokens[1].c_str(), tokens[2].c_str(), tokens[3].c_str());
+				}
+			}
 
 			std::cout << std::endl;
 		}
