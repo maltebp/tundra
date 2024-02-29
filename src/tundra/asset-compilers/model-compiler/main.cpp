@@ -40,7 +40,7 @@ int main(int argc, const char* argv[]) try {
         std::cout << '\t' << normal << std::endl;
     }
 
-    std::cout << "Finished parsing model (vertices: " << obj_model->vertices.size() << ", normals: " << obj_model->normals.size() ")" << std::endl;
+    std::cout << "Finished parsing model (vertices: " << obj_model->vertices.size() << ", normals: " << obj_model->normals.size() << ")" << std::endl;
 
     return 0;
 

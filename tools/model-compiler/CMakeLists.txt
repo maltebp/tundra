@@ -20,6 +20,7 @@ set( FILES
 	${SRC_AC}/assert.hpp
 	${SRC_AC}/float2.hpp
 	${SRC_AC}/float3.hpp
+	${SRC_AC}/int3.hpp
 	${SRC_AC}/obj-model.hpp
 	${SRC_AC}/obj-object.hpp
 	${SRC_AC}/obj-parser.cpp

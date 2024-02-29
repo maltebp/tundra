@@ -9,9 +9,8 @@ namespace td {
     
     class ObjObject {
     public:
-
-        std::vector<Float3> vertices;
-
+        std::vector<int> vertex_indices;
+        std::vector<int> normal_indices;
     };
 
 }
