@@ -9,12 +9,12 @@
 		{
 			"name":          "debug",
 			"displayName":   "Debug",
-			"generator":     "Ninja",
+			"generator":     "Visual Studio 17 2022",
 			"binaryDir":     "${sourceDir}/../../build/model-compiler/debug/",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Debug",
 				"CMAKE_CXX_COMPILER": "cl",
-				"CMAKE_CXX_FLAGS": "/EHsc"
+				"CMAKE_CXX_FLAGS": "/EHsc /Zc:preprocessor"
 			}
 		},
 		{

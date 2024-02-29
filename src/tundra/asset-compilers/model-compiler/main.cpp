@@ -3,7 +3,9 @@
 #include <filesystem>
 #include <stdexcept>
 
+#include "tundra/asset-compilers/model-compiler/assert.hpp"
 #include "tundra/asset-compilers/model-compiler/obj-model.hpp"
+#include "tundra/asset-compilers/model-compiler/obj-parser.hpp"
 
 namespace {
 
@@ -12,35 +14,33 @@ namespace {
     };
 
     Arguments parse_args(int argc, const char* argv[]) {
-        if( argc != 2 ) {
-            throw std::invalid_argument("Invalid number of arguments");    
-        }
-        
+        td::ac::assert(argc == 2, "Invalid number of arguments (was %d)", argc);
+
         std::filesystem::path input_file_path { argv[1] };
-        if( !std::filesystem::exists(input_file_path) ) {
-            throw std::invalid_argument(std::string("Path does not exist: ") + input_file_path.string());
-        }   
+        td::ac::assert(std::filesystem::exists(input_file_path), "Path does not exit: '%s'", input_file_path.string().c_str());
 
         return { input_file_path };
     }
-
-    td::ObjModel parse_obj(std::filesystem::path& obj_file_path) {
-        std::cout << "Parsing .obj " << obj_file_path << " ... " << std::endl;
-        return { };
-    }
-
 }
 
 int main(int argc, const char* argv[]) try {
 
     Arguments parsed_args = parse_args(argc, argv);
 
-    parse_obj(parsed_args.input_file_path);
+    td::ac::ObjParser obj_parser;
+    td::ac::ObjModel* obj_model = obj_parser.parse(parsed_args.input_file_path);
+
+
+
 
     return 0;
 
+}
+catch (td::ac::InputException e) {
+    
+    std::cerr << "Error: " << e.what() << std::endl;
+
 } catch(std::exception e) {
-
-    std::cout << "Error: " << e.what() << std::endl;
-
+    std::cerr << "Internal exception: " << e.what() << std::endl;
+    throw e;
 }
