@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 namespace td {
 
     class Float3 {
@@ -14,5 +16,9 @@ namespace td {
         float z = 0;
 
     };
+
+    static std::ostream& operator<<(std::ostream& stream, const Float3 f3) {
+        return stream << "(" << f3.x << ", " << f3.y << ", " << f3.z << ")";
+    }
 
 }

@@ -91,8 +91,6 @@ namespace td::ac {
 					assert_input(false, "Ill-formated vertex (%s %s %s)", tokens[1].c_str(), tokens[2].c_str(), tokens[3].c_str());
 				}
 			}
-
-			std::cout << std::endl;
 		}
 
 		return model;
