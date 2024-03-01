@@ -12,7 +12,13 @@ namespace td::ac {
 	struct ByteArray {
 	public:
 
-		ByteArray(uint32 size) : data(new byte[size]), size(size) { }
+		ByteArray(uint32 size) : data(new byte[size]), size(size) {
+			byte* next = data;
+			for( int i = 0; i < size; i++ ) {
+				*next = 0;
+				next++;
+			}
+		}
 
 		template<typename T>
 		void append_bytes(const T& t) {

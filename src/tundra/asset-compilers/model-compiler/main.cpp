@@ -88,6 +88,12 @@ int main(int argc, const char* argv[]) try {
         }
     }
 
+    for( td::Float3& vertex : obj_model->vertices ) {
+        vertex.x *= 50;
+        vertex.y *= 50;
+        vertex.z *= 50;
+    }
+
     std::cout << "Converting to Model Asser..." << std::endl;
     td::ModelAsset* model_asset = obj_model->to_model_asset();
 

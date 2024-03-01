@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include <tundra/assets/model/model-asset.hpp>
+	#include <tundra/assets/model/model-asset.hpp>
 #include <tundra/assets/model/model-part.hpp>
 
 namespace td::ac {
@@ -67,7 +67,7 @@ namespace td::ac {
 		model_asset->num_parts = triangles_grouped_by_material.size();
 		model_asset->model_parts = new ModelPart*[model_asset->num_parts];
 
-		int i = 0;
+		int j = 0;
 		for( auto& [material_name, triangles] : triangles_grouped_by_material ) {
 			
 			ModelPart* model_part = new ModelPart();
@@ -82,15 +82,15 @@ namespace td::ac {
 					(uint16)(triangles[i].indices[2].x),
 				};
 
-				model_part->vertex_indices[i] = {
+				model_part->normal_indices[i] = {
 					(uint16)(triangles[i].indices[0].z),
 					(uint16)(triangles[i].indices[1].z),
 					(uint16)(triangles[i].indices[2].z)
 				};
 			}
 
-			model_asset->model_parts[i] = model_part;
-			i++;
+			model_asset->model_parts[j] = model_part;
+			j++;
 		}
 
 		return model_asset;
