@@ -6,6 +6,10 @@
 #include "tundra/asset-compilers/model-compiler/float3.hpp"
 #include "tundra/asset-compilers/model-compiler/obj-object.hpp"
 
+namespace td {
+    class ModelAsset;
+}
+
 namespace td::ac {
 
     class ObjModel {
@@ -16,6 +20,8 @@ namespace td::ac {
         std::vector<Float3> normals;
 
         std::vector<ObjObject*> obj_objects;
+
+        ModelAsset* to_model_asset() const;
 
     };
 

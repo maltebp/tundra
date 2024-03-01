@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-#ifdef TD_PLATFORM_PLAYSTATION
+#ifdef TD_PLATFORM_DEVELOPMENT
 #include <exception>
 #endif
 
@@ -20,7 +20,7 @@ namespace {
         std:: printf(format, args...);
 
 #if defined TD_PLATFORM_PLAYSTATION
-        for (;;) {
+        for (;;) {  
             __asm__ volatile("");
         }
 #elif defined TD_PLATFORM_DEVELOPMENT
