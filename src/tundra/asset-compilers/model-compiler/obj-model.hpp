@@ -15,7 +15,7 @@ namespace td::ac {
 
         std::vector<Float3> normals;
 
-        std::vector<ObjObject> obj_objects;
+        std::vector<ObjObject*> obj_objects;
 
     };
 

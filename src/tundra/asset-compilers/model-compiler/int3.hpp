@@ -5,13 +5,13 @@ namespace td {
     class Int3 {
     public:
 
-        constexpr Float2() = default;
+        constexpr Int3() = default;
 
-        constexpr Float2(float x, float y) : x(x), y(y) { }
+        constexpr Int3(int x, int y, int z) : x(x), y(y), z(z) { }
 
-        float x = 0;
-        float y = 0;
-
+        int x = 0;
+        int y = 0;
+        int z = 0;
     };
 
 }

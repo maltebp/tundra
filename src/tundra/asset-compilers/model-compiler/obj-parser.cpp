@@ -8,7 +8,10 @@
 
 #include "tundra/core/assert.hpp"
 #include "tundra/asset-compilers/model-compiler/obj-model.hpp"
+#include "tundra/asset-compilers/model-compiler/obj-object.hpp"
+#include "tundra/asset-compilers/model-compiler/obj-object-part.hpp"
 #include "tundra/asset-compilers/model-compiler/float3.hpp"
+#include "tundra/asset-compilers/model-compiler/int3.hpp"
 #include "tundra/asset-compilers/model-compiler/assert-input.hpp"
 
 std::vector<std::string> parse_line(std::ifstream& stream) {
@@ -54,12 +57,12 @@ std::vector<std::string> parse_line(std::ifstream& stream) {
 	return tokens;	
 }
 
-std::tuple<int, int, int> parse_index(const std::string& index_token) {
+td::Int3 parse_index(const std::string& index_token) {
 	std::istringstream line_stream{ index_token };
 	std::string index_string;
-	int vertex_index = 0;
-	int normal_index = 0;
-	int texture_index = 0;
+	int vertex_index = -1;
+	int normal_index = -1;
+	int texture_index = -1;
 
 	int index_count = 0;
 	while( std::getline(line_stream, index_string, '/') ) {
@@ -70,7 +73,7 @@ std::tuple<int, int, int> parse_index(const std::string& index_token) {
 		if( index_count == 3 ) normal_index = std::stoi(index_string);
 	}
 
-	td::ac::assert_input(index_count == 3, "Invalid number of elements in face index (was %d)", index_count);
+	td::ac::input_assert(index_count == 3, "Invalid number of elements in face index (was %d)", index_count);
 
 	return { vertex_index, texture_index, normal_index };
 }
@@ -84,7 +87,12 @@ namespace td::ac {
 
 		ObjModel* model = new ObjModel();
 
-		std::cout << "Content: " << std::endl;
+		bool current_object_is_default = true;
+		ObjObject* current_object = new ObjObject();
+		
+		bool current_object_part_is_default = false;
+		ObjObjectPart* current_object_part = new ObjObjectPart();
+		current_object->parts.push_back(current_object_part);
 
 		std::string line;
 		
@@ -97,8 +105,67 @@ namespace td::ac {
 				continue;
 			}
 
+			if( tokens[0] == "g" || tokens[0] == "o" ) {
+				std::string name;
+				for( int i = 1; i < tokens.size(); i++ ) {
+					name += tokens[i];
+					if( i < tokens.size() - 1 ) {
+						name += " ";
+					}
+				}
+
+				td::ac::input_assert_warning(!name.empty(), "Object has no name");
+
+				bool is_default_and_is_unused = current_object_is_default && !current_object->has_any_faces();
+				if( is_default_and_is_unused ) {
+					delete current_object;
+				}
+				else
+				{
+					td::ac::input_assert_warning(current_object->has_any_faces(), "Object '%s' has no faces", current_object->name);
+					model->obj_objects.push_back(current_object);
+				}
+
+				current_object = new ObjObject();
+				current_object->name = name;
+				current_object_is_default = false;
+
+				current_object_part = new ObjObjectPart();
+				current_object->parts.push_back(current_object_part);
+				current_object_part_is_default = true;
+			}
+
+			if( tokens[0] == "usemtl" ) {
+				td::ac::input_assert(current_object != nullptr, "'usemtl' used before an object/group has been defined (we currently don't support this)");
+
+				std::string material_name;
+				for( int i = 1; i < tokens.size(); i++ ) {
+					material_name += tokens[i];
+					if( i < tokens.size() - 1 ) {
+						material_name += " ";
+					}
+				}
+
+				td::ac::input_assert(!material_name.empty(), "'usemtl' has not name");
+
+				bool current_is_unused = current_object_part->faces.size() == 0;
+				if( current_object_part_is_default && current_is_unused ) {
+					// Re-use the defaul
+					current_object_part->material_name = material_name;
+					current_object_part_is_default = false;
+				}
+				else
+				{
+					td::ac::input_assert_warning(current_object_part->faces.size() > 0, "Object part has no faces");
+					current_object_part = new ObjObjectPart();
+					current_object_part->material_name = material_name;
+					current_object->parts.push_back(current_object_part);
+					current_object_part_is_default = false;
+				}
+			}
+
 			if( tokens[0] == "v" ) {
-				td::ac::assert_input(tokens.size() == 4, "Invalid vertex format (only %d tokens)", tokens.size());
+				td::ac::input_assert(tokens.size() == 4, "Invalid vertex format (only %d tokens)", tokens.size());
 
 				try {
 					Float3 vertex{
@@ -109,12 +176,12 @@ namespace td::ac {
 					model->vertices.push_back(vertex);
 				}
 				catch( std::invalid_argument& e ) {
-					assert_input(false, "Ill-formated vertex (%s %s %s)", tokens[1].c_str(), tokens[2].c_str(), tokens[3].c_str());
+					input_assert(false, "Ill-formated vertex (%s %s %s)", tokens[1].c_str(), tokens[2].c_str(), tokens[3].c_str());
 				}
 			}
 
 			if( tokens[0] == "vn" ) {
-				td::ac::assert_input(tokens.size() == 4, "Invalid normal format (only %d tokens)", tokens.size());
+				td::ac::input_assert(tokens.size() == 4, "Invalid normal format (only %d tokens)", tokens.size());
 
 				try {
 					Float3 normal{
@@ -125,33 +192,28 @@ namespace td::ac {
 					model->normals.push_back(normal);
 				}
 				catch( std::invalid_argument& e ) {
-					assert_input(false, "Ill-formated normal (%s %s %s)", tokens[1].c_str(), tokens[2].c_str(), tokens[3].c_str());
+					input_assert(false, "Ill-formated normal (%s %s %s)", tokens[1].c_str(), tokens[2].c_str(), tokens[3].c_str());
 				}
 			}
 
 			if( tokens[0] == "f" ) {
-				td::ac::assert_input(tokens.size() > 3, "Invalid index format (%d tokens)", tokens.size());
+				td::ac::input_assert(tokens.size() > 3, "Invalid index format (%d tokens)", tokens.size());
 
-				size_t num_indices = tokens.size() - 1;
+				ObjFace face;
 
 				for( int i = 1; i < tokens.size(); i++ ) {
-					const std::string& token = tokens[i];
-					
-					
-				}
+                    Int3 index = parse_index(tokens[i]);
+					face.indices.push_back(index);
+				}   
 
-				try {
-					Float3 normal{
-						std::stof(tokens[1]),
-						std::stof(tokens[2]),
-						std::stof(tokens[3])
-					};
-					model->normals.push_back(normal);
-				}
-				catch( std::invalid_argument& e ) {
-					assert_input(false, "Ill-formated normal (%s %s %s)", tokens[1].c_str(), tokens[2].c_str(), tokens[3].c_str());
-				}
+				current_object_part->faces.push_back(face);
 			}
+		}
+
+		td::ac::input_assert_warning(current_object_part_is_default || current_object->has_any_faces(), "Last object '%s' has no faces", current_object->name);
+
+		if( !current_object_is_default || current_object->has_any_faces() ) {
+			model->obj_objects.push_back(current_object);
 		}
 
 		return model;
