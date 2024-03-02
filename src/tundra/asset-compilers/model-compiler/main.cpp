@@ -62,7 +62,6 @@ int main(int argc, const char* argv[]) try {
     td::ac::ObjParser obj_parser;
     td::ac::ObjModel* obj_model = obj_parser.parse(parsed_args.input_file_path);
 
-    /*
     std::cout << "Content: " << std::endl;
 
     std::cout << std::endl << "Vertices:" << std::endl;
@@ -73,7 +72,7 @@ int main(int argc, const char* argv[]) try {
     std::cout << std::endl << "Normals:" << std::endl;
     for( const td::Float3 normal : obj_model->normals ) {
         std::cout << '\t' << normal << std::endl;
-    }*/
+    }
 
     std::cout << "Finished parsing model (vertices: " 
         << obj_model->vertices.size() 
@@ -88,23 +87,28 @@ int main(int argc, const char* argv[]) try {
         }
     }
 
-    for( td::Float3& vertex : obj_model->vertices ) {
-        vertex.x *= 50;
-        vertex.y *= 50;
-        vertex.z *= 50;
-    }
-
     std::cout << "Converting to Model Asser..." << std::endl;
     td::ModelAsset* model_asset = obj_model->to_model_asset();
 
-    std::cout << "Finished paring Model Asset" << std::endl;
+    std::cout << "Finished parsing Model Asset" << std::endl;
     std::cout << "  Vertices: " << model_asset->num_vertices << std::endl;
     std::cout << "  Normals: " << model_asset->num_normals << std::endl;
     std::cout << "  Parts: " << model_asset->num_parts << std::endl;
     for( int i = 0; i < model_asset->num_parts; i++ ) {
-
         std::cout << "    Triangles: " << model_asset->model_parts[i]->num_triangles << std::endl;
     }
+
+    /*for( int i = 0; i < model_asset->num_vertices; i++ ) {
+        Vec3<td::int16> vertex = model_asset->vertices[i];
+        std::cout << vertex.x << ", " << vertex.y << ", " << vertex.z << std::endl;
+    }*/
+
+    //for( int i = 0; i < model_asset->num_parts; i++ ) {
+    //    for( int j = 0; j < model_asset->model_parts[i]->num_triangles; j++ ) {
+    //        Vec3<td::uint16> vertex_indices = model_asset->model_parts[i]->vertex_indices[j];
+    //        std::cout << vertex_indices.x << ", " << vertex_indices.y << ", " << vertex_indices.z << std::endl;
+    //    }
+    //}
 
     std::cout << "Testing equality operator...";
     TD_ASSERT((*model_asset) == (*model_asset), "ModelAsset operator== failed (object is not equal to itself)");

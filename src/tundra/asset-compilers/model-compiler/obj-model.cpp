@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-	#include <tundra/assets/model/model-asset.hpp>
+#include <tundra/assets/model/model-asset.hpp>
 #include <tundra/assets/model/model-part.hpp>
 
 namespace td::ac {
@@ -10,9 +10,6 @@ namespace td::ac {
 	ObjFace triangulate_face(const ObjFace& face) {
 
 		ObjFace triangulated_face;
-		triangulated_face.indices.push_back(face.indices[0]);
-		triangulated_face.indices.push_back(face.indices[1]);
-		triangulated_face.indices.push_back(face.indices[2]);
 
 		const Int3 first_indices = face.indices[0];
 		Int3 previous_indices = face.indices[1];
