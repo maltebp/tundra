@@ -26,6 +26,7 @@ set( TD_BASE_SOURCES
 
 if(TD_PLATFORM STREQUAL "PlayStation")
     psn00bsdk_add_library(td.base STATIC ${TD_BASE_SOURCES} ${TD_BASE_HEADERS})
+    set_property(TARGET td.base PROPERTY PSN00BSDK_TARGET_TYPE EXECUTABLE_GPREL)
 else()
     add_library(td.base STATIC ${TD_BASE_SOURCES} ${TD_BASE_HEADERS})
 endif()

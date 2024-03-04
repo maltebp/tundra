@@ -13,6 +13,7 @@ set( TD_ENGINE_SOURCES
 )
 
 psn00bsdk_add_library(td.playstation.engine STATIC ${TD_ENGINE_SOURCES} ${TD_ENGINE_HEADERS})
+set_property(TARGET td.playstation.engine PROPERTY PSN00BSDK_TARGET_TYPE EXECUTABLE_GPREL)
 
 target_link_libraries(td.playstation.engine td.base)
 
