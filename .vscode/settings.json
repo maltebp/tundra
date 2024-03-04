@@ -3,4 +3,9 @@
         "--compile-commands-dir=${workspaceFolder}\\build\\playstation",
         "--query-driver=C:\\Users\\malte\\tools\\psn00bsdk\\bin\\mipsel-none-elf-g++.exe"
     ],
+    "files.associations": {
+        "chrono": "cpp",
+        "system_error": "cpp",
+        "xlocale": "cpp"
+    },
 }

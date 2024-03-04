@@ -38,8 +38,8 @@ namespace td {
 }
 
 #define TDI_TEST_GEN(name, internal_name)\
-    void TD_CONCAT(internal_name, _func)(td::Test*);\
-    td::Test internal_name{name, &TD_CONCAT(internal_name, _func)};\
-    void TD_CONCAT(internal_name, _func)(td::Test* td_internal_input_test)
+    static void TD_CONCAT(internal_name, _func)(td::Test*);\
+    static td::Test internal_name{name, &TD_CONCAT(internal_name, _func)};\
+    static void TD_CONCAT(internal_name, _func)(td::Test* td_internal_input_test)
 
 #define TD_TEST(name) TDI_TEST_GEN(name, TD_CONCAT(td_test_, __COUNTER__))
