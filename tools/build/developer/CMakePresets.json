@@ -1,0 +1,20 @@
+{
+	"version": 3,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 21,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name":          "developer",
+			"displayName":   "Developer",
+			"description":   "Generates the Developer project",
+			"generator":     "Visual Studio 17 2022",
+			"binaryDir":     "${sourceDir}/../../../build/developer/",
+			"warnings": {
+				"dev": false
+			}
+		}
+	]
+}

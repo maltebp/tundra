@@ -1,0 +1,39 @@
+cmake_minimum_required(VERSION 3.21)
+
+set( TD_BASE_DIR_INCLUDE ${TD_DIR_INCLUDE}/base )
+
+set( TD_BASE_HEADERS 
+    ${TD_BASE_DIR_INCLUDE}/tundra/core/assert.hpp
+    ${TD_BASE_DIR_INCLUDE}/tundra/core/macro-util.hpp
+    ${TD_BASE_DIR_INCLUDE}/tundra/core/types.hpp
+
+    ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-asset.hpp
+    ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-file-header.hpp
+    ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-deserializer.hpp
+    ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-part-header.hpp
+    ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-part.hpp
+)
+
+set( TD_BASE_DIR_SRC ${TD_DIR_SRC}/base )
+
+set( TD_BASE_SOURCES
+
+    ${TD_BASE_DIR_SRC}/tundra/assets/model/model-asset.cpp
+    ${TD_BASE_DIR_SRC}/tundra/assets/model/model-deserializer.cpp
+)
+
+if(TD_PLATFORM STREQUAL "PlayStation")
+    psn00bsdk_add_library(td.base STATIC ${TD_BASE_SOURCES} ${TD_BASE_HEADERS})
+else()
+    add_library(td.base STATIC ${TD_BASE_SOURCES} ${TD_BASE_HEADERS})
+endif()
+
+
+target_include_directories(
+    td.base
+    PUBLIC ${TD_BASE_DIR_INCLUDE}
+    PRIVATE ${TD_BASE_DIR_SRCs}
+)
+
+source_group(TREE ${TD_BASE_DIR_SRC}/tundra PREFIX src FILES ${TD_BASE_SOURCES})
+source_group(TREE ${TD_BASE_DIR_INCLUDE}/tundra PREFIX include FILES ${TD_BASE_HEADERS})
