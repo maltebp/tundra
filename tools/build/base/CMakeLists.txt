@@ -20,6 +20,8 @@ set( TD_BASE_SOURCES
 
     ${TD_BASE_DIR_SRC}/tundra/assets/model/model-asset.cpp
     ${TD_BASE_DIR_SRC}/tundra/assets/model/model-deserializer.cpp
+    ${TD_BASE_DIR_SRC}/tundra/test-framework/test-runner.cpp
+    ${TD_BASE_DIR_SRC}/tundra/test-framework/test.cpp
 )
 
 if(TD_PLATFORM STREQUAL "PlayStation")

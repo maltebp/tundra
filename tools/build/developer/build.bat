@@ -9,6 +9,5 @@ pushd %~dp0 || exit /b
 
 cmake --build ..\..\..\build\developer --config %~1 || goto done
 
-
 :done
 popd

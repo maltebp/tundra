@@ -23,3 +23,4 @@ add_compile_definitions( TD_PLATFORM_DEVELOPER )
 
 add_subdirectory(../base base)
 add_subdirectory(asset-compiler)
+add_subdirectory(tests)
