@@ -26,7 +26,7 @@ namespace td {
                 any_tests_failed = true;
                 std::printf(" FAILURE\n", test->name);
                 std::printf("      %s\n", Test::current_failure_report.comparison_string);
-                std::printf("       in %s:%d\n", Test::current_failure_report.file_name, Test::current_failure_report.line_number);
+                std::printf("       in %s:%d\n\n", Test::current_failure_report.file_name, Test::current_failure_report.line_number);
             }
             else {
                 std::printf(" Success\n");
