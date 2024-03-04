@@ -17,7 +17,7 @@ namespace {
     // Should not be called by code manually
     template<typename ... TArgs>
     static void _handle_assert (const char *format, TArgs... args) {
-        std:: printf(format, args...);
+        std::printf(format, args...);
 
 #if defined TD_PLATFORM_PLAYSTATION
         for (;;) {  

@@ -9,7 +9,6 @@ project(
 	DESCRIPTION  ""
 )
 
-
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
@@ -18,4 +17,5 @@ add_compile_definitions( TD_PLATFORM_PLAYSTATION )
 
 add_subdirectory(../base base)
 add_subdirectory(engine)
+add_subdirectory(tests)
 

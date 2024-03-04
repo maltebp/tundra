@@ -18,15 +18,15 @@ namespace td {
             Test::current_failure_report = {};
             Test::last_test_failed = false;
             
-            std::printf("  %s..", test->name);
+            std::printf("  %s =", test->name);
 
             test->function(test);
             
             if( Test::last_test_failed ) {
                 any_tests_failed = true;
-                std::fprintf(stderr, " FAILURE\n", test->name);
-                std::fprintf(stderr, "      %s\n", Test::current_failure_report.comparison_string);
-                std::fprintf(stderr, "       in %s:%d\n", Test::current_failure_report.file_name, Test::current_failure_report.line_number);
+                std::printf(" FAILURE\n", test->name);
+                std::printf("      %s\n", Test::current_failure_report.comparison_string);
+                std::printf("       in %s:%d\n", Test::current_failure_report.file_name, Test::current_failure_report.line_number);
             }
             else {
                 std::printf(" Success\n");
@@ -34,7 +34,7 @@ namespace td {
         }
 
         if( any_tests_failed ) {
-            std::fprintf(stderr, "\nTESTS FAILED!\n");
+            std::printf("\nTESTS FAILED!\n");
         }
         else {
             std::printf("\nAll tests succeeded\n");

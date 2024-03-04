@@ -3,12 +3,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Model Compiler Test",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/model-compiler/debug/td-model-compiler.exe",
-            "args": ["arg1", "arg2"],
-            "cwd": "${workspaceFolder}"
+            "type": "gdb",
+            "request": "attach",
+            "name": "PlayStation Tests (Debug, PCSX Redux)",
+            "target": "localhost:3333",
+            "remote": true,
+            "executable": "build\\playstation\\tests\\Debug\\td.playstation.tests.elf",
+            "gdbpath": "gdb-multiarch",
+            "cwd": "${workspaceRoot}",
+            "autorun": [
+                "set substitute-path /project .",
+                "monitor reset shellhalt",
+                "load build/playstation/tests/Debug/td.playstation.tests.elf",
+            ],
+            "valuesFormatting": "prettyPrinters"
         }
     ]
 }
