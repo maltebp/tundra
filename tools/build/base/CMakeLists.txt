@@ -4,6 +4,7 @@ set( TD_BASE_DIR_INCLUDE ${TD_DIR_INCLUDE}/base )
 
 set( TD_BASE_HEADERS 
     ${TD_BASE_DIR_INCLUDE}/tundra/core/assert.hpp
+    ${TD_BASE_DIR_INCLUDE}/tundra/core/log.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/core/macro-util.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/core/types.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/core/string.hpp

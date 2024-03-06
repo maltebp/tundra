@@ -12,7 +12,7 @@
 
 #else
 
-namespace {
+namespace td::internal {
 
     // Should not be called by code manually
     template<typename ... TArgs>
@@ -33,6 +33,6 @@ namespace {
 }
 
 #define TD_ASSERT(expression, format, ...) \
-	((expression) ? ((void) 0) : _handle_assert("Assert failed in " __FILE__ ":%d: "  #expression " (" format ")\n", __LINE__ __VA_OPT__(,) __VA_ARGS__)) \
+	((expression) ? ((void) 0) : td::internal::_handle_assert("Assert failed in " __FILE__ ":%d: "  #expression " (" format ")\n", __LINE__ __VA_OPT__(,) __VA_ARGS__)) \
 
 #endif

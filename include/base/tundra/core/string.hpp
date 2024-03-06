@@ -1,7 +1,6 @@
 #pragma once
 
 #include <tundra/core/types.hpp>
-#include <tundra/core/template-util.hpp>
 
 namespace td {
 
