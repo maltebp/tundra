@@ -20,8 +20,6 @@ namespace td {
 
         String(const String& other);
 
-        String(String&& other);
-
         ~String();
 
         uint32 get_size() const { return size; }

@@ -43,11 +43,6 @@ namespace td {
         characters[this->size] = '\0';
     }
 
-    String::String(String&& other) {
-		//TODO:
-        TD_ASSERT(false, "Not implemented");
-	}
-
     String::~String() {
 		if( characters != nullptr ) {
             delete[] characters;
