@@ -16,6 +16,7 @@ target_link_libraries(td.playstation.tests PRIVATE td.playstation.engine)
 
 target_include_directories(
     td.playstation.tests
+    PRIVATE ${TD_DIR_TESTS}/base
     PRIVATE ${TD_TESTS_DIR_SRC}
 )
 

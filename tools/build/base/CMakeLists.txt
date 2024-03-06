@@ -6,6 +6,7 @@ set( TD_BASE_HEADERS
     ${TD_BASE_DIR_INCLUDE}/tundra/core/assert.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/core/macro-util.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/core/types.hpp
+    ${TD_BASE_DIR_INCLUDE}/tundra/core/string.hpp
 
     ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-asset.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-file-header.hpp
@@ -18,6 +19,7 @@ set( TD_BASE_DIR_SRC ${TD_DIR_SRC}/base )
 
 set( TD_BASE_SOURCES
 
+    ${TD_BASE_DIR_SRC}/tundra/core/string.cpp
     ${TD_BASE_DIR_SRC}/tundra/assets/model/model-asset.cpp
     ${TD_BASE_DIR_SRC}/tundra/assets/model/model-deserializer.cpp
     ${TD_BASE_DIR_SRC}/tundra/test-framework/test-runner.cpp

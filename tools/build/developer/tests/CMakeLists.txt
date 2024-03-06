@@ -16,7 +16,7 @@ target_link_libraries(td.developer.tests td.developer.asset-compiler)
 
 target_include_directories(
     td.developer.tests
-    PRIVATE ${TD_TESTS_DIR_SRC}
+    PRIVATE ${TD_DIR_TESTS}/base
 	PRIVATE ${TD_ASSET_COMPILER_DIR_SRC}
 )
 

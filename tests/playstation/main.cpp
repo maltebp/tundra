@@ -1,6 +1,6 @@
 #include <tundra/test-framework/test-runner.hpp>
 
-#include "tests/test-test.hpp"
+#include "base-tests.hpp"
 
 int main() {
     return td::TestRunner::run();

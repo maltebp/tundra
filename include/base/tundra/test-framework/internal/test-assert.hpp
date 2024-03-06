@@ -3,18 +3,14 @@
 #include <cstdio>
 
 #include <tundra/core/types.hpp>
+#include <tundra/core/string.hpp>
 
 #include <tundra/test-framework/test.hpp>
-#include <tundra/test-framework/test-value-to-string.hpp>
 #include <tundra/test-framework/internal/test-failure-report.hpp>
 
 namespace td::internal {
 
-    const uint32 TEST_VALUE_STRING_BUFFER_SIZE = 128;
-    static char value_1_string_buffer[TEST_VALUE_STRING_BUFFER_SIZE];
-    static char value_2_string_buffer[TEST_VALUE_STRING_BUFFER_SIZE];
-
-    const uint32 FAILURE_MESSAGE_BUFFER_SIZE = 128 + 2 * TEST_VALUE_STRING_BUFFER_SIZE;
+    const uint32 FAILURE_MESSAGE_BUFFER_SIZE = 516;
     static char failure_message_buffer[FAILURE_MESSAGE_BUFFER_SIZE];
 
     template<typename T1, typename T2>
@@ -62,8 +58,8 @@ namespace td::internal {
     ) {
         if( comparison_func(value_1, value_2) ) return true;
 
-        TestValueToString<T1>::to_string(value_1, value_1_string_buffer, TEST_VALUE_STRING_BUFFER_SIZE);
-        TestValueToString<T2>::to_string(value_2, value_2_string_buffer, TEST_VALUE_STRING_BUFFER_SIZE);
+        String value_1_string = td::to_string(value_1);
+        String value_2_string = td::to_string(value_2);
         
         std::snprintf(
             failure_message_buffer,
@@ -72,9 +68,9 @@ namespace td::internal {
             value_1_raw_string,
             comparison_operator, 
             value_2_raw_string,
-            value_1_string_buffer, 
+            value_1_string.get_c_string(), 
             comparison_operator,
-            value_2_string_buffer);
+            value_2_string.get_c_string());
 
         Test::current_failure_report = { test, failure_message_buffer, file_name, line_number };
         Test::last_test_failed = true;
