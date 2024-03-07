@@ -32,5 +32,19 @@
                 "load build/playstation/tests/Debug/td.playstation.tests.elf",
             ],
         },
+        {
+            "type": "gdb",
+            "request": "attach",
+            "name": "Hardware Tests (Release)",
+            "target": "localhost:3334",
+            "remote": true,
+            "executable": "build\\playstation\\tests\\Release\\td.playstation.tests.elf",
+            "gdbpath": "gdb-multiarch",
+            "cwd": "${workspaceRoot}",
+            "valuesFormatting": "prettyPrinters",
+            "autorun": [
+                "load build/playstation/tests/Release/td.playstation.tests.elf",
+            ],
+        },
     ],
 }
