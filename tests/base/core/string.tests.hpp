@@ -1,7 +1,7 @@
 #pragma once
 
-#include <tundra/test-framework/internal/test-assert.hpp>
 #include <tundra/test-framework/test.hpp>
+#include <tundra/test-framework/test-assert.hpp>
 
 #include <tundra/core/string.hpp>
 
