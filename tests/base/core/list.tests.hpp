@@ -20,8 +20,16 @@ public:
     }
 
     TestType(const TestType& other) 
-        :   value(other.value) {
+        :   value(other.value) 
+    {
         num_constructors_called++;
+    }
+
+    TestType(TestType&& other) 
+        :   value(other.value) 
+    {
+        num_constructors_called++;
+        num_move_constructors_called++;
     }
 
     ~TestType() {
@@ -39,6 +47,7 @@ public:
     int value = 0;
 
     static inline td::uint32 num_constructors_called = 0;
+    static inline td::uint32 num_move_constructors_called = 0;
     static inline td::uint32 num_destructors_called = 0;
 };
 
@@ -77,6 +86,29 @@ TD_TEST("list/add-and-remove") {
 
     TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 1);
     TD_TEST_ASSERT_EQUAL(list.get_size(), 0);       
+}
+
+TD_TEST("list/remove-in-middle") {
+    
+    TestType t1 { 10 };
+    TestType t2 { 15 };
+    TestType t3 { 20 };
+
+    td::List<TestType> list;
+    list.add(t1);
+    list.add(t2);
+    list.add(t3);
+
+    TestType::num_constructors_called = 0;
+    TestType::num_move_constructors_called = 0;
+    TestType::num_destructors_called = 0;
+
+    list.remove(1);
+
+    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 1);
+    TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 1);
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 2);
+    TD_TEST_ASSERT_EQUAL(list.get_size(), 2);       
 }
 
 TD_TEST("list/destructor") {
@@ -142,6 +174,7 @@ TD_TEST("list/add-with-relocation") {
 
     TestType::num_constructors_called = 0;
     TestType::num_destructors_called = 0;
+    TestType::num_move_constructors_called = 0;
 
     td::List<TestType> list;
     list.add(t1);
@@ -154,6 +187,7 @@ TD_TEST("list/add-with-relocation") {
     TD_TEST_ASSERT_EQUAL(list.get_size(), 3);
 
     TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 5);
+    TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 2);
     TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 2);
 
     TD_TEST_ASSERT_EQUAL(list[0], TestType{10});

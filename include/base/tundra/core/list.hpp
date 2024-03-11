@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cstdlib>
+
 #include <tundra/core/types.hpp>
 #include <tundra/core/assert.hpp>
-#include <cstdlib>
+#include <tundra/core/utility.hpp>
 
 // For some reason, it cannot find the placement new
 void* operator new(size_t count, void* address) noexcept;
@@ -43,8 +45,7 @@ namespace td {
             elements[index].~T();
 
             for( int i = index + 1; i < size; i++ ) {
-                // TODO: Use move constructor instead
-                new(elements + i - 1) T(elements[i]);
+                new(elements + i - 1) T(td::move(elements[i]));
                 elements[i].~T();
             }
 
@@ -90,7 +91,7 @@ namespace td {
 
             if( elements != nullptr ) {
                 for( int i = 0; i < size; i++ ) {
-                    new (new_elements + i) T(elements[i]);
+                    new (new_elements + i) T(td::move(elements[i]));
                     elements[i].~T();
                 }
 
