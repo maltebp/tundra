@@ -23,7 +23,7 @@ namespace td {
         
         if( this->size > 0 ) {
             characters = new char[this->size + 1];
-            for( int i = 0; i < this->size; i++ ) {
+            for( uint32 i = 0; i < this->size; i++ ) {
                 characters[i] = c_string[i];
             }
             characters[this->size] = '\0';
@@ -37,7 +37,7 @@ namespace td {
     String::String(const String& other) {
         this->size = other.size;
         this->characters = new char[this->size + 1];
-        for( int i = 0; i < this->size; i++ ) {
+        for( uint32 i = 0; i < this->size; i++ ) {
             characters[i] = other.characters[i];
         }
         characters[this->size] = '\0';
@@ -52,7 +52,7 @@ namespace td {
     bool String::is_empty_or_whitespace() const {
 		if( this->is_empty() ) return true;
         
-        for( int i = 0; i < size; i++ ) {
+        for( uint32 i = 0; i < this->size; i++ ) {
             if( characters[i] == ' ' ) continue;
             if( characters[i] == '\t' ) continue;
             if( characters[i] == '\n' ) continue;
@@ -76,7 +76,7 @@ namespace td {
         
         // "test\0"
         // "test2\0"
-        int c_string_length = 0;
+        uint32 c_string_length = 0;
         while(c_string[c_string_length] != '\0') {
             if( c_string_length >= this->size ) return false; // c_string is longer than this
             if( c_string[c_string_length] != this->characters[c_string_length] )  return false;
@@ -154,7 +154,7 @@ namespace td {
         // It may be worth considering if we should also re-allocate if there is
         // large a difference in the sizes of the target and source string
 
-        for( int i = 0; i < size; i++ ) {
+        for( uint32 i = 0; i < size; i++ ) {
             this->characters[i] = c_string[i];
         }
 
@@ -166,11 +166,11 @@ namespace td {
                 
         char* new_characters = new char[this->size + size + 1];
         
-        for( int i = 0; i < this->size; i++ ) {
+        for( uint32 i = 0; i < this->size; i++ ) {
             new_characters[i] = this->characters[i];
         }
 
-        for( int i = 0; i < size; i++ ) {
+        for( uint32 i = 0; i < size; i++ ) {
             new_characters[this->size + i] = c_string[i];
         }
 

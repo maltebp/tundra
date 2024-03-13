@@ -14,7 +14,7 @@ TD_TEST("string/basic-constructor") {
     // Ensure that memory was copied
     TD_TEST_ASSERT_NOT_EQUAL(s.get_c_string(), c_string);
 
-    TD_TEST_ASSERT_EQUAL(s.get_size(), 4);
+    TD_TEST_ASSERT_EQUAL(s.get_size(), (td::uint32)4);
 
     int i = 0;
     while(c_string[i] != '\0') {

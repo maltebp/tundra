@@ -23,7 +23,7 @@ namespace td {
 
         ~List() {
             if( elements != nullptr ) {
-                for( int i = 0; i < size; i++ ) {
+                for( uint32 i = 0; i < size; i++ ) {
                     elements[i].~T();
                 }
                 ::operator delete ((void*)elements);
@@ -44,7 +44,7 @@ namespace td {
             TD_ASSERT(index < size, "List index out of bounds (was %d but size is %d)", index, size);
             elements[index].~T();
 
-            for( int i = index + 1; i < size; i++ ) {
+            for( uint32 i = index + 1; i < size; i++ ) {
                 new(elements + i - 1) T(td::move(elements[i]));
                 elements[i].~T();
             }
@@ -55,7 +55,7 @@ namespace td {
         void clear() {
             if( elements == nullptr ) return;
 
-            for( int i = 0; i < size; i++ ) {
+            for( uint32 i = 0; i < size; i++ ) {
                 elements[i].~T();
             }            
 
@@ -90,7 +90,7 @@ namespace td {
             TD_ASSERT(new_elements != nullptr, "Failed at allocated buffer of size %d", new_available_size * sizeof(T));
 
             if( elements != nullptr ) {
-                for( int i = 0; i < size; i++ ) {
+                for( uint32 i = 0; i < size; i++ ) {
                     new (new_elements + i) T(td::move(elements[i]));
                     elements[i].~T();
                 }

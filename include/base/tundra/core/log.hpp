@@ -23,7 +23,7 @@
         template<typename T>
         const T& to_print_value(const T& value) { return value; }
 
-        static const char* to_print_value(const td::String& string) {
+        static inline const char* to_print_value(const td::String& string) {
             std::printf("Using string print value"); 
             return string.get_c_string(); 
         }
@@ -33,15 +33,15 @@
             return td::to_string(o);
         }
 
-        static char convert_to_string_if_object(const char& value) { return value; }
-        static short convert_to_string_if_object(const short& value) { return value; }
-        static int convert_to_string_if_object(const int& value) { return value; }
-        static long convert_to_string_if_object(const long& value) { return value; }
-        static long long convert_to_string_if_object(const long long& value) { return value; }
-        static unsigned short convert_to_string_if_object(const unsigned short& value) { return value; }
-        static unsigned int convert_to_string_if_object(const unsigned int& value) { return value; }
-        static unsigned long convert_to_string_if_object(const unsigned  long& value) { return value; }
-        static unsigned long long convert_to_string_if_object(const unsigned long long& value) { return value; }
+        static inline char convert_to_string_if_object(const char& value) { return value; }
+        static inline short convert_to_string_if_object(const short& value) { return value; }
+        static inline int convert_to_string_if_object(const int& value) { return value; }
+        static inline long convert_to_string_if_object(const long& value) { return value; }
+        static inline long long convert_to_string_if_object(const long long& value) { return value; }
+        static inline unsigned short convert_to_string_if_object(const unsigned short& value) { return value; }
+        static inline unsigned int convert_to_string_if_object(const unsigned int& value) { return value; }
+        static inline unsigned long convert_to_string_if_object(const unsigned  long& value) { return value; }
+        static inline unsigned long long convert_to_string_if_object(const unsigned long long& value) { return value; }
 
         template<typename ... TArgs>
         void print_strings(const char* message, TArgs... args) {

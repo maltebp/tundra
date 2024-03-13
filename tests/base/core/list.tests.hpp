@@ -66,11 +66,11 @@ TD_TEST("list/add") {
     td::List<TestType> list;
     list.add(t1);
 
-    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 1);
-    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 0);
+    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 1U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 0U);
 
     TD_TEST_ASSERT_EQUAL(list[0], TestType{10});    
-    TD_TEST_ASSERT_EQUAL(list.get_size(), 1);   
+    TD_TEST_ASSERT_EQUAL(list.get_size(), 1U);   
 }
 
 TD_TEST("list/add-and-remove") {
@@ -84,8 +84,8 @@ TD_TEST("list/add-and-remove") {
     list.add(t1);
     list.remove(0);
 
-    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 1);
-    TD_TEST_ASSERT_EQUAL(list.get_size(), 0);       
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 1U);
+    TD_TEST_ASSERT_EQUAL(list.get_size(), 0U);       
 }
 
 TD_TEST("list/remove-in-middle") {
@@ -105,10 +105,10 @@ TD_TEST("list/remove-in-middle") {
 
     list.remove(1);
 
-    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 1);
-    TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 1);
-    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 2);
-    TD_TEST_ASSERT_EQUAL(list.get_size(), 2);       
+    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 1U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 1U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 2U);
+    TD_TEST_ASSERT_EQUAL(list.get_size(), 2U);       
 }
 
 TD_TEST("list/destructor") {
@@ -122,7 +122,7 @@ TD_TEST("list/destructor") {
         list.add(t1);    
     }
     
-    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 1);
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 1U);
 }
 
 TD_TEST("list/clear") {
@@ -139,8 +139,8 @@ TD_TEST("list/clear") {
 
     list.clear();
 
-    TD_TEST_ASSERT_EQUAL(list.get_size(), 0);
-    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 2);
+    TD_TEST_ASSERT_EQUAL(list.get_size(), 0U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 2U);
 }
 
 TD_TEST("list/clear-reuse") {
@@ -161,9 +161,9 @@ TD_TEST("list/clear-reuse") {
     list.add(t1);
     list.add(t2);
     
-    TD_TEST_ASSERT_EQUAL(list.get_size(), 2);
-    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 4);
-    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 2);
+    TD_TEST_ASSERT_EQUAL(list.get_size(), 2U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 4U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 2U);
 }
 
 TD_TEST("list/add-with-relocation") {
@@ -180,15 +180,15 @@ TD_TEST("list/add-with-relocation") {
     list.add(t1);
     list.add(t2);
 
-    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 2);
+    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 2U);
 
     list.add(t3);
 
-    TD_TEST_ASSERT_EQUAL(list.get_size(), 3);
+    TD_TEST_ASSERT_EQUAL(list.get_size(), 3U);
 
-    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 5);
-    TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 2);
-    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 2);
+    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 5U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 2U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 2U);
 
     TD_TEST_ASSERT_EQUAL(list[0], TestType{10});
     TD_TEST_ASSERT_EQUAL(list[1], TestType{15});

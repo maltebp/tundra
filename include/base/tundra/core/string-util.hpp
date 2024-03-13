@@ -19,8 +19,8 @@ namespace td {
             int32 num_chars_to_write = snprintf(&dummy_buffy, 1, format, format_args...);
             TD_ASSERT(num_chars_to_write >= 0, "snprintf failed (used format '%s' and it returned %d)", format, num_chars_to_write);
 
-            char* buffer = new char[num_chars_to_write + 1];
-            int32 num_written_characters  = snprintf(buffer, num_chars_to_write + 1, format, format_args...);
+            char* buffer = new char[(uint32)num_chars_to_write + 1];
+            int32 num_written_characters  = snprintf(buffer, (uint32)num_chars_to_write + 1, format, format_args...);
             TD_ASSERT(num_written_characters >= 0, "snprintf failed (used format '%s' and it returned %d)", format, num_written_characters);
             TD_ASSERT(num_written_characters == num_chars_to_write, "snprintf did not write the full string (wrote '%d' characters, but should write %d)", format, num_written_characters);
 
