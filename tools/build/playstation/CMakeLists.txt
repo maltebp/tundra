@@ -15,6 +15,13 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set( TD_PLATFORM PlayStation )
 add_compile_definitions( TD_PLATFORM_PLAYSTATION )
 
+if (MSVC)
+	# Modern pre-processor (e.g. to enable __VA_OPT__) - seemingly can't add this to tundra.cmake
+	add_compile_options(/Zc:preprocessor /W4 /WX)
+else()
+	add_compile_options(-Wconversion -Wall -Wextra -pedantic -Wsign-conversion)
+endif() 
+
 add_subdirectory(../base base)
 add_subdirectory(engine)
 add_subdirectory(tests)

@@ -2,6 +2,7 @@
 
 #include "tundra/core/string-util.hpp"
 #include "tundra/core/string.hpp"
+#include "tundra/core/utility.hpp"
 #include <tundra/core/assert.hpp>
 #include <tundra/core/types.hpp>
 
@@ -263,6 +264,17 @@ namespace td {
             1000000000U,
         };
 
+        template<typename T>
+        static constexpr T abs(T t) {
+            // This being constexpr ensures we do not get warnings from trying
+            // to negate an unsigned integral
+            if constexpr (is_unsigned<T>()) {
+                return t;
+            } else {
+                return t < 0 ? -t : t;
+            }
+        }
+
         template<typename TDerived, typename TStoreType, typename TIntermediate, int TNumFractionBits>
         String fixed_base_to_string(const FixedBase<TDerived, TStoreType, TIntermediate, TNumFractionBits>& fixed_point, uint32 precision) {
             using TFixedBase = FixedBase<TDerived, TStoreType, TIntermediate, TNumFractionBits>;
@@ -270,7 +282,7 @@ namespace td {
             TD_ASSERT(precision <= MAX_PRINT_PRECISION, "Precision above %d is not support", MAX_PRINT_PRECISION); // Haven't tested if 18 is the magic number
 
             const TStoreType raw_value = fixed_point.get_raw_value();
-            const uint64 positive_value = (uint64)(raw_value < 0 ? -raw_value : raw_value);
+            const uint64 positive_value = (uint64)(abs<TStoreType>(raw_value));
             
             // We keep intermediary results in uint64, but we will only print uint32.uint32.
             // TODO: All calculations does not need this high precision so they could be optimized

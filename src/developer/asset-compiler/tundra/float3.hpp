@@ -17,7 +17,7 @@ namespace td {
 
     };
 
-    static std::ostream& operator<<(std::ostream& stream, const Float3 f3) {
+    static inline std::ostream& operator<<(std::ostream& stream, const Float3 f3) {
         return stream << "(" << f3.x << ", " << f3.y << ", " << f3.z << ")";
     }
 

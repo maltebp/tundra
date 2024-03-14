@@ -59,13 +59,7 @@ namespace td {
                 elements[i].~T();
             }            
 
-            ::operator delete ((void*)elements);
-            elements = nullptr;
             size = 0;
-        }
-
-        void reseve() {
-
         }
 
         td::uint32 get_size() const { return size; }

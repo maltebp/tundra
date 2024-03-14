@@ -14,7 +14,7 @@ namespace td::ac {
 
 		ByteArray(uint32 size) : data(new byte[size]), size(size) {
 			byte* next = data;
-			for( int i = 0; i < size; i++ ) {
+			for( uint32 i = 0; i < size; i++ ) {
 				*next = 0;
 				next++;
 			}
@@ -34,7 +34,7 @@ namespace td::ac {
 
 		template<typename T>
 		void append_bytes_array(const T* t, uint32 num_elements) {
-			for( int i = 0; i < num_elements; i++ ) {
+			for( uint32 i = 0; i < num_elements; i++ ) {
 				append_bytes<T>(t[i]);
 			}
 		}

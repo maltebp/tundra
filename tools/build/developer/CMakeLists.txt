@@ -15,7 +15,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 if (MSVC)
     # Modern pre-processor (e.g. to enable __VA_OPT__) - seemingly can't add this to tundra.cmake
-    add_compile_options(/Zc:preprocessor)
+    add_compile_options(/Zc:preprocessor /W4)
+else()
+	add_compile_options(-Wconversion -Wall -Wextra -pedantic -Wsign-conversion)
 endif() 
 
 set( TD_PLATFORM Developer )

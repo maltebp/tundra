@@ -4,6 +4,13 @@ function(td_link_engine target)
 
     add_compile_definitions(TD_PLATFORM_PLAYSTATION)
 
+    if (MSVC)
+        # Modern pre-processor (e.g. to enable __VA_OPT__) - seemingly can't add this to tundra.cmake
+        target_compile_options(${target} /Zc:preprocessor /W4 /WX)
+    else()
+        target_compile_options(${target} -Wconversion -Wall -Wextra -pedantic -Wsign-conversion)
+    endif() 
+
     get_filename_component( TD_DIR external/tundra ABSOLUTE)
     get_filename_component( TD_INCLUDE ${TD_DIR}/include ABSOLUTE)
     get_filename_component( TD_LIB ${TD_DIR}/build/playstation/lib ABSOLUTE)

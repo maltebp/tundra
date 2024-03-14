@@ -15,7 +15,7 @@ namespace td :: ac {
         return t;
     }
 
-    static const char* correct_format_arg(const std::string& s) {
+    static inline const char* correct_format_arg(const std::string& s) {
         return s.c_str();
     }
 

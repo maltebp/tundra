@@ -39,7 +39,7 @@ std::vector<std::string> parse_line(std::ifstream& stream) {
 	while( true ) {
 		if( line_stream_without_comments.eof() ) break;
 
-		char c = line_stream_without_comments.get();
+		char c = (char)line_stream_without_comments.get();
 		TD_ASSERT(
 			line_stream_without_comments.eof() || !line_stream_without_comments.fail(),
 			"Line stream has reached fail state without reaching end-of-file when reading char");
@@ -177,7 +177,7 @@ namespace td::ac {
 					};
 					model->vertices.push_back(vertex);
 				}
-				catch( std::invalid_argument& e ) {
+				catch( std::invalid_argument&) {
 					input_assert(false, "Ill-formated vertex (%s %s %s)", tokens[1].c_str(), tokens[2].c_str(), tokens[3].c_str());
 				}
 			}
@@ -193,7 +193,7 @@ namespace td::ac {
 					};
 					model->normals.push_back(normal);
 				}
-				catch( std::invalid_argument& e ) {
+				catch( std::invalid_argument&) {
 					input_assert(false, "Ill-formated normal (%s %s %s)", tokens[1].c_str(), tokens[2].c_str(), tokens[3].c_str());
 				}
 			}

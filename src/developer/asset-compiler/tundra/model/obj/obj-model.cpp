@@ -29,7 +29,7 @@ namespace td::ac {
 
 		ModelAsset* model_asset = new ModelAsset();
 
-		model_asset->num_vertices = this->vertices.size();
+		model_asset->num_vertices = (uint16)this->vertices.size();
 		model_asset->vertices = new Vec3<int16>[model_asset->num_vertices];
 		for( int i = 0; i < model_asset->num_vertices; i++ ) {
 			model_asset->vertices[i] = {
@@ -39,7 +39,7 @@ namespace td::ac {
 			};
 		}
 
-		model_asset->num_normals = this->normals.size();
+		model_asset->num_normals = (uint16)this->normals.size();
 		model_asset->normals = new Vec3<int16>[model_asset->num_normals];
 		for( int i = 0; i < model_asset->num_normals; i++ ) {
 			model_asset->normals[i] = {
@@ -61,14 +61,14 @@ namespace td::ac {
 			}
 		}
 
-		model_asset->num_parts = triangles_grouped_by_material.size();
+		model_asset->num_parts = (uint16)triangles_grouped_by_material.size();
 		model_asset->model_parts = new ModelPart*[model_asset->num_parts];
 
 		int j = 0;
 		for( auto& [material_name, triangles] : triangles_grouped_by_material ) {
 			
 			ModelPart* model_part = new ModelPart();
-			model_part->num_triangles = triangles.size();
+			model_part->num_triangles = (uint16)triangles.size();
 			model_part->vertex_indices = new Vec3<uint16>[model_part->num_triangles];
 			model_part->normal_indices = new Vec3<uint16>[model_part->num_triangles];
 
