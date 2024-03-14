@@ -10,5 +10,4 @@ namespace td {
     constexpr remove_reference<T>::type&& move(T& t) noexcept {
         return static_cast<typename remove_reference<T>::type&&>(t);
     }
-
 }

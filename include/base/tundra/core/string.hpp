@@ -14,7 +14,7 @@ namespace td {
         // Copies the C-string up until the null-terminator
         String(const char* c_string);
 
-        // The c_string must be dynamically allocated, and the String takes
+        // The c_string ARRAY must be dynamically allocated, and the String takes
         // ownership of allocated memory (it will delete it on destruction)
         String(char* c_string, uint32 length);
 

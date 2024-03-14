@@ -26,8 +26,8 @@ namespace td::internal {
 
     template<typename T1, typename T2>
     static void report_failure(const TestArgs<T1, T2>& test_args, const char* comparison_operator) {
-        td::String value_1_string = td::to_string(test_args.value_1);
-        td::String value_2_string = td::to_string(test_args.value_2);
+        String value_1_string = to_string(test_args.value_1);
+        String value_2_string = to_string(test_args.value_2);
         
         std::snprintf(
             failure_message_buffer,

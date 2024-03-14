@@ -16,9 +16,6 @@
 			"cacheVariables": {
 				"PSN00BSDK_TC":     "",
 				"PSN00BSDK_TARGET": "mipsel-none-elf"
-			},
-			"warnings": {
-				"dev": false
 			}
 		}
 	]
