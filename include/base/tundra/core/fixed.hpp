@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tundra/core/fixed.fwd.hpp>
+
 #include "tundra/core/string-util.hpp"
 #include "tundra/core/string.hpp"
 #include "tundra/core/utility.hpp"
@@ -14,9 +16,8 @@ namespace td {
             consteval explicit ConstEvalDouble(long double d) : d(d) { }
             long double d;
         };
-    }
-    
-    template<typename TDerived, typename TStoreType, typename TIntermediate, int TNumFractionBits>
+
+        template<typename TDerived, typename TStoreType, typename TIntermediate, int TNumFractionBits>
     class FixedBase {
     public:
 
@@ -28,9 +29,13 @@ namespace td {
             TNumFractionBits < sizeof(TStoreType) * 8,
             "Number of fraction bits must be lower than the number of bits in store type (integer part must at least have 1 bit)");
 
-        constexpr FixedBase() : value(0) { };        
+        constexpr FixedBase() = default;
 
-        constexpr FixedBase(const FixedBase& other) : value(other.value) { }
+        constexpr FixedBase(const FixedBase& other) = default;
+
+        constexpr FixedBase(FixedBase&& other) = default;
+
+        constexpr ~FixedBase() = default;
 
         consteval FixedBase(internal::ConstEvalDouble d) : value((TStoreType)(d.d * ONE)) { }
 
@@ -61,6 +66,10 @@ namespace td {
         constexpr TDerived& operator+=(const TDerived& other) {
             value += other.value;
             return static_cast<TDerived&>(*this);
+        }
+
+        constexpr TDerived operator-() const requires(td::is_signed<TStoreType>()) {
+            return from_raw_fixed_value(-value);
         }
 
         constexpr TDerived operator-(const TDerived& other) const {
@@ -163,16 +172,19 @@ namespace td {
         }
 
     };
+    }
+    
+    
 
     consteval internal::ConstEvalDouble to_fixed(double d) {
         return internal::ConstEvalDouble(d);
     };
 
     template<int TNumFractionBits>
-    class Fixed16 : public FixedBase<Fixed16<TNumFractionBits>, td::int16, td::int32, TNumFractionBits> {
+    class Fixed16 : public internal::FixedBase<Fixed16<TNumFractionBits>, td::int16, td::int32, TNumFractionBits> {
     public:
 
-        using Base = FixedBase<Fixed16<TNumFractionBits>, td::int16, td::int32, TNumFractionBits>;
+        using Base = internal::FixedBase<Fixed16<TNumFractionBits>, td::int16, td::int32, TNumFractionBits>;
 
         using Base::Base;
 
@@ -181,14 +193,18 @@ namespace td {
         consteval Fixed16(internal::ConstEvalDouble d) : Base(d) { }
 
         constexpr bool operator==(const Fixed16& other) const { return this->value == other.value; }
+
+        constexpr bool operator<(const Fixed16& other) const { return this->value < other.value; }
+
+        constexpr bool operator>(const Fixed16& other) const { return this->value > other.value; }
         
     };
 
     template<int TNumFractionBits>
-    class UFixed16 : public FixedBase<UFixed16<TNumFractionBits>, td::uint16, td::uint32, TNumFractionBits> {
+    class UFixed16 : public internal::FixedBase<UFixed16<TNumFractionBits>, td::uint16, td::uint32, TNumFractionBits> {
     public:
 
-        using Base = FixedBase<UFixed16<TNumFractionBits>, td::uint16, td::uint32, TNumFractionBits>;
+        using Base = internal::FixedBase<UFixed16<TNumFractionBits>, td::uint16, td::uint32, TNumFractionBits>;
 
         using Base::Base;
         
@@ -198,13 +214,17 @@ namespace td {
 
         constexpr bool operator==(const UFixed16& other) const { return this->value == other.value; }
 
+        constexpr bool operator<(const UFixed16& other) const { return this->value < other.value; }
+
+        constexpr bool operator>(const UFixed16& other) const { return this->value > other.value; }
+
     };
 
     template<int TNumFractionBits>
-    class Fixed32 : public FixedBase<Fixed32<TNumFractionBits>, td::int32, td::int64, TNumFractionBits> {
+    class Fixed32 : public internal::FixedBase<Fixed32<TNumFractionBits>, td::int32, td::int64, TNumFractionBits> {
     public:
 
-        using Base = FixedBase<Fixed32<TNumFractionBits>, td::int32, td::int64, TNumFractionBits>;
+        using Base = internal::FixedBase<Fixed32<TNumFractionBits>, td::int32, td::int64, TNumFractionBits>;
 
         using Base::Base;
 
@@ -220,13 +240,17 @@ namespace td {
 
         constexpr bool operator==(const Fixed32& other) const { return this->value == other.value; }
 
+        constexpr bool operator<(const Fixed32& other) const { return this->value < other.value; }
+
+        constexpr bool operator>(const Fixed32& other) const { return this->value > other.value; }
+
     };
 
     template<int TNumFractionBits>
-    class UFixed32 : public FixedBase<UFixed32<TNumFractionBits>, td::uint32, td::uint64, TNumFractionBits> {
+    class UFixed32 : public internal::FixedBase<UFixed32<TNumFractionBits>, td::uint32, td::uint64, TNumFractionBits> {
     public:
 
-        using Base = FixedBase<UFixed32<TNumFractionBits>, td::uint32, td::uint64, TNumFractionBits>;
+        using Base = internal::FixedBase<UFixed32<TNumFractionBits>, td::uint32, td::uint64, TNumFractionBits>;
 
         using Base::Base;
 
@@ -241,6 +265,10 @@ namespace td {
         constexpr UFixed32(const UFixed16<TSameNumFractionBits>& other) : Base(other) { static_assert(TSameNumFractionBits == TNumFractionBits);  }
 
         constexpr bool operator==(const UFixed32& other) const { return this->value == other.value; }
+
+        constexpr bool operator<(const UFixed32& other) const { return this->value < other.value; }
+
+        constexpr bool operator>(const UFixed32& other) const { return this->value > other.value; }
 
     };
 
@@ -271,7 +299,12 @@ namespace td {
             if constexpr (is_unsigned<T>()) {
                 return t;
             } else {
-                return t < 0 ? -t : t;
+                if( t < (T)0 ) {
+                    return -t;
+                }
+                else {
+                    return t;
+                }
             }
         }
 
@@ -284,7 +317,8 @@ namespace td {
             const TStoreType raw_value = fixed_point.get_raw_value();
             const uint64 positive_value = (uint64)(abs<TStoreType>(raw_value));
             
-            // We keep intermediary results in uint64, but we will only print uint32.uint32.
+            // We keep intermediary results in uint64, but we will only print uint32.uint32, because
+            // the psn00bsdk implementation of printf does not support larger integrals.
             // TODO: All calculations does not need this high precision so they could be optimized
 
             uint64 whole_part = (uint64)(positive_value >> TNumFractionBits); 

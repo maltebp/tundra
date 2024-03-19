@@ -354,10 +354,10 @@ namespace fixed_compile_time_tests {
     namespace explicit_constructors {
 
         // Default constructors
-        static constexpr td::Fixed16<12> f16_default;
-        static constexpr td::UFixed16<12> uf16_default;
-        static constexpr td::Fixed32<12> f32_default;
-        static constexpr td::UFixed32<12> uf32_default;
+        static constexpr td::Fixed16<12> f16_default{0};
+        static constexpr td::UFixed16<12> uf16_default{0};
+        static constexpr td::Fixed32<12> f32_default{0};
+        static constexpr td::UFixed32<12> uf32_default{0};
 
         static constexpr td::UFixed16<12> uf16_f16 { f16_default };
         static constexpr td::Fixed32<12> f32_f16 { f16_default };

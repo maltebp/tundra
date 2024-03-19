@@ -3,13 +3,15 @@ cmake_minimum_required(VERSION 3.21)
 set( TD_ENGINE_DIR_INCLUDE ${TD_DIR_INCLUDE}/playstation/engine )
 
 set( TD_ENGINE_HEADERS 
-    ${TD_ENGINE_DIR_INCLUDE}/tundra/temp.hpp
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/gte/initialize.hpp
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/gte/operations.hpp
 )
 
 set( TD_ENGINE_DIR_SRC ${TD_DIR_SRC}/playstation/engine )
 
 set( TD_ENGINE_SOURCES
-	${TD_ENGINE_DIR_SRC}/tundra/temp.cpp
+    ${TD_ENGINE_DIR_SRC}/tundra/gte/initialize.cpp 
+    ${TD_ENGINE_DIR_SRC}/tundra/gte/operations.cpp 
 )
 
 psn00bsdk_add_library(td.playstation.engine STATIC ${TD_ENGINE_SOURCES} ${TD_ENGINE_HEADERS})

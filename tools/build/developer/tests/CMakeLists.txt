@@ -5,8 +5,6 @@ set( TD_TESTS_DIR_SRC ${TD_DIR_TESTS}/developer )
 set( TD_TESTS_SOURCES
 
 	${TD_TESTS_DIR_SRC}/main.cpp
-	${TD_TESTS_DIR_SRC}/tests/test-test.hpp
-
 )
 
 add_executable(td.developer.tests ${TD_TESTS_SOURCES})

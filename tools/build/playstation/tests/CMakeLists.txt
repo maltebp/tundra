@@ -3,10 +3,7 @@ cmake_minimum_required(VERSION 3.21)
 set( TD_TESTS_DIR_SRC ${TD_DIR_TESTS}/playstation )
 
 set( TD_TESTS_SOURCES
-
 	${TD_TESTS_DIR_SRC}/main.cpp
-	${TD_TESTS_DIR_SRC}/tests/test-test.hpp
-
 )
 
 psn00bsdk_add_executable(td.playstation.tests GPREL ${TD_TESTS_SOURCES})
