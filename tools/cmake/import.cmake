@@ -8,9 +8,9 @@ function(td_link_engine target)
 
     if (MSVC)
         # Modern pre-processor (e.g. to enable __VA_OPT__) - seemingly can't add this to tundra.cmake
-        target_compile_options(${target} /Zc:preprocessor /W4 /WX)
+        target_compile_options(${target} PUBLIC /Zc:preprocessor /W4 /WX)
     else()
-        target_compile_options(${target} -Wconversion -Wall -Wextra -Wpedantic -Wsign-conversion)
+        target_compile_options(${target} PUBLIC -Wconversion -Wall -Wextra -Wpedantic -Wsign-conversion)
     endif() 
 
     get_filename_component( TD_DIR external/tundra ABSOLUTE)
