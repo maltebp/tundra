@@ -2,7 +2,7 @@
 # project CMakeLists.txt and this will do for now
 function(td_link_engine target) 
 
-    set_target_properties(${target} PROPERTY CXX_STANDARD 20)
+    set_target_properties(${target} PROPERTIES CXX_STANDARD 20)
 
     add_compile_definitions(TD_PLATFORM_PLAYSTATION)
 
