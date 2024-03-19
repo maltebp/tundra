@@ -2,13 +2,15 @@
 # project CMakeLists.txt and this will do for now
 function(td_link_engine target) 
 
+    set_target_properties(${target} PROPERTY CXX_STANDARD 20)
+
     add_compile_definitions(TD_PLATFORM_PLAYSTATION)
 
     if (MSVC)
         # Modern pre-processor (e.g. to enable __VA_OPT__) - seemingly can't add this to tundra.cmake
         target_compile_options(${target} /Zc:preprocessor /W4 /WX)
     else()
-        target_compile_options(${target} -Wconversion -Wall -Wextra -pedantic -Wsign-conversion)
+        target_compile_options(${target} -Wconversion -Wall -Wextra -Wpedantic -Wsign-conversion)
     endif() 
 
     get_filename_component( TD_DIR external/tundra ABSOLUTE)
