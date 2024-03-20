@@ -2,6 +2,7 @@
 
 #include "tundra/core/string-util.hpp"
 #include "tundra/core/string.hpp"
+#include "tundra/core/utility.hpp"
 #include <tundra/test-framework/test.hpp>
 #include <tundra/test-framework/test-assert.hpp>
 
@@ -12,6 +13,7 @@ class TestType {
 public:
 
     TestType() {
+        num_default_constructors_called++;
         num_constructors_called++;
     }
 
@@ -22,6 +24,7 @@ public:
     TestType(const TestType& other) 
         :   value(other.value) 
     {
+        num_copy_constructors_called++;
         num_constructors_called++;
     }
 
@@ -44,8 +47,18 @@ public:
         return value != other.value;
     }
 
+    static void reset_constructor_counters() {
+        num_default_constructors_called = 0;
+        num_copy_constructors_called = 0;
+        num_constructors_called = 0;
+        num_move_constructors_called = 0;
+        num_destructors_called = 0;
+    }
+
     int value = 0;
 
+    static inline td::uint32 num_default_constructors_called = 0;
+    static inline td::uint32 num_copy_constructors_called = 0;
     static inline td::uint32 num_constructors_called = 0;
     static inline td::uint32 num_move_constructors_called = 0;
     static inline td::uint32 num_destructors_called = 0;
@@ -109,20 +122,6 @@ TD_TEST("list/remove-in-middle") {
     TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 1U);
     TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 2U);
     TD_TEST_ASSERT_EQUAL(list.get_size(), 2U);       
-}
-
-TD_TEST("list/destructor") {
-    TestType t1 { 10 };
-
-    TestType::num_constructors_called = 0;
-    TestType::num_destructors_called = 0;
-
-    {
-        td::List<TestType> list;
-        list.add(t1);    
-    }
-    
-    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 1U);
 }
 
 TD_TEST("list/clear") {
@@ -193,4 +192,131 @@ TD_TEST("list/add-with-relocation") {
     TD_TEST_ASSERT_EQUAL(list[0], TestType{10});
     TD_TEST_ASSERT_EQUAL(list[1], TestType{15});
     TD_TEST_ASSERT_EQUAL(list[2], TestType{20});
+}
+
+TD_TEST("list/size-constructor") {
+
+    TestType::reset_constructor_counters();
+
+    td::List<TestType> list_1;
+    TD_TEST_ASSERT_EQUAL(list_1.get_size(), 0U);
+
+    td::List<TestType> list_2 { 3 };
+    TD_TEST_ASSERT_EQUAL(list_2.get_size(), 3U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_default_constructors_called, 3U);
+    
+    TD_TEST_ASSERT_EQUAL(list_2[0], TestType{});
+    TD_TEST_ASSERT_EQUAL(list_2[1], TestType{});
+    TD_TEST_ASSERT_EQUAL(list_2[2], TestType{});
+}
+
+TD_TEST("list/copy-constructor") {
+    
+    td::List<TestType> list;
+    list.add({1});
+    list.add({2});
+    list.add({3});
+
+    TestType::num_constructors_called = 0;
+    TestType::num_destructors_called = 0;
+    TestType::num_move_constructors_called = 0;
+
+    td::List<TestType> list_copy_1 { list };
+
+    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 3U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 0U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 0U);
+
+    TD_TEST_ASSERT_EQUAL(list_copy_1.get_size(), 3U);   
+    TD_TEST_ASSERT_EQUAL(list_copy_1[0], TestType{1});   
+    TD_TEST_ASSERT_EQUAL(list_copy_1[1], TestType{2});   
+    TD_TEST_ASSERT_EQUAL(list_copy_1[2], TestType{3});   
+}
+
+TD_TEST("list/copy-constructor-empty") {
+
+    TestType::num_constructors_called = 0;
+    TestType::num_destructors_called = 0;
+    TestType::num_move_constructors_called = 0;
+
+    td::List<TestType> list;
+    td::List<TestType> list_copy { list };
+
+    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 0U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 0U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 0U);
+    TD_TEST_ASSERT_EQUAL(list_copy.get_size(), 0U);   
+}
+
+TD_TEST("list/copy-assignment") {
+ 
+    td::List<TestType> list_1;
+    list_1.add({1});
+    list_1.add({2});
+    list_1.add({3});
+
+    TestType::reset_constructor_counters();
+
+    td::List<TestType> list_2;
+    TD_TEST_ASSERT_EQUAL(list_2.get_size(), 0U);
+
+    list_2 = list_1;
+    TD_TEST_ASSERT_EQUAL(list_2.get_size(), 3U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 3U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 0U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 0U);
+
+    td::List<TestType> list_3;
+    list_3.add(4);
+    TestType::reset_constructor_counters();
+
+    list_3 = list_2;
+    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 3U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 0U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 1U);
+
+    // Assign empty list
+    TestType::reset_constructor_counters();
+    td::List<TestType> list_4;
+    list_3 = list_4;
+    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 0U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 0U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 3U);
+}
+
+TD_TEST("list/move-constructor") {
+
+    td::List<TestType> list_1;
+    list_1.add({1});
+    list_1.add({2});
+    list_1.add({3});
+
+    TestType::reset_constructor_counters();
+
+    td::List<TestType> list_2 { td::move(list_1) };
+    
+    // We simply move the pointer of the allocated memory, so no constructors
+    // nor destructors should be called
+    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 0U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 0U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 0U);
+
+    TD_TEST_ASSERT_EQUAL(list_2.get_size(), 3U);
+    TD_TEST_ASSERT_EQUAL(list_2[0], TestType{1});
+    TD_TEST_ASSERT_EQUAL(list_2[1], TestType{2});
+    TD_TEST_ASSERT_EQUAL(list_2[2], TestType{3});
+}
+
+TD_TEST("list/destructor") {
+    TestType t1 { 10 };
+
+    TestType::num_constructors_called = 0;
+    TestType::num_destructors_called = 0;
+
+    {
+        td::List<TestType> list;
+        list.add(t1);    
+    }
+    
+    TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 1U);
 }
