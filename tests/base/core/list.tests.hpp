@@ -88,17 +88,24 @@ TD_TEST("list/add") {
 
 TD_TEST("list/add-and-remove") {
     
-    TestType t1 { 10 };
-
-    TestType::num_constructors_called = 0;
-    TestType::num_destructors_called = 0;
-
     td::List<TestType> list;
-    list.add(t1);
-    list.remove(0);
+    list.add(TestType{1});
+    list.add(TestType{2});
+    list.add(TestType{3});
+    list.add(TestType{4});
 
+    TestType to_remove {4};
+
+    TestType::reset_constructor_counters();
+    
+    bool removed = list.remove(to_remove);
+    TD_TEST_ASSERT_EQUAL(removed, true);
+    TD_TEST_ASSERT_EQUAL(list.get_size(), 3U);       
     TD_TEST_ASSERT_EQUAL(TestType::num_destructors_called, 1U);
-    TD_TEST_ASSERT_EQUAL(list.get_size(), 0U);       
+
+    TD_TEST_ASSERT_EQUAL(list[0], TestType{1});
+    TD_TEST_ASSERT_EQUAL(list[1], TestType{2});
+    TD_TEST_ASSERT_EQUAL(list[2], TestType{3});
 }
 
 TD_TEST("list/remove-in-middle") {
@@ -116,7 +123,7 @@ TD_TEST("list/remove-in-middle") {
     TestType::num_move_constructors_called = 0;
     TestType::num_destructors_called = 0;
 
-    list.remove(1);
+    list.remove_at(1);
 
     TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 1U);
     TD_TEST_ASSERT_EQUAL(TestType::num_move_constructors_called, 1U);

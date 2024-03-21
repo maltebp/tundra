@@ -24,13 +24,22 @@
         const T& to_print_value(const T& value) { return value; }
 
         static inline const char* to_print_value(const td::String& string) {
-            std::printf("Using string print value"); 
             return string.get_c_string(); 
         }
 
         template<typename T>
         static td::String convert_to_string_if_object(const T& o) { 
             return td::to_string(o);
+        }
+
+        template<typename T>
+        static T* convert_to_string_if_object(T* o) { 
+            return o;
+        }
+
+        template<typename T>
+        static const T* convert_to_string_if_object(const T* o) { 
+            return o;
         }
 
         static inline char convert_to_string_if_object(const char& value) { return value; }
@@ -60,7 +69,7 @@
     // printf format, with the extension that '%s' format works for classes for
     // which there is a specialization of td::to_string<T> defined
     #define TD_DEBUG_LOG(...)\
-        td::internal::log(__VA_ARGS__);
+        td::internal::log(__VA_ARGS__)
 
 #endif
 

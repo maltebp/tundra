@@ -87,6 +87,9 @@ namespace td {
     String to_string<char>(const char& value);
 
     template<>
+    String to_string<signed char>(const signed char& value);
+
+    template<>
     String to_string<short>(const short& value);
 
     template<>

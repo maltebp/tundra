@@ -66,6 +66,7 @@
         "xlocinfo": "cpp",
         "xlocmes": "cpp",
         "xlocnum": "cpp",
-        "xmemory": "cpp"
+        "xmemory": "cpp",
+        "log.hpp": "c"
     },
 }

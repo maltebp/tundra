@@ -1,4 +1,4 @@
-#pragma once
+#pragma once    
 
 namespace td {
 
@@ -7,7 +7,7 @@ namespace td {
     template<class T> struct remove_reference<T&&> { typedef T type; };
 
     template<typename  T>
-    constexpr remove_reference<T>::type&& move(T& t) noexcept {
+    constexpr remove_reference<T>::type&& move(T&& t) noexcept {
         return static_cast<typename remove_reference<T>::type&&>(t);
     }
 
@@ -26,4 +26,4 @@ namespace td {
     template<> consteval bool is_unsigned<unsigned long>() { return true; };
     template<> consteval bool is_unsigned<unsigned long long>() { return true; };
     
-    }
+}

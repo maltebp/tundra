@@ -191,6 +191,18 @@ namespace td {
     }
 
     template<>
+    String to_string<unsigned char>(const unsigned char& value) {
+        const char value_buffer[2] { (char)value, '\0' }; 
+        return String { value_buffer };
+    }
+
+    template<>
+    String to_string<signed char>(const signed char& value) {
+        const char value_buffer[2] { value, '\0' }; 
+        return String { value_buffer };
+    }
+
+    template<>
     String to_string<bool>(const bool& value) {
         return String { value ? "true" : "false" };
     }

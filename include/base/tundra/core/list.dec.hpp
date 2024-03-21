@@ -21,20 +21,35 @@ namespace td {
 
         ~List();
 
+        void reserve(td::uint32 capacity_to_reserve);
+
         void add(const T& element);
 
-        void remove(uint32 index);
+        void add(T&& element);
+
+        // Removes first element matching type - returns true if any elements was found
+        bool remove(const T& element);
+
+        void remove_at(uint32 index);
 
         // Destroy all elements and set size to 0 (does not deallocate memory)
         void clear();
+        
+        // Returns the index of the first matching element uint32::max if it was
+        // not found
+        [[nodiscard]] uint32 index_of(const T& element) const;
 
-        td::uint32 get_size() const;
+        [[nodiscard]] td::uint32 get_size() const;
+
+        [[nodiscard]] T& get_last();
+
+        [[nodiscard]] const T& get_last() const;
 
         List<T>& operator=(const List& other);
 
-        T& operator[](uint32 i);
+        [[nodiscard]] T& operator[](uint32 i);
 
-        const T& operator[](uint32 i) const;
+        [[nodiscard]] const T& operator[](uint32 i) const;
 
     private:
 

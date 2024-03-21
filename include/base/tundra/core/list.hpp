@@ -5,8 +5,11 @@
 #include <cstdlib>
 
 #include <tundra/core/types.hpp>
+#include <tundra/core/limits.hpp>
 #include <tundra/core/assert.hpp>
+#include <tundra/core/log.hpp>
 #include <tundra/core/utility.hpp>
+
 
 // For some reason, it cannot find the placement new
 void* operator new(size_t count, void* address) noexcept;
@@ -57,6 +60,12 @@ namespace td {
 }
 
 template<typename T>
+void td::List<T>::reserve(td::uint32 capacity_to_reserve) {
+    if( capacity_to_reserve < capacity ) return;
+    reallocate(capacity_to_reserve);
+}
+
+template<typename T>
 void td::List<T>::add(const T& element) {
     if( size == capacity ) {
         uint32 new_size = capacity == 0 ? 2 : capacity * 2;
@@ -68,7 +77,30 @@ void td::List<T>::add(const T& element) {
 }
 
 template<typename T>
-void td::List<T>::remove(uint32 index) {
+void td::List<T>::add(T&& element) {
+    if( size == capacity ) {
+        uint32 new_size = capacity == 0 ? 2 : capacity * 2;
+        reallocate(new_size);
+    }
+
+    new (elements + size) T(td::move(element));
+    size++;
+}
+
+template<typename T>
+bool td::List<T>::remove(const T& element) {
+    for( uint32 i = 0; i < size; i++ ) {
+        if( (*this)[i] == element ) {
+            remove_at(i);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+template<typename T>
+void td::List<T>::remove_at(uint32 index) {
     TD_ASSERT(index < size, "List index out of bounds (was %d but size is %d)", index, size);
     elements[index].~T();
 
@@ -92,7 +124,28 @@ void td::List<T>::clear() {
 }
 
 template<typename T>
+[[nodiscard]] td::uint32 td::List<T>::index_of(const T& element) const {
+    for( uint32 i = 0; i < size; i++ ) {
+        if( elements[i] == element ) return i;
+    }
+
+    return td::limits::numeric_limits<td::uint32>::max;
+}
+
+template<typename T>
 td::uint32 td::List<T>::get_size() const { return size; }
+
+template<typename T>
+T& td::List<T>::get_last() {
+    TD_ASSERT(size > 0, "List is empty when trying to get last");
+    return elements[size - 1];
+}
+
+template<typename T>
+const T& td::List<T>::get_last() const {
+    TD_ASSERT(size > 0, "List is empty when trying to get last");
+    return elements[size - 1];
+}
 
 template<typename T>
 td::List<T>& td::List<T>::operator=(const td::List<T>& other) {

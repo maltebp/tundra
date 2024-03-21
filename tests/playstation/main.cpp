@@ -6,6 +6,7 @@
 
 #include "tests/gte/operations.tests.hpp"
 
+
 int main() {
 
     td::gte::initialize();
