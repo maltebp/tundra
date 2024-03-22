@@ -61,19 +61,24 @@ namespace td {
             return component == other.component;
         }
 
-        // TODO: This should just return a pointer - you have to type out the same
-        // things anyway. And in that case we can just use the defereference operator
-
-        [[nodiscard]] bool get(TComponent*& out) {
+        [[nodiscard]] TComponent* operator->() {
             clear_if_dead();
-            out = component;
-            return component == nullptr;
+            return component;
         }
 
-        [[nodiscard]] bool get(TComponent const *& out) const {
+        [[nodiscard]] const TComponent* operator->() const {
             clear_if_dead();
-            out = component;
-            return component == nullptr;
+            return component;
+        }
+
+        [[nodiscard]] operator TComponent*() {
+            clear_if_dead();
+            return component;
+        }
+
+        [[nodiscard]] operator const TComponent*() const {
+            clear_if_dead();
+            return component;
         }
 
         void clear_if_dead() const {
@@ -107,13 +112,7 @@ namespace td {
 
     template<typename TComponent>
     String to_string(const ComponentRef<TComponent>& ref) {
-        const TComponent* component;
-        if( ref.get(component) ) {
-            return to_string(component);
-        }
-        else {
-            return to_string(nullptr);
-        }
+        return to_string((const TComponent*)ref);
     }
 
 }

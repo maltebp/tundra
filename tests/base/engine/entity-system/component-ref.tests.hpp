@@ -26,9 +26,8 @@ namespace td::component_ref_tests {
         
         ComponentRef<TestComponent> c_ref = e->add_component<TestComponent>();
 
-        TestComponent* c_deref;
-        bool ref_is_valid = c_ref.get(c_deref);
-        TD_TEST_ASSERT_EQUAL(ref_is_valid, true);
+        TestComponent* c_deref = c_ref;
+        TD_TEST_ASSERT_NOT_EQUAL(c_deref, nullptr);
         TD_TEST_ASSERT_EQUAL(c_deref->a, 1);
         TD_TEST_ASSERT_EQUAL(c_deref->b, 2);
         TD_TEST_ASSERT_EQUAL(c_deref->c, 3);
