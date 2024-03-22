@@ -251,12 +251,15 @@ namespace td::internal {
         // using pointer = // pointer type
         // using reference = // reference type
 
-        constexpr Iterator(RegistryBlock& block, Type type) : block(block) {
-            if( type == Type::End || block.num_entries == 0) {
-                component = block.entries + block.capacity;
+        constexpr Iterator() : block(nullptr), component(nullptr) { }
+
+        constexpr Iterator(RegistryBlock* block, Type type) : block(block) {
+            TD_ASSERT(block != nullptr, "Block must not be nullptr in non-default iterator constructor");
+            if( type == Type::End || block->num_entries == 0) {
+                component = block->entries + block->capacity;
             }
             else {
-                component = block.entries;
+                component = block->entries;
                 skip_if_hole();
             }
         }
@@ -278,11 +281,11 @@ namespace td::internal {
     private:
 
         constexpr void skip_if_hole() {
-            TComponent* end_ptr = block.entries + block.capacity;
+            TComponent* end_ptr = block->entries + block->capacity;
 
             if( component == end_ptr || component->is_allocated() ) return;
             uint16 hole_tail_index = component->hole_index;
-            TComponent* hole_tail = block.entries + hole_tail_index;
+            TComponent* hole_tail = block->entries + hole_tail_index;
 
             // This should either be the end poiner or a valid non-hole entry
             component = hole_tail + 1;
@@ -292,7 +295,7 @@ namespace td::internal {
             );
         }
 
-        RegistryBlock& block;
+        RegistryBlock* block;
 
         TComponent* component;
 
@@ -300,12 +303,12 @@ namespace td::internal {
 
     template<typename TComponent>
     RegistryBlock<TComponent>::Iterator RegistryBlock<TComponent>::begin() {
-        return RegistryBlock<TComponent>::Iterator(*this, Iterator::Type::Begin);
+        return RegistryBlock<TComponent>::Iterator(this, Iterator::Type::Begin);
     }
 
     template<typename TComponent>
     RegistryBlock<TComponent>::Iterator RegistryBlock<TComponent>::end() {
-        return RegistryBlock<TComponent>::Iterator(*this, Iterator::Type::End);
+        return RegistryBlock<TComponent>::Iterator(this, Iterator::Type::End);
     }
 
 }

@@ -70,6 +70,19 @@ namespace td::internal {
 
         // TODO: Make this tweakable by user (this number is pulled out of a hat)
         static inline constexpr uint32 BLOCK_SIZE = 25; 
+
+        class Iterator;
+
+        // TODO: Registry should be refactored to a non-static class instead of this approach
+        // This was a quick hack to allow us to iterator static registry in a foreach loop
+        struct Iterable {
+            Iterator begin();
+            Iterator end();
+        };
+
+        static Iterable get_iterable() {
+            return {};
+        }
         
     private:
 
@@ -84,10 +97,96 @@ namespace td::internal {
             return blocks.get_last();
         }
 
-        // TODO: This should be adjustable on a type-level
-
         static inline List<RegistryBlock<TComponent>> blocks;
 
     };
+
+
+    template<typename TComponent>
+    class Registry<TComponent>::Iterator {
+    public:
+
+        enum class Type { Begin, End };
+
+        constexpr Iterator(Type type) {
+            if( type == Type::End || Registry::get_num_blocks() == 0 ) {
+                block_index = Registry::get_num_blocks();
+                block_iterator = {};
+            }
+            else {
+                block_index = 0;
+                block_iterator = Registry::blocks[0].begin();
+                skip_if_hole_or_block_end();
+            }
+        }
+
+        constexpr bool operator==(const Iterator& other) const {
+            
+            if( block_index >= Registry::get_num_blocks() ) {
+                return other.block_index >= Registry::get_num_blocks();
+            }
+            else {
+                return block_index == other.block_index && block_iterator == other.block_iterator;
+            }
+        }
+
+        constexpr Iterator& operator++() {
+            if( block_index >= Registry::get_num_blocks() ) return *this;
+
+            if( block_iterator != RegistryBlock<TComponent>::Iterator() ) {
+
+            }
+            
+            // TD_ASSERT(
+            //     ,
+            //     "Block index is less than number of blocks, but iterator is nullptr"
+            // );
+
+            block_iterator++;
+            skip_if_hole_or_block_end();
+            return *this;
+        }
+
+        constexpr TComponent* operator*() {
+            TD_ASSERT(block_index < Registry::get_num_blocks(), "Dereferencing end iterator");
+            return *block_iterator;
+        }
+
+    private:
+
+        void skip_if_hole_or_block_end() {
+            // We assume that block index is below number of blocks (checked by caller)
+
+            bool reached_end_of_block = block_iterator == Registry::blocks[block_index].end();
+            if( !reached_end_of_block ) return;
+
+            // Find next, non-empty block
+            block_index++;
+            while(block_index < Registry::get_num_blocks()) {
+                RegistryBlock<TComponent>& block = Registry::blocks[block_index];
+                if( block.get_num_allocated_components() > 0 ) {
+                    block_iterator = block.begin();
+                }
+                else {
+                    block_index++;
+                }
+            }
+        }
+
+        uint32 block_index;
+
+        RegistryBlock<TComponent>::Iterator block_iterator;
+
+    };
+
+    template<typename TComponent>
+    Registry<TComponent>::Iterator Registry<TComponent>::Iterable::begin() {
+        return Iterator(*this, Iterator::Type::Begin);
+    }
+
+    template<typename TComponent>
+    Registry<TComponent>::Iterator Registry<TComponent>::Iterable::end() {
+        return Iterator(*this, Iterator::Type::End);
+    }
 
 };

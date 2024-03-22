@@ -67,4 +67,21 @@ namespace td::registry_tests {
         TD_TEST_ASSERT_EQUAL(Reg::get_num_blocks(), NUM_BLOCKS);      
     }
 
+
+    TD_TEST("engine/entity-system/registry/iterator/one-full-block") {
+
+        List<TestComponent*> components;
+        for( int i = 0; i < 10; i++ ) {
+            components.add(internal::Registry<TestComponent>::create_component());
+        }
+
+        int num_iterated_components = 0;
+        for( TestComponent* component : internal::Registry<TestComponent>::get_iterable() ) {
+            num_iterated_components++;
+            uint32 index_of_component = allocated_components.index_of(component);
+            TD_TEST_ASSERT_LESS(index_of_component, td::limits::numeric_limits<uint32>::max);
+        }
+
+        TD_TEST_ASSERT_EQUAL(num_iterated_components, 10);
+    }
 }
