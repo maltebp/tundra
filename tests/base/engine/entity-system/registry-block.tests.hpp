@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tundra/core/assert.hpp"
+#include "tundra/core/limits.hpp"
 #include <tundra/test-framework/test.hpp>
 #include <tundra/test-framework/test-assert.hpp>
 
@@ -12,8 +14,8 @@ namespace td::internal::registy_block_tests {
     class TestComponent : public ComponentMetaData {
     public:
 
-        int16 a;
-        int32 b;
+        int16 a = 1;
+        int32 b = 2;
 
     };   
 
@@ -96,7 +98,7 @@ namespace td::internal::registy_block_tests {
         TD_TEST_ASSERT_EQUAL(registry_block.get_num_holes(), 1);
     }
 
-    TD_TEST("entity-system/delete-and-recreate") {
+    TD_TEST("entity-system/registry-block/delete-and-recreate") {
 
         RegistryBlock<TestComponent> registry_block{10};
 
@@ -129,6 +131,63 @@ namespace td::internal::registy_block_tests {
         }
 
         TD_TEST_ASSERT_EQUAL(registry_block.get_num_allocated_components(), 0);
+    }
+
+    TD_TEST("entity-system/registry-block/iterator/no-holes") {
+
+        RegistryBlock<TestComponent> registry_block{10};
+
+        List<TestComponent*> allocated_components;
+        for( uint16 i = 0; i < 10; i++ ) {
+            allocated_components.add(registry_block.allocate_component());
+        }
+
+        int num_iterated_components = 0;
+        for( TestComponent* component : registry_block ) {
+            num_iterated_components++;
+            uint32 index_of_component = allocated_components.index_of(component);
+            TD_TEST_ASSERT_LESS(index_of_component, td::limits::numeric_limits<uint32>::max);
+        }
+
+        TD_TEST_ASSERT_EQUAL(num_iterated_components, 10);
+    }
+
+    TD_TEST("entity-system/registry-block/iterator/empty") {
+
+        RegistryBlock<TestComponent> registry_block{10};
+
+        int num_iterated_components = 0;
+        for( TestComponent* component : registry_block ) {
+            static_cast<void>(component);
+            num_iterated_components++;
+        }
+
+        TD_TEST_ASSERT_EQUAL(num_iterated_components, 0);
+    }
+
+    TD_TEST("entity-system/registry-block/iterator/holes") {
+
+        RegistryBlock<TestComponent> registry_block{10};
+
+        List<TestComponent*> allocated_components;
+        for( uint16 i = 0; i < 10; i++ ) {
+            allocated_components.add(registry_block.allocate_component());
+        }
+
+        // Delete every other (starting from the first in allocated memory - i.e.
+        // the 10th allocated component)
+        for( uint32 i = 0; i < 5; i++ ) {
+            registry_block.free_component(allocated_components[i * 2 + 1]);
+        }
+
+        int num_iterated_components = 0;
+        for( TestComponent* component : registry_block ) {
+            num_iterated_components++;
+            uint32 index_of_component = allocated_components.index_of(component);
+            TD_TEST_ASSERT_LESS(index_of_component, td::limits::numeric_limits<uint32>::max);
+        }
+
+        TD_TEST_ASSERT_EQUAL(num_iterated_components, 5);
     }
 
 }
