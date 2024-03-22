@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tundra/core/log.hpp"
 #include <tundra/core/assert.hpp>
 #include <tundra/engine/entity-system/internal/component-meta-data.hpp>
 #include <tundra/engine/entity-system/internal/component-flags.hpp>
@@ -52,6 +53,14 @@ namespace td::internal {
             TD_ASSERT(owning_block != nullptr, "Component was not part of any block");
             component->~TComponent();
             owning_block->free_component(component);
+        }   
+
+        // This deallocates all blocks (and thus deallocates all components), BUT
+        // it does not destroy the components.
+        // Only use this for testing and if you know what you are doing
+        static void clear_block_list() {
+            TD_ASSERT(get_num_components() == 0, "All components must be destroyed before clearing blocks");
+            blocks.clear();
         }
 
         static uint32 get_num_components() { 
@@ -68,9 +77,6 @@ namespace td::internal {
 
         static uint32 get_num_blocks() { return blocks.get_size(); }
 
-        // TODO: Make this tweakable by user (this number is pulled out of a hat)
-        static inline constexpr uint32 BLOCK_SIZE = 25; 
-
         class Iterator;
 
         // TODO: Registry should be refactored to a non-static class instead of this approach
@@ -83,6 +89,9 @@ namespace td::internal {
         static Iterable get_iterable() {
             return {};
         }
+
+        // TODO: Make this tweakable by user (this number is pulled out of a hat)
+        static inline constexpr uint32 BLOCK_SIZE = 25; 
         
     private:
 
@@ -105,6 +114,8 @@ namespace td::internal {
     template<typename TComponent>
     class Registry<TComponent>::Iterator {
     public:
+
+        using BlockIterator = RegistryBlock<TComponent>::Iterator;
 
         enum class Type { Begin, End };
 
@@ -133,16 +144,12 @@ namespace td::internal {
         constexpr Iterator& operator++() {
             if( block_index >= Registry::get_num_blocks() ) return *this;
 
-            if( block_iterator != RegistryBlock<TComponent>::Iterator() ) {
+            TD_ASSERT(
+                block_iterator != BlockIterator{},
+                "Block index is less than number of blocks, but iterator is nullptr"
+            );
 
-            }
-            
-            // TD_ASSERT(
-            //     ,
-            //     "Block index is less than number of blocks, but iterator is nullptr"
-            // );
-
-            block_iterator++;
+            ++block_iterator;
             skip_if_hole_or_block_end();
             return *this;
         }
@@ -155,7 +162,8 @@ namespace td::internal {
     private:
 
         void skip_if_hole_or_block_end() {
-            // We assume that block index is below number of blocks (checked by caller)
+
+            if( block_index >= Registry::get_num_blocks() ) return;
 
             bool reached_end_of_block = block_iterator == Registry::blocks[block_index].end();
             if( !reached_end_of_block ) return;
@@ -166,6 +174,7 @@ namespace td::internal {
                 RegistryBlock<TComponent>& block = Registry::blocks[block_index];
                 if( block.get_num_allocated_components() > 0 ) {
                     block_iterator = block.begin();
+                    break;
                 }
                 else {
                     block_index++;
@@ -175,18 +184,18 @@ namespace td::internal {
 
         uint32 block_index;
 
-        RegistryBlock<TComponent>::Iterator block_iterator;
+        BlockIterator block_iterator;
 
     };
 
     template<typename TComponent>
     Registry<TComponent>::Iterator Registry<TComponent>::Iterable::begin() {
-        return Iterator(*this, Iterator::Type::Begin);
+        return Iterator(Iterator::Type::Begin);
     }
 
     template<typename TComponent>
     Registry<TComponent>::Iterator Registry<TComponent>::Iterable::end() {
-        return Iterator(*this, Iterator::Type::End);
+        return Iterator(Iterator::Type::End);
     }
 
 };

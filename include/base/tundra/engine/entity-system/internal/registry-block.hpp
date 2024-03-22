@@ -265,7 +265,7 @@ namespace td::internal {
         }
 
         constexpr bool operator==(const Iterator& other) const {
-            return &block == &other.block && component == other.component;
+            return block == other.block && component == other.component;
         } 
 
         constexpr Iterator& operator++() {
