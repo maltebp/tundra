@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include <tundra/core/types.hpp>
 
 namespace td {
@@ -129,6 +131,8 @@ namespace td {
         //the const T& variant
         return internal::ptr_to_string(ptr);
     }
+
+    String to_string(std::nullptr_t ptr);
 
     template<>
     String to_string<char>(const char* string);

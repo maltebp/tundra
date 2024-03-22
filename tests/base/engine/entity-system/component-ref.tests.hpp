@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tundra/core/assert.hpp"
 #include <tundra/test-framework/test.hpp>
 #include <tundra/test-framework/test-assert.hpp>
 #include <tundra/test-framework/utility/constructor-statistics.hpp>
@@ -33,6 +34,25 @@ namespace td::component_ref_tests {
         TD_TEST_ASSERT_EQUAL(c_deref->c, 3);
 
         TD_TEST_ASSERT_EQUAL(TestComponent::num_constructors_called, 1U);
+    }
+
+    TD_TEST("engine/entity-system/component-ref/equality") {
+        Entity* e = Entity::create();
+        TestComponent* c = e->add_component<TestComponent>();
+        
+        ComponentRef<TestComponent> ref_1 { c };
+        ComponentRef<TestComponent> ref_2 { ref_1 };
+        ComponentRef<TestComponent> ref_3;
+
+        TD_TEST_ASSERT_EQUAL(ref_1, c);
+        TD_TEST_ASSERT_EQUAL(ref_2, c);
+
+        TD_TEST_ASSERT_EQUAL(ref_1, ref_2);
+        
+        TD_TEST_ASSERT_NOT_EQUAL(ref_3, ref_1);
+        TD_TEST_ASSERT_NOT_EQUAL(ref_3, ref_2);
+        TD_TEST_ASSERT_NOT_EQUAL(ref_3, c);
+        TD_TEST_ASSERT_EQUAL(ref_3, nullptr);
     }
 
     TD_TEST("engine/entity-system/component-ref/reference-count-is-adjusted") {

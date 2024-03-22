@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cstddef>
 #include <tundra/core/assert.hpp>
+#include <tundra/core/string.hpp>
 
 #include <tundra/engine/entity-system/internal/registry.hpp>
 
@@ -20,14 +22,14 @@ namespace td {
         }
 
         ComponentRef(const ComponentRef& other) {
-            if( other.component != nullptr && other.component.is_alive() ) {
+            if( other.component != nullptr && other.component->is_alive() ) {
                 component = other.component;
                 component->reference_count++;
             }
         }
 
         ComponentRef(ComponentRef&& other) {
-            if( other.component != nullptr && other.component.is_alive() ) {
+            if( other.component != nullptr && other.component->is_alive() ) {
                 component = other.component;
                 other.component = nullptr;
             }
@@ -43,48 +45,46 @@ namespace td {
             clear();
             
             this->component = component;
-            component->reference_count++;
+            if( component != nullptr ) {
+                component->reference_count++;
+            }
         }
 
-        bool get(TComponent*& out) {
-            if( component == nullptr ) {
-                out = nullptr;
-                return false;
-            } 
-            else if( !component->is_alive() ) {
+        [[nodiscard]] constexpr bool operator==(TComponent* other) const {
+            clear_if_dead();
+            return component == other;
+        }
+
+        [[nodiscard]] constexpr bool operator==(const ComponentRef& other) const {
+            clear_if_dead();
+            other.clear_if_dead();
+            return component == other.component;
+        }
+
+        // TODO: This should just return a pointer - you have to type out the same
+        // things anyway. And in that case we can just use the defereference operator
+
+        [[nodiscard]] bool get(TComponent*& out) {
+            clear_if_dead();
+            out = component;
+            return component == nullptr;
+        }
+
+        [[nodiscard]] bool get(TComponent const *& out) const {
+            clear_if_dead();
+            out = component;
+            return component == nullptr;
+        }
+
+        void clear_if_dead() const {
+            if( component != nullptr && !component->is_alive()) {
                 clear();
-                out = nullptr;
-                return false;
             }
-            else {
-                out = component;
-                return true;
-            }
-        }
-
-        bool get(TComponent const *& out) const {
-            if( component == nullptr ) {
-                out = nullptr;
-                return false;
-            } 
-            else if( !component->is_alive() ) {
-                clear();
-                out = nullptr;
-                return false;
-            }
-            else {
-                out = component;
-                return true;
-            }
-        }
-
-        void release_if_dead() const {
-            clear();
         }
 
     private:
         
-        void clear() {
+        void clear() const {
             if( component == nullptr ) return;
 
             TD_ASSERT(
@@ -104,5 +104,16 @@ namespace td {
     };
 
     using EntityRef = ComponentRef<Entity>;
+
+    template<typename TComponent>
+    String to_string(const ComponentRef<TComponent>& ref) {
+        const TComponent* component;
+        if( ref.get(component) ) {
+            return to_string(component);
+        }
+        else {
+            return to_string(nullptr);
+        }
+    }
 
 }

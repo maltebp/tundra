@@ -1,4 +1,5 @@
 
+#include <cstddef>
 #include <tundra/core/string.hpp>
 
 #include <tundra/core/assert.hpp>
@@ -255,6 +256,10 @@ namespace td {
     template<>
     String to_string<char>(const char* string) {
         return String{string};
+    }
+
+    String to_string(std::nullptr_t) {
+        return String{"nullptr"};
     }
 
 }

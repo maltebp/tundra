@@ -1,6 +1,5 @@
 #pragma once
 
-#include "tundra/core/log.hpp"
 #include <tundra/core/assert.hpp>
 #include <tundra/engine/entity-system/internal/component-meta-data.hpp>
 #include <tundra/engine/entity-system/internal/component-flags.hpp>
