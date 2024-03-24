@@ -11,3 +11,5 @@
 #include <engine/entity-system/registry.tests.hpp>
 #include <engine/entity-system/entity.tests.hpp>
 #include <engine/entity-system/component-ref.tests.hpp>
+
+#include <engine/dynamic-transform.tests.hpp>

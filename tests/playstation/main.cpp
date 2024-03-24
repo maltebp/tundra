@@ -5,6 +5,7 @@
 #include "base-tests.hpp"
 
 #include "tests/gte/operations.tests.hpp"
+#include "tests/gte/compute-transform.tests.hpp"
 
 
 int main() {

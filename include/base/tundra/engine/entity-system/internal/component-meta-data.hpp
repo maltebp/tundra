@@ -7,7 +7,7 @@ namespace td {
     template<typename T>
     class ComponentRef;
     
-    template<typename T>
+    template<typename TDerived, typename TBase>
     class Component;
 }
 
@@ -47,7 +47,7 @@ namespace td::internal {
 
         friend class ComponentBase;
 
-        template<typename T>
+        template<typename TDerived, typename TBase>
         friend class td::Component;
 
     };

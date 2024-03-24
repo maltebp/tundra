@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tundra/core/utility.hpp"
 #include <tundra/engine/entity-system/internal/component-base.hpp>
 #include <tundra/engine/entity-system/internal/component-flags.hpp>
 #include <tundra/engine/entity-system/internal/registry.hpp>
@@ -27,6 +28,7 @@ namespace td {
 
             flags &= ~internal::ComponentFlags::IsAlive;
 
+            // Destroy children
             ComponentBase* current = this->next;
             while( current != this ) {
                 TD_ASSERT(current->next != nullptr, "ComponentBase is not connected to another");
@@ -45,11 +47,11 @@ namespace td {
             }
         }
 
-        template<typename TComponent>
-        TComponent* add_component() {
+        template<typename TComponent, typename ... TArgs>
+        TComponent* add_component(TArgs&& ... args) {
             TD_ASSERT(is_alive(), "Entity is not alive");
             
-            TComponent* component = internal::Registry<TComponent>::create_component();
+            TComponent* component = internal::Registry<TComponent>::create_component(forward<TArgs>(args)...);
 
             component->next = this;
             component->reference_count = 0;

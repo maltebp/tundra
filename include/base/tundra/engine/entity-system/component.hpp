@@ -1,6 +1,5 @@
 #pragma once
 
-#include "tundra/engine/entity-system/internal/component-flags.hpp"
 #include <tundra/core/assert.hpp>
 
 #include <tundra/engine/entity-system/internal/registry.hpp>
@@ -12,20 +11,19 @@ namespace td {
     class Entity;
     
     // TDerived must be deriving from Component<TDerived>
-    template<typename TDerived>
-    class Component : public internal::ComponentBase {
+    template<typename TDerived, typename TBase = internal::ComponentBase>
+    class Component : public TBase {
     public:
         
         virtual void destroy() override final {
-            TD_ASSERT(is_alive(), "Component is not alive when destroyed");
-            TD_ASSERT(is_allocated(), "Component is not allocated");
-            
-            ComponentBase* previous = get_previous_component();
-            previous->next = next;
-
-            this->flags &= ~internal::ComponentFlags::IsAlive;
+            TD_ASSERT(TBase::is_alive(), "Component is not alive when destroyed");
+            TD_ASSERT(TBase::is_allocated(), "Component is not allocated");           
     
             on_destroy();
+
+            internal::ComponentBase* previous = TBase::get_previous_component();
+            previous->next = TBase::next;
+            this->flags &= ~internal::ComponentFlags::IsAlive;
 
             if( this->reference_count == 0 ) {
                 free();

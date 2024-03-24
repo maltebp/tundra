@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstddef>
 #include <tundra/core/assert.hpp>
 #include <tundra/core/string.hpp>
 
@@ -39,11 +38,19 @@ namespace td {
             clear();
         }
 
-        void operator=(TComponent* component) {
-            TD_ASSERT(component->is_alive(), "Component is not alive");
-            
+        void operator=(const ComponentRef<TComponent>& other) {
+            other.clear_if_dead();
             clear();
-            
+            this->component = other.component;
+            if( component != nullptr ) {
+                component->reference_count++;
+            }
+        }
+
+        void operator=(TComponent* component) {
+            TD_ASSERT(component == nullptr || component->is_alive(), "Non-nullptr component is not alive");
+        
+            clear();
             this->component = component;
             if( component != nullptr ) {
                 component->reference_count++;
@@ -61,22 +68,12 @@ namespace td {
             return component == other.component;
         }
 
-        [[nodiscard]] TComponent* operator->() {
+        [[nodiscard]] TComponent* operator->() const {
             clear_if_dead();
             return component;
         }
 
-        [[nodiscard]] const TComponent* operator->() const {
-            clear_if_dead();
-            return component;
-        }
-
-        [[nodiscard]] operator TComponent*() {
-            clear_if_dead();
-            return component;
-        }
-
-        [[nodiscard]] operator const TComponent*() const {
+        [[nodiscard]] operator TComponent*() const {
             clear_if_dead();
             return component;
         }

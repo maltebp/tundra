@@ -15,10 +15,11 @@ namespace td::internal {
 
         // TODO: Non-default create function
 
-        static TComponent* create_component() {
+        template<typename ... TArgs>
+        static TComponent* create_component(TArgs&& ... args) {
 
             TComponent* component = get_free_block().allocate_component();
-            new(component) TComponent();
+            new(component) TComponent(forward<TArgs>(args)...);
 
             component->flags |= ComponentFlags::IsAllocated | ComponentFlags::IsAlive; 
             component->reference_count = 0;

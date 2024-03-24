@@ -27,6 +27,8 @@ set( TD_BASE_SOURCES
     ${TD_BASE_DIR_SRC}/tundra/engine/entity-system/component-meta-data.cpp
     ${TD_BASE_DIR_SRC}/tundra/engine/entity-system/component-base.cpp
 
+    ${TD_BASE_DIR_SRC}/tundra/engine/dynamic-transform.cpp
+
     ${TD_BASE_DIR_SRC}/tundra/test-framework/test-runner.cpp
     ${TD_BASE_DIR_SRC}/tundra/test-framework/test.cpp
 )

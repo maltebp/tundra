@@ -10,6 +10,20 @@ namespace td {
     constexpr remove_reference<T>::type&& move(T&& t) noexcept {
         return static_cast<typename remove_reference<T>::type&&>(t);
     }
+    
+    template <typename T>
+	T&& forward(typename remove_reference<T>::type& x) {
+		return static_cast<T&&>(x);
+	}
+
+
+	template <typename T>
+    T&& forward(typename remove_reference<T>::type&& x)
+	{
+        // TODO: This should be implemented properly
+		// static_assert(!is_lvalue_reference<T>::value, "forward T isn't lvalue reference");
+		return static_cast<T&&>(x);
+	}
 
     template<typename T> consteval bool is_unsigned();
     template<typename T> consteval bool is_signed() { return !is_unsigned<T>(); }
