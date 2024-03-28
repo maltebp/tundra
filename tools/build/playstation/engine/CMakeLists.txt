@@ -6,14 +6,16 @@ set( TD_ENGINE_HEADERS
     ${TD_ENGINE_DIR_INCLUDE}/tundra/gte/initialize.hpp
     ${TD_ENGINE_DIR_INCLUDE}/tundra/gte/operations.hpp
     ${TD_ENGINE_DIR_INCLUDE}/tundra/gte/compute-transform.hpp
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/playstation-time.hpp
 )
 
-set( TD_ENGINE_DIR_SRC ${TD_DIR_SRC}/playstations/engine )
+set( TD_ENGINE_DIR_SRC ${TD_DIR_SRC}/playstation/engine )
 
 set( TD_ENGINE_SOURCES
     ${TD_ENGINE_DIR_SRC}/tundra/gte/initialize.cpp 
     ${TD_ENGINE_DIR_SRC}/tundra/gte/operations.cpp 
     ${TD_ENGINE_DIR_SRC}/tundra/gte/compute-transform.cpp
+    ${TD_ENGINE_DIR_SRC}/tundra/playstation-time.cpp
 )
 
 psn00bsdk_add_library(td.playstation.engine STATIC ${TD_ENGINE_SOURCES} ${TD_ENGINE_HEADERS})

@@ -8,6 +8,7 @@ set( TD_BASE_HEADERS
     ${TD_BASE_DIR_INCLUDE}/tundra/core/macro-util.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/core/types.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/core/string.hpp
+    ${TD_BASE_DIR_INCLUDE}/tundra/core/time.hpp
 
     ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-asset.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-file-header.hpp

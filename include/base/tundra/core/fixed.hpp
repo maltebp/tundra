@@ -122,6 +122,12 @@ namespace td {
             value = (TStoreType)((((TIntermediate)value) << TNumFractionBits) / other.value);
             return static_cast<TDerived&>(*this);
         }
+        
+        static constexpr TDerived from_raw_fixed_value(TStoreType value) {
+            TDerived f;
+            f.value  = value;
+            return f; 
+        }
 
         // Multiplies without storing in intermediate type (expensive for 64-bit intermediate)
         constexpr TDerived fast_multiply(const TDerived& other) const requires(sizeof(TIntermediate) > 4) {
@@ -147,11 +153,7 @@ namespace td {
 
         constexpr explicit FixedBase(TStoreType t) : value((TStoreType)(t << TNumFractionBits)) { }
 
-        static constexpr TDerived from_raw_fixed_value(TStoreType value) {
-            TDerived f;
-            f.value  = value;
-            return f; 
-        }
+        
 
         TStoreType value;
 
@@ -243,6 +245,8 @@ namespace td {
         constexpr bool operator<(const Fixed32& other) const { return this->value < other.value; }
 
         constexpr bool operator>(const Fixed32& other) const { return this->value > other.value; }
+
+        constexpr bool operator>=(const Fixed32& other) const { return *this == other || *this > other; }
 
     };
 
@@ -382,7 +386,7 @@ namespace td {
         return internal::fixed_base_to_string(fixed_point, precision);
     }
 
-    template<int TNumFractionBits>
+    template<int TNumFractionBits>  
     String to_string(const UFixed16<TNumFractionBits>& fixed_point, uint32 precision = 3) {
         return internal::fixed_base_to_string(fixed_point, precision);
     }
