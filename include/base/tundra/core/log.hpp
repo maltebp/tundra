@@ -29,7 +29,7 @@
 
         template<typename T>
         static td::String convert_to_string_if_object(const T& o) { 
-            return td::to_string(o);
+            return to_string(o);
         }
 
         template<typename T>
