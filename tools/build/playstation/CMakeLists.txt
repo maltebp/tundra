@@ -24,4 +24,5 @@ endif()
 
 add_subdirectory(../base base)
 add_subdirectory(engine)
-add_subdirectory(tests)
+add_subdirectory(tests/automated)
+add_subdirectory(tests/manual/model-rendering)
