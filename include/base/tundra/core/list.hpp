@@ -148,6 +148,16 @@ const T& td::List<T>::get_last() const {
 }
 
 template<typename T>
+[[nodiscard]] T* td::List<T>::get_data() {
+    return elements;
+}
+
+template<typename T>
+[[nodiscard]] const T* td::List<T>::get_data() const {
+    return elements;
+}
+
+template<typename T>
 td::List<T>& td::List<T>::operator=(const td::List<T>& other) {
 
     clear();

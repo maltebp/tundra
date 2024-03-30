@@ -122,6 +122,10 @@ namespace td {
             value = (TStoreType)((((TIntermediate)value) << TNumFractionBits) / other.value);
             return static_cast<TDerived&>(*this);
         }
+
+        [[nodiscard]] constexpr explicit operator TStoreType() const {
+            return value >> TNumFractionBits; 
+        }
         
         static constexpr TDerived from_raw_fixed_value(TStoreType value) {
             TDerived f;

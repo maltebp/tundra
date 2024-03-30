@@ -15,6 +15,10 @@ set( TD_BASE_HEADERS
     ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-deserializer.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-part-header.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-part.hpp
+
+    ${TD_BASE_DIR_INCLUDE}/tundra/engine/rendering/ordering-table-node.hpp
+    ${TD_BASE_DIR_INCLUDE}/tundra/engine/rendering/ordering-table-layer.hpp
+    ${TD_BASE_DIR_INCLUDE}/tundra/engine/rendering/ordering-table.hpp
 )
 
 set( TD_BASE_DIR_SRC ${TD_DIR_SRC}/base )
@@ -29,6 +33,9 @@ set( TD_BASE_SOURCES
     ${TD_BASE_DIR_SRC}/tundra/engine/entity-system/component-base.cpp
 
     ${TD_BASE_DIR_SRC}/tundra/engine/dynamic-transform.cpp
+
+    ${TD_BASE_DIR_SRC}/tundra/engine/rendering/ordering-table-layer.cpp
+    ${TD_BASE_DIR_SRC}/tundra/engine/rendering/ordering-table.cpp
 
     ${TD_BASE_DIR_SRC}/tundra/test-framework/test-runner.cpp
     ${TD_BASE_DIR_SRC}/tundra/test-framework/test.cpp

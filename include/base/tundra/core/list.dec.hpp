@@ -45,6 +45,10 @@ namespace td {
 
         [[nodiscard]] const T& get_last() const;
 
+        [[nodiscard]] T* get_data();
+
+        [[nodiscard]] const T* get_data() const;
+
         List<T>& operator=(const List& other);
 
         [[nodiscard]] T& operator[](uint32 i);

@@ -5,6 +5,8 @@
 
 #include <tundra/engine/entity-system/internal/registry.hpp>
 
+// TODO: Create a component-ref.dec.hpp
+
 namespace td {
 
     template<typename TComponent>
