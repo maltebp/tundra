@@ -4,7 +4,7 @@ include(../tundra.cmake)
 
 project(
 	td.playstation
-	LANGUAGES    C CXX
+	LANGUAGES    C CXX ASM
 	VERSION      1.0.0
 	DESCRIPTION  ""
 )

@@ -52,13 +52,14 @@
             "name": "Test: Model Renderer (Redux, Debug)",
             "target": "localhost:3333",
             "remote": true,
-            "executable": "build\\playstation\\tests\\manual\\model-rendering\\td.playstation.tests.manual.model-rendering.elf",
+            "executable": "build\\playstation\\tests\\manual\\model-rendering\\Debug\\td.playstation.tests.manual.model-rendering.elf",
             "gdbpath": "gdb-multiarch",
             "cwd": "${workspaceRoot}",
-            "valuesFormatting": "prettyPrinters",
             "autorun": [
+                "set substitute-path /project .",
+                "monitor reset shellhalt",
                 "load build/playstation/tests/manual/model-rendering/Debug/td.playstation.tests.manual.model-rendering.elf",
             ],
-        },
+        }
     ],
 }
