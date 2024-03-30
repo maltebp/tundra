@@ -1,3 +1,5 @@
+#include <tundra/core/fixed.hpp>
+
 #include <psxgpu.h>
 #include <psxgte.h>
 #include <inline_c.h>
@@ -9,6 +11,7 @@
 
 #include "model.hpp"
 #include "renderer.hpp"
+#include "tundra/core/fixed.hpp"
 
 constexpr int RESOLUTION[] = { 320, 240 };
 
@@ -55,16 +58,41 @@ int main() {
 	renderer.set_light_color(0, {ONE >> 1, ONE >> 1, ONE >> 1 });
 
     renderer.get_camera().set_position({0, ONE * 3, (int32_t)(-ONE * 5.25)});
-    renderer.get_camera().set_target({0, (int32_t)(ONE * 2.5), 0});
+    renderer.get_camera().set_target({0, 0, 0});
+
+    constexpr td::uint16 MODEL_SIZE = (td::uint16)(ONE * 0.75);
+    
+    Model model { *suzanne_model };
+    model.scale = { MODEL_SIZE, MODEL_SIZE, MODEL_SIZE };
+    model.color = { 80, 255, 150, 0 };
+
+    td::Fixed16<12> model_y_rotation = 0;
+    td::Fixed16<12> camera_y_rotation = 0;
+
+    td::Fixed32<12> camera_height = 2;
+    td::Fixed32<12> camera_xz_distance = 5;
 
     while(true) {
-            
-        constexpr td::uint16 size = (td::uint16)(ONE * 0.75);
-        Model model { *suzanne_model };
-        model.position = { 0, 0 + (int32_t)((size * 0.75)), 0 };
-        model.scale = { size, size, size };
-        model.color = { 80, 255, 150, 0 };
-        model.rotation = { 0, -ONE >> 2, 0 };
+        model_y_rotation += td::to_fixed(0.01);
+        if( model_y_rotation > 1 ) {
+            model_y_rotation -= 1;
+        }
+
+        model.rotation = { 0, model_y_rotation.get_raw_value(), 0 };
+
+        camera_y_rotation -= td::to_fixed(0.005);
+        if( camera_y_rotation < 0 ) {
+            camera_y_rotation += 1;            
+        }
+
+        td::Fixed32<12> camera_x = td::Fixed32<12>::from_raw_fixed_value(isin(camera_y_rotation.get_raw_value())) * camera_xz_distance;
+        td::Fixed32<12> camera_z = td::Fixed32<12>::from_raw_fixed_value(icos(camera_y_rotation.get_raw_value())) * camera_xz_distance;
+
+        renderer.get_camera().set_position({
+            camera_x.get_raw_value(),
+            camera_height.get_raw_value(),
+            camera_z.get_raw_value() 
+        });
 
         renderer.draw_model(model);
 
