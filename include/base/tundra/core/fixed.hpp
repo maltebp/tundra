@@ -2,9 +2,10 @@
 
 #include <tundra/core/fixed.fwd.hpp>
 
-#include "tundra/core/string-util.hpp"
-#include "tundra/core/string.hpp"
-#include "tundra/core/utility.hpp"
+#include <tundra/core/limits.hpp>
+#include <tundra/core/string-util.hpp>
+#include <tundra/core/string.hpp>
+#include <tundra/core/utility.hpp>
 #include <tundra/core/assert.hpp>
 #include <tundra/core/types.hpp>
 
@@ -17,7 +18,7 @@ namespace td {
             long double d;
         };
 
-        template<typename TDerived, typename TStoreType, typename TIntermediate, int TNumFractionBits>
+    template<typename TDerived, typename TStoreType, typename TIntermediate, int TNumFractionBits>
     class FixedBase {
     public:
 
@@ -37,7 +38,7 @@ namespace td {
 
         constexpr ~FixedBase() = default;
 
-        consteval FixedBase(internal::ConstEvalDouble d) : value((TStoreType)(d.d * ONE)) { }
+        consteval FixedBase(internal::ConstEvalDouble d) : value((TStoreType)(d.d * ONE_RAW)) { }
 
         // Same type, other number of fraction bits
         template<typename TOtherDerived, int TOtherNumFractionBits>
@@ -149,15 +150,13 @@ namespace td {
 
         constexpr TStoreType get_raw_fraction() const { return value & FRACTION_MASK; }
 
-        static constexpr TStoreType ONE = 1 << TNumFractionBits;
+        static constexpr TStoreType ONE_RAW = 1 << TNumFractionBits;
 
-        static constexpr TStoreType FRACTION_MASK = ONE - 1;
+        static constexpr TStoreType FRACTION_MASK = ONE_RAW - 1;
 
     protected:
 
         constexpr explicit FixedBase(TStoreType t) : value((TStoreType)(t << TNumFractionBits)) { }
-
-        
 
         TStoreType value;
 
@@ -399,4 +398,24 @@ namespace td {
     String to_string(const Fixed16<TNumFractionBits>& fixed_point, uint32 precision = 3) {
         return internal::fixed_base_to_string(fixed_point, precision);
     }
+
+    namespace internal {
+        template<typename FixedType>
+        struct fixed_limits {
+            static constexpr inline FixedType min = FixedType::from_raw_fixed_value(limits::numeric_limits<typename FixedType::Type>::min);
+            static constexpr inline FixedType max = FixedType::from_raw_fixed_value(limits::numeric_limits<typename FixedType::Type>::max);
+        };
+    }
+
+    template<int TNumFractionBits>
+    struct limits::numeric_limits<Fixed16<TNumFractionBits>> : internal::fixed_limits<Fixed16<TNumFractionBits>> { };
+    
+    template<int TNumFractionBits>
+    struct limits::numeric_limits<UFixed16<TNumFractionBits>> : internal::fixed_limits<UFixed16<TNumFractionBits>> { };
+
+    template<int TNumFractionBits>
+    struct limits::numeric_limits<Fixed32<TNumFractionBits>> : internal::fixed_limits<Fixed32<TNumFractionBits>> { };
+
+    template<int TNumFractionBits>
+    struct limits::numeric_limits<UFixed32<TNumFractionBits>> : internal::fixed_limits<UFixed32<TNumFractionBits>> { };
 }

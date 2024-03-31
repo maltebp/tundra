@@ -4,16 +4,21 @@
 #include <psxgpu.h>
 
 #include <tundra/core/assert.hpp>
+#include <tundra/core/list.hpp>
+#include <tundra/engine/rendering/ordering-table-layer.hpp>
+#include <tundra/engine/rendering/ordering-table-node.hpp>
+#include <tundra/engine/rendering/ordering-table.hpp>
 
 #include "array.hpp"
 #include "initialize-prim.hpp"
+
 
 
 class RenderBuffer {
 public:
 
     RenderBuffer(
-        size_t ordering_table_size, // Full size, including foreground and background 
+        td::uint16 ordering_table_size, // Full size, including foreground and background 
         size_t primitives_buffer_size, 
         int display_x, int display_y, 
         int draw_x, int draw_y, 
@@ -24,7 +29,7 @@ public:
 
     // Allocate memory for the prim, initializes it and adds it to the ordering table
     template<typename TPrim>
-    TPrim* create_and_add_prim(int16_t z);
+    TPrim* create_and_add_prim(td::uint16 resolution_index);
 
     template<typename TPrim>
     TPrim* create_and_add_background_prim();
@@ -32,17 +37,13 @@ public:
     template<typename TPrim>
     TPrim* create_and_add_foreground_prim();
 
+    td::OrderingTableLayer& get_middle_layer();
 
     void draw();
 
     void clear();    
 
     void activate();
-
-    // Size minus foreground and background
-    size_t ordering_table_size() const { return ordering_table.get_size() - 2; }
-
-    uint32_t& get_foreground_ordering_table_entry() { return ordering_table.get_first(); }
 
     // Because of the annoying FntSort I have to expose these
     uint8_t* next_primitive_ptr;
@@ -53,29 +54,25 @@ private:
     DISPENV display_environment;
 	DRAWENV drawing_environment;
 
-    Array<uint32_t> ordering_table;
+    td::OrderingTable ordering_table;
 };
 
 
 template<typename TPrim>
-TPrim* RenderBuffer::create_and_add_prim(int16_t z) {
+TPrim* RenderBuffer::create_and_add_prim(td::uint16 resolution_index) {
     TD_ASSERT(
         next_primitive_ptr + sizeof(TPrim) < primitives_buffer.get_data_end(),
         "Render buffer's primitive buffer is full");
+    td::OrderingTableLayer& layer = get_middle_layer();
 
-    TD_ASSERT(z >= 0, "Z value must be larger than or equal to 0 (was %d)", z);
-
-    TD_ASSERT(z < ordering_table_size(), "z value must be less than %d (was %d)", ordering_table_size(), z);
-
-    // 0 is reserved for foreground prims
-    int adjusted_z = z + 1;
+    TD_ASSERT(resolution_index < layer.get_resolution(), "resolution index must be less than %d (was %d)", layer.get_resolution(), resolution_index);
 
     TPrim* prim = (TPrim*)next_primitive_ptr;
     next_primitive_ptr += sizeof(TPrim);
     initialize_prim(prim);
-    
-    uint32_t* ordering_table_entry = &ordering_table[z];
-    addPrim(ordering_table_entry, prim);
+
+    td::OrderingTableNode* prim_ordering_table_node = (td::OrderingTableNode*)prim;
+    layer.add_node(prim_ordering_table_node, resolution_index);
 
     return prim;
 }
@@ -89,9 +86,9 @@ TPrim* RenderBuffer::create_and_add_background_prim() {
     TPrim* prim = (TPrim*)next_primitive_ptr;
     next_primitive_ptr += sizeof(TPrim);
     initialize_prim(prim);
-    
-    uint32_t* ordering_table_entry = &ordering_table.get_last();
-    addPrim(ordering_table_entry, prim);
+
+    td::OrderingTableNode* prim_ordering_table_node = (td::OrderingTableNode*)prim;
+    ordering_table.get_layer(0).add_to_front(prim_ordering_table_node);
     
     return prim;
 }
@@ -105,9 +102,9 @@ TPrim* RenderBuffer::create_and_add_foreground_prim() {
     TPrim* prim = (TPrim*)next_primitive_ptr;
     next_primitive_ptr += sizeof(TPrim);
     initialize_prim(prim);
-    
-    uint32_t* ordering_table_entry = &ordering_table.get_first();
-    addPrim(ordering_table_entry, prim);
+
+    td::OrderingTableNode* prim_ordering_table_node = (td::OrderingTableNode*)prim;
+    ordering_table.get_layer(2).add_to_front(prim_ordering_table_node);
     
     return prim;
 }

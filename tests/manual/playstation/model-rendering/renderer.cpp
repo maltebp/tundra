@@ -11,6 +11,8 @@
 
 #include "globals.hpp"
 #include "model.hpp"
+#include "tundra/core/fixed.hpp"
+#include "tundra/engine/rendering/ordering-table-layer.hpp"
 
 const int32_t CULL_DISTANCE = ONE * 20;
 
@@ -57,7 +59,7 @@ INDEX cube_indices[] = {
 #define CUBE_FACES 6
 
 void Renderer::initialize(
-    size_t ordering_table_size,
+    td::uint16 ordering_table_size,
     size_t primitives_buffer_size,
     int resolution_width, 
     int resolution_height,
@@ -186,18 +188,29 @@ void Renderer::draw_model(const Model& model) {
             if( face_is_backfacing ) continue;
         
             /* Calculate average Z for depth sorting */
-            int average_z;
-            gte_avsz4();
-            gte_stotz( &average_z );
+            gte_avsz3();
+
+            // Typically, you'd use gte_stotz to get the average z, but this is
+            // a 16-bit value, so many values above 2^16 would return a z-value
+            // that is actually within the near- and far-plane becaus, so we
+            // cannot detect that they are outside the far plane
+
+            td::uint32 ordering_table_index_32;
+            gte_stopz(&ordering_table_index_32);
+            ordering_table_index_32 >>= 12;
+
+            // TODO: Set the layer factor
+
+            td::OrderingTableLayer& layer = active_render_buffer->get_middle_layer();
+
+            // In front, or on, near-plane
+            if( ordering_table_index_32 == 0 ) continue;
+
+            // Behind far-plane
+            if( ordering_table_index_32 >= layer.get_resolution() ) continue;
+
+            td::uint16 ordering_table_index = (td::uint16)(ordering_table_index_32);
         
-            int16_t low_precision_average_z = (int16_t)(average_z >> 6);
-            if( low_precision_average_z >= active_render_buffer->ordering_table_size() ) continue;
-
-            // I think the backface culling handles if the face is behind camera (i.e. Z is negative)
-            TD_ASSERT(
-                low_precision_average_z >= 0, 
-                "average_z was not larger then 0 (it was %.2f)", low_precision_average_z);        
-
             DVECTOR v0;
             DVECTOR v1;
             DVECTOR v2;
@@ -236,7 +249,7 @@ void Renderer::draw_model(const Model& model) {
             // else
             {
                 POLY_G3* triangle_prim = active_render_buffer->create_and_add_prim<POLY_G3>(
-                    low_precision_average_z); 
+                    ordering_table_index); 
 
                 triangle_prim->r0 = model.color.r;
                 triangle_prim->g0 = model.color.g;

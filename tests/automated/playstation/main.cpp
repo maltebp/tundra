@@ -19,7 +19,7 @@ int main() {
 
     ResetGraph(0);
 
-    td::gte::initialize();
+    td::gte::initialize(); 
 
     return td::TestRunner::run();
 

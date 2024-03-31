@@ -10,33 +10,36 @@ namespace td {
 
     class OrderingTable;
 
-    struct OrderingTableLayerPart {
-        Fixed32<12> far_plane;
-        uint16 resolution;
-    };
-
     class OrderingTableLayer {
     public:
 
-        // Creates a layer with a single level with no far/near-plane limits
-        // (i.e. primitives are rendered in order they are submitted)
-        // TODO: Actually, I think they are rendered in reverse order - check this!
-        OrderingTableLayer();
+        OrderingTableLayer(
+            uint16 resolution, 
+            UFixed16<12> far_plane = td::limits::numeric_limits<UFixed16<12>>::max
+        );
 
-        OrderingTableLayer(Fixed32<12> near_plane, Fixed32<12> far_plane, const List<OrderingTableLayerPart>& parts);
+        void add_node(OrderingTableNode* node, uint16 resolution_index);
 
-        OrderingTableLayer(Fixed32<12> near_plane, Fixed32<12> far_plane, uint16 resolution);
+        void add_to_front(OrderingTableNode* node);
 
-        void add_node(OrderingTableNode* node, td::Fixed32<12> z);
+        [[nodiscard]] uint16 get_resolution() const;
+
+        // The Z factor that the sum of 3 z values are multiplied with to map it the ordering table
+        [[nodiscard]] uint32 get_z_map_factor_3() const;
+        
+        // The Z factor that the sum of 4 z values are multiplied with to map it the ordering table
+        [[nodiscard]] uint32 get_z_map_factor_4() const;
 
     private:
 
-        [[nodiscard]] static uint16 compute_total_resolution(const List<OrderingTableLayerPart>& parts);
+        const uint16 resolution;
+        const UFixed16<12> far_plane;
+        const uint32 z_map_factor_3;
+        const uint32 z_map_factor_4;
+        
+        uint32 num_added_nodes = 0;
+        OrderingTableNode* front_node;
 
-        const Fixed32<12> near_plane;
-        const Fixed32<12> far_plane;
-
-        List<OrderingTableLayerPart> parts;
         List<OrderingTableNode> ordering_table;
 
         friend class OrderingTable;

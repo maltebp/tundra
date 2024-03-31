@@ -19,7 +19,7 @@ public:
     Renderer(const Renderer&) = delete;
 
     void initialize(
-        size_t ordering_table_size,
+        td::uint16 ordering_table_size,
         size_t primitives_buffer_size,
         int resolution_width, 
         int resolution_height,

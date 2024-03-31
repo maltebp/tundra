@@ -2,70 +2,58 @@
 
 #include <psxgpu.h>
 
+#include <tundra/engine/rendering/ordering-table-node.hpp>
+#include <tundra/core/fixed.hpp>
 #include <tundra/core/list.hpp>
 #include <tundra/core/assert.hpp>
 
 namespace td {
 
-    OrderingTableLayer::OrderingTableLayer() : OrderingTableLayer(0, 0, 1) { }
-
-    OrderingTableLayer::OrderingTableLayer(Fixed32<12> near_plane, Fixed32<12> far_plane, const List<OrderingTableLayerPart>& parts) 
-        :   near_plane(near_plane),
-            far_plane(near_plane + parts.get_last().far_plane),
-            parts(parts),
-            ordering_table(compute_total_resolution(parts))
-    {
-        TD_ASSERT(parts.get_size() > 0, "Parts must not be empty");
-        TD_ASSERT(far_plane > near_plane, "Far plane must be larger than near plane (far plane was %s, near plane was %s)", far_plane, near_plane);
-    }
-
-    OrderingTableLayer::OrderingTableLayer(Fixed32<12> near_plane, Fixed32<12> far_plane, uint16 resolution) 
-        :   near_plane(near_plane),
+    OrderingTableLayer::OrderingTableLayer(uint16 resolution, UFixed16<12> far_plane) 
+        :   resolution(resolution),
             far_plane(far_plane),
+            z_map_factor_3(UFixed32<12>{resolution} / (UFixed32<12>{far_plane} * 3)),
+            z_map_factor_4(UFixed32<12>{resolution} / (UFixed32<12>{far_plane} * 4)),
             ordering_table(resolution)
-    { 
-        TD_ASSERT(resolution != 0, "Depth resolution must not be 0");
-        TD_ASSERT(far_plane > near_plane, "Far plane must be larger than near plane (far plane was %s, near plane was %s)", far_plane, near_plane);
-
-        parts.add({far_plane, resolution});
+    {
+        TD_ASSERT(resolution > 0, "Resolution must be larger than 0");
+        TD_ASSERT(far_plane > 0, "Far plane must be larger than 0");
     }
 
-    void OrderingTableLayer::add_node(OrderingTableNode* node, td::Fixed32<12> z) {
-        if( z < near_plane ) return;
-
-        Fixed32<12> part_near_plane = near_plane;
-        uint32 part_node_index = 0;
-
-        for( uint32 i = 0; i < parts.get_size(); i++ ) {
-            if( z >= parts[i].far_plane ) {
-                part_near_plane = parts[i].far_plane;
-                part_node_index += parts[i].resolution;
-            }
-            else {
-                Fixed32<12> local_z_signed = z - part_near_plane;
-                TD_ASSERT(local_z_signed >= 0, "Internal error: node's local z %s was less than 0 ", local_z_signed);
-                TD_ASSERT(local_z_signed < (parts[i].far_plane - part_near_plane), "Internal error: node's local z %s was not below local far plane %s", local_z_signed, far_plane);
-                UFixed32<12> local_z_unsigned{ local_z_signed };
-                uint32 node_index = part_node_index + (uint32)(local_z_unsigned / parts[i].resolution);  
-                addPrim(&parts[node_index], node);
-            }
-        }
-    }
-
-    [[nodiscard]] uint16 OrderingTableLayer::compute_total_resolution(const List<OrderingTableLayerPart>& parts) {
-        uint32 total_resolution = 0;
-        for( uint32 i = 0; i < parts.get_size(); i++ ) {
-            total_resolution += parts[i].resolution;
-        }
-        
+    void OrderingTableLayer::add_node(OrderingTableNode* node, uint16 resolution_index) {
         TD_ASSERT(
-            total_resolution, 
-            "OrderingTableLayer's total resolution is larger than the max of %d (was %d)",
-            td::limits::numeric_limits<uint16>::max,
-            total_resolution
+            resolution_index < resolution, 
+            "Resolution index was out of bounds (was %d, but resolution is %d)", 
+            resolution_index, resolution
         );
 
-        return (uint16) total_resolution;
+        OrderingTableNode& node_to_append_to = ordering_table[resolution_index];
+        node->next_node_ptr = node_to_append_to.next_node_ptr;
+        node_to_append_to.set_next_node(node);
+
+        if( &node_to_append_to == front_node ) {
+            front_node = node;
+        }
+
+        num_added_nodes++;
     }
 
+    void OrderingTableLayer::add_to_front(OrderingTableNode* node) {
+        node->next_node_ptr = front_node->next_node_ptr;
+        front_node->set_next_node(node);
+        front_node = node;
+        num_added_nodes++;
+    }
+
+    uint16 OrderingTableLayer::get_resolution() const { 
+        return resolution;
+    }
+
+    uint32 OrderingTableLayer::get_z_map_factor_3() const { 
+        return z_map_factor_3;
+    }
+
+    uint32 OrderingTableLayer::get_z_map_factor_4() const { 
+        return z_map_factor_4;
+    }
 }

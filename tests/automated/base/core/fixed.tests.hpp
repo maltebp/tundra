@@ -88,7 +88,7 @@ TD_TEST("fixed/equality") {
 TD_TEST("fixed/one") {
     {
         td::Fixed16<12> f1 { 1 };
-        TD_TEST_ASSERT_EQUAL(f1.get_raw_value(), td::Fixed16<12>::ONE);
+        TD_TEST_ASSERT_EQUAL(f1.get_raw_value(), td::Fixed16<12>::ONE_RAW);
     }
 }
 

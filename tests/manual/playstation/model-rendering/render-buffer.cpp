@@ -1,15 +1,28 @@
 #include "render-buffer.hpp"
 
+#include <tundra/engine/rendering/ordering-table-layer.hpp>
+
+td::List<td::OrderingTableLayer> create_layers(td::uint16 mid_layer_resolution) {
+
+    td::List<td::OrderingTableLayer> layers;
+    
+    layers.add(td::OrderingTableLayer{1}); // Foreground
+    layers.add(td::OrderingTableLayer{mid_layer_resolution});
+    layers.add(td::OrderingTableLayer{1}); // Background
+
+    return layers;
+}
+
 RenderBuffer::RenderBuffer(
-    size_t ordering_table_size, 
+    td::uint16 ordering_table_size, 
     size_t primitives_buffer_size, 
     int display_x, int display_y, 
     int draw_x, int draw_y, 
     int framebuffer_width, int framebuffer_height, 
     CVECTOR clear_color
 )
-    :   ordering_table(ordering_table_size),
-        primitives_buffer(primitives_buffer_size)
+    :   primitives_buffer(primitives_buffer_size),
+        ordering_table(create_layers(ordering_table_size))
 {
     // TODO: Does it make sense to differ in draw and display coordinates?
 
@@ -29,14 +42,18 @@ RenderBuffer::RenderBuffer(
 
 void RenderBuffer::clear() {
     next_primitive_ptr = primitives_buffer.get_data();
-    ClearOTagR(ordering_table.get_data(), ordering_table.get_size());
+    ordering_table.clear();
 }
 
 void RenderBuffer::draw() {
-    DrawOTag(&ordering_table.get_last());
+    DrawOTag((const td::uint32*)ordering_table.get_first_node_to_draw());
 }
 
 void RenderBuffer::activate() {
     PutDrawEnv( &drawing_environment );
     PutDispEnv(&display_environment);
+}
+
+td::OrderingTableLayer& RenderBuffer::get_middle_layer() {
+    return ordering_table.get_layer(1);
 }

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <tundra/core/types.hpp>
+#include <tundra/core/list.dec.hpp>
+
 #include <tundra/engine/rendering/ordering-table-node.hpp>
 #include <tundra/engine/rendering/ordering-table-layer.hpp>
 
@@ -13,6 +16,12 @@ namespace td {
         void clear();
 
         OrderingTableLayer& get_layer(uint32 layer_index);
+
+        [[nodiscard]] uint32 get_num_layers() const;
+
+        // Returns the first node in the linked list, which is the first node
+        // to draw (i.e. the node that is furthest to the back in the last layer).
+        [[nodiscard]] const OrderingTableNode* get_first_node_to_draw() const;
 
     private:
 

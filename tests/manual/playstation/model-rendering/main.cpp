@@ -15,7 +15,7 @@
 
 constexpr int RESOLUTION[] = { 320, 240 };
 
-constexpr size_t ORDERING_TABLE_SIZE = 2048; // entries
+constexpr td::uint16 ORDERING_TABLE_SIZE = 2048; // entries
 
 constexpr size_t PRIMIIVES_BUFFER_SIZE = 30000; // bytes
 
@@ -45,6 +45,7 @@ int main() {
     td::ModelAsset* suzanne_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_suzanne);
 
     // TD_DEBUG_LOG("Setting up renderer");
+    TD_DEBUG_LOG("Initializing renderer and data");
     Renderer renderer;
     renderer.initialize(
         ORDERING_TABLE_SIZE,
@@ -72,6 +73,7 @@ int main() {
     td::Fixed32<12> camera_height = 2;
     td::Fixed32<12> camera_xz_distance = 5;
 
+    TD_DEBUG_LOG("Running main loop");
     while(true) {
         model_y_rotation += td::to_fixed(0.01);
         if( model_y_rotation > 1 ) {
