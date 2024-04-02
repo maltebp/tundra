@@ -1,6 +1,6 @@
 #include "render-buffer.hpp"
 
-#include <tundra/engine/rendering/ordering-table-layer.hpp>
+#include <tundra/rendering/ordering-table-layer.hpp>
 
 td::List<td::OrderingTableLayer> create_layers(td::uint16 mid_layer_resolution) {
 

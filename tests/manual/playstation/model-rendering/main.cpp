@@ -5,6 +5,7 @@
 #include <inline_c.h>
 
 #include <tundra/core/log.hpp>
+#include <tundra/core/list.hpp>
 #include <tundra/gte/initialize.hpp>
 #include <tundra/assets/model/model-asset.hpp>
 #include <tundra/assets/model/model-deserializer.hpp>
@@ -22,7 +23,7 @@ constexpr size_t PRIMIIVES_BUFFER_SIZE = 30000; // bytes
 constexpr CVECTOR CLEAR_COLOR = { 200, 60, 30 };
 
 namespace assets {
-    extern "C" const uint8_t mdl_suzanne[];
+    extern "C" const uint8_t mdl_fish[];
 }
 
 #include <cstdio>
@@ -42,7 +43,8 @@ int main() {
 	gte_SetGeomScreen(RESOLUTION[0] / 2);
 
     TD_DEBUG_LOG("Loading Suzanne");
-    td::ModelAsset* suzanne_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_suzanne);
+    td::ModelAsset* fish_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_fish);
+    TD_DEBUG_LOG("  Model triangles: %d", fish_model->get_total_num_triangles());
 
     // TD_DEBUG_LOG("Setting up renderer");
     TD_DEBUG_LOG("Initializing renderer and data");
@@ -61,13 +63,25 @@ int main() {
     renderer.get_camera().set_position({0, ONE * 3, (int32_t)(-ONE * 5.25)});
     renderer.get_camera().set_target({0, 0, 0});
 
-    constexpr td::uint16 MODEL_SIZE = (td::uint16)(ONE * 0.75);
-    
-    Model model { *suzanne_model };
-    model.scale = { MODEL_SIZE, MODEL_SIZE, MODEL_SIZE };
-    model.color = { 80, 255, 150, 0 };
+    constexpr td::uint16 MODEL_SIZE = (td::uint16)(ONE * 2);
 
-    td::Fixed16<12> model_y_rotation = 0;
+    td::Fixed32<12> model_distance = 2;
+    td::List<Model> models;
+    td::Fixed16<12> model_rotation = 0;
+    for( td::int32 model_x = -1; model_x < 2; model_x++ ) {
+        for( td::int32 model_z = -1; model_z < 2; model_z++ ) {
+            
+            Model model { *fish_model };
+            model.scale = { MODEL_SIZE, MODEL_SIZE, MODEL_SIZE };
+            model.color = { 80, 255, 150, 0 };
+            model.position = VECTOR{ (model_distance * model_x).get_raw_value(), 0, (model_distance * model_z).get_raw_value() };
+            model.rotation = {0, model_rotation.get_raw_value(), 0};
+            model_rotation += td::to_fixed(0.15);
+            models.add(model);
+        
+        }   
+    }
+        
     td::Fixed16<12> camera_y_rotation = 0;
 
     td::Fixed32<12> camera_height = 2;
@@ -75,12 +89,6 @@ int main() {
 
     TD_DEBUG_LOG("Running main loop");
     while(true) {
-        model_y_rotation += td::to_fixed(0.01);
-        if( model_y_rotation > 1 ) {
-            model_y_rotation -= 1;
-        }
-
-        model.rotation = { 0, model_y_rotation.get_raw_value(), 0 };
 
         camera_y_rotation -= td::to_fixed(0.005);
         if( camera_y_rotation < 0 ) {
@@ -96,7 +104,9 @@ int main() {
             camera_z.get_raw_value() 
         });
 
-        renderer.draw_model(model);
+        for( td::uint32 i = 0; i < models.get_size(); i++ ) {
+            renderer.draw_model(models[i]);
+        }
 
         renderer.flush();
     }

@@ -7,6 +7,11 @@ set( TD_ENGINE_HEADERS
     ${TD_ENGINE_DIR_INCLUDE}/tundra/gte/operations.hpp
     ${TD_ENGINE_DIR_INCLUDE}/tundra/gte/compute-transform.hpp
     ${TD_ENGINE_DIR_INCLUDE}/tundra/playstation-time.hpp
+
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/rendering/primitive-buffer.hpp
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/rendering/ordering-table-node.hpp
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/rendering/ordering-table-layer.hpp
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/rendering/ordering-table.hpp
 )
 
 set( TD_ENGINE_DIR_SRC ${TD_DIR_SRC}/playstation/engine )
@@ -16,6 +21,10 @@ set( TD_ENGINE_SOURCES
     ${TD_ENGINE_DIR_SRC}/tundra/gte/operations.cpp 
     ${TD_ENGINE_DIR_SRC}/tundra/gte/compute-transform.cpp
     ${TD_ENGINE_DIR_SRC}/tundra/playstation-time.cpp
+
+    ${TD_ENGINE_DIR_SRC}/tundra/rendering/primitive-buffer.cpp
+    ${TD_ENGINE_DIR_SRC}/tundra/rendering/ordering-table-layer.cpp
+    ${TD_ENGINE_DIR_SRC}/tundra/rendering/ordering-table.cpp
 )
 
 psn00bsdk_add_library(td.playstation.engine STATIC ${TD_ENGINE_SOURCES} ${TD_ENGINE_HEADERS})

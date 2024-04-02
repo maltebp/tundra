@@ -12,7 +12,7 @@
 #include "globals.hpp"
 #include "model.hpp"
 #include "tundra/core/fixed.hpp"
-#include "tundra/engine/rendering/ordering-table-layer.hpp"
+#include "tundra/rendering/ordering-table-layer.hpp"
 
 const int32_t CULL_DISTANCE = ONE * 20;
 

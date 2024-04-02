@@ -3,8 +3,8 @@
 #include <tundra/core/types.hpp>
 #include <tundra/core/list.dec.hpp>
 
-#include <tundra/engine/rendering/ordering-table-node.hpp>
-#include <tundra/engine/rendering/ordering-table-layer.hpp>
+#include <tundra/rendering/ordering-table-node.hpp>
+#include <tundra/rendering/ordering-table-layer.hpp>
 
 namespace td {
 
@@ -12,6 +12,8 @@ namespace td {
     public:
     
         OrderingTable(const List<OrderingTableLayer>& layers);
+
+        OrderingTable(const OrderingTable&) = delete;
 
         void clear();
 

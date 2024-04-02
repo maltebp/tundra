@@ -1,8 +1,8 @@
-#include <tundra/engine/rendering/ordering-table-layer.hpp>
+#include <tundra/rendering/ordering-table-layer.hpp>
 
 #include <psxgpu.h>
 
-#include <tundra/engine/rendering/ordering-table-node.hpp>
+#include <tundra/rendering/ordering-table-node.hpp>
 #include <tundra/core/fixed.hpp>
 #include <tundra/core/list.hpp>
 #include <tundra/core/assert.hpp>

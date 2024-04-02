@@ -1,10 +1,10 @@
-#include <tundra/engine/rendering/ordering-table.hpp>
+#include <tundra/rendering/ordering-table.hpp>
 
 #include <psxgpu.h>
 
 #include <tundra/core/assert.hpp>
 #include <tundra/core/list.hpp>
-#include <tundra/engine/rendering/ordering-table-layer.hpp>
+#include <tundra/rendering/ordering-table-layer.hpp>
 
 
 namespace td {

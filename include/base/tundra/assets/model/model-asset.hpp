@@ -47,6 +47,14 @@ namespace td {
 			return !(*this == other);
 		}
 
+		td::uint32 get_total_num_triangles() const {
+			td::uint32 total_num_triangles = 0;
+			for( uint16 i = 0; i < num_parts; i++ )	{
+				total_num_triangles += model_parts[i]->num_triangles;
+			}
+			return total_num_triangles;
+		}
+
 		const char* name = nullptr;
 
 		uint16 num_vertices = 0;

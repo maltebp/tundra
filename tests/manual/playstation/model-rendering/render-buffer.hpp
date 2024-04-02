@@ -5,9 +5,9 @@
 
 #include <tundra/core/assert.hpp>
 #include <tundra/core/list.hpp>
-#include <tundra/engine/rendering/ordering-table-layer.hpp>
-#include <tundra/engine/rendering/ordering-table-node.hpp>
-#include <tundra/engine/rendering/ordering-table.hpp>
+#include <tundra/rendering/ordering-table-layer.hpp>
+#include <tundra/rendering/ordering-table-node.hpp>
+#include <tundra/rendering/ordering-table.hpp>
 
 #include "array.hpp"
 #include "initialize-prim.hpp"
