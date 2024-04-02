@@ -84,6 +84,4 @@ namespace td::entity_tests {
         TD_TEST_ASSERT_EQUAL(TestComponent::num_destructors_called,3U);
     }
 
-
-
 }

@@ -39,6 +39,8 @@ namespace td {
         // not found
         [[nodiscard]] uint32 index_of(const T& element) const;
 
+        [[nodiscard]] bool contains(const T& element) const;
+
         [[nodiscard]] td::uint32 get_size() const;
 
         [[nodiscard]] T& get_last();

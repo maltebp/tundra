@@ -1,7 +1,8 @@
 #pragma once
 
-#include <tundra/engine/entity-system/entity.fwd.hpp>
 #include <tundra/engine/entity-system/internal/component-base.hpp>
+#include <tundra/engine/entity-system/entity.fwd.hpp>
+#include <tundra/engine/entity-system/internal/registry.dec.hpp>
 
 namespace td {
 
@@ -11,6 +12,8 @@ namespace td {
     public:
         
         virtual void destroy() override final;
+
+        static internal::Registry<TDerived>::Iterable get_all();
 
     protected:
 

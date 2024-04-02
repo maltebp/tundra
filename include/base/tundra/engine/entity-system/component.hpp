@@ -3,6 +3,7 @@
 #include <tundra/engine/entity-system/component.dec.hpp>
 
 #include <tundra/core/assert.hpp>
+
 #include <tundra/engine/entity-system/internal/registry.hpp>
 #include <tundra/engine/entity-system/internal/component-meta-data.hpp>
 
@@ -27,6 +28,11 @@ namespace td {
     template<typename TDerived, typename TBase>
     void Component<TDerived, TBase>::free() {
         internal::Registry<TDerived>::free_component(static_cast<TDerived*>(this));
+    }
+
+    template<typename TDerived, typename TBase>
+    internal::Registry<TDerived>::Iterable Component<TDerived, TBase>::get_all() {
+        return internal::Registry<TDerived>::get_all();
     }
 
 }

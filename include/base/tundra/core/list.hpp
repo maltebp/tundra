@@ -133,6 +133,11 @@ template<typename T>
 }
 
 template<typename T>
+[[nodiscard]] bool td::List<T>::contains(const T& element) const {
+    return index_of(element) != td::limits::numeric_limits<td::uint32>::max;
+}
+
+template<typename T>
 td::uint32 td::List<T>::get_size() const { return size; }
 
 template<typename T>
