@@ -1,114 +1,105 @@
 #pragma once
 
+#include <tundra/engine/entity-system/internal/registry.dec.hpp>
+
 #include <tundra/core/assert.hpp>
+
 #include <tundra/engine/entity-system/internal/component-meta-data.hpp>
 #include <tundra/engine/entity-system/internal/component-flags.hpp>
 #include <tundra/engine/entity-system/internal/registry-block.hpp>
 
 namespace td::internal {
 
-    // TODO: Rename to ComponentRegistry 
+    template<typename TComponent>
+    template<typename ... TArgs>
+    TComponent* Registry<TComponent>::create_component(TArgs&& ... args) {
+
+        TComponent* component = get_free_block().allocate_component();
+        new(component) TComponent(forward<TArgs>(args)...);
+
+        component->flags |= ComponentFlags::IsAllocated | ComponentFlags::IsAlive; 
+        component->reference_count = 0;
+        component->next = component;
+        
+        return component;
+    }
 
     template<typename TComponent>
-    class Registry {    
-    public:
+    void Registry<TComponent>::destroy_component(TComponent* component) {
+        component->destroy();
+    }
 
-        // TODO: Non-default create function
+    template<typename TComponent>
+    void Registry<TComponent>::free_component(TComponent* component) {
+        TD_ASSERT(
+            component->reference_count == 0,
+            "Component still has reference count of %d when freed",
+            component->reference_count);
 
-        template<typename ... TArgs>
-        static TComponent* create_component(TArgs&& ... args) {
-
-            TComponent* component = get_free_block().allocate_component();
-            new(component) TComponent(forward<TArgs>(args)...);
-
-            component->flags |= ComponentFlags::IsAllocated | ComponentFlags::IsAlive; 
-            component->reference_count = 0;
-            component->next = component;
-            
-            return component;
-        }
-
-        // TODO: Exists because I was too lazy to refactor (refactor this)
-        static void destroy_component(TComponent* component) {
-            component->destroy();
-        }
-
-        static void free_component(TComponent* component) {
-            TD_ASSERT(
-                component->reference_count == 0,
-                "Component still has reference count of %d when freed",
-                component->reference_count);
-
-            TD_ASSERT( !component->is_alive(), "Component is still alive when freed");
-            TD_ASSERT( component->is_allocated(), "Component has not been allocated when freed");
-            
-            RegistryBlock<TComponent>* owning_block = nullptr;
-            for( uint32 i = 0; i < blocks.get_size(); i++ ) {
-                if( blocks[i].component_belongs_to_block(component) ) {
-                    owning_block = &blocks[i];
-                    break;
-                }
-            }
-            
-            TD_ASSERT(owning_block != nullptr, "Component was not part of any block");
-            component->~TComponent();
-            owning_block->free_component(component);
-        }   
-
-        // This deallocates all blocks (and thus deallocates all components), BUT
-        // it does not destroy the components.
-        // Only use this for testing and if you know what you are doing
-        static void clear_block_list() {
-            TD_ASSERT(get_num_components() == 0, "All components must be destroyed before clearing blocks");
-            blocks.clear();
-        }
-
-        static uint32 get_num_components() { 
-            // We can track this when components are created instead, if 
-            // accumulating this when needed becomes a performance issue
-
-            uint32 num_components = 0;
-            for( uint32 i = 0; i < blocks.get_size(); i++ ) {
-                num_components += blocks[i].get_num_allocated_components();
-            }
-
-            return num_components;
-        }
-
-        static uint32 get_num_blocks() { return blocks.get_size(); }
-
-        class Iterator;
-
-        // TODO: Registry should be refactored to a non-static class instead of this approach
-        // This was a quick hack to allow us to iterator static registry in a foreach loop
-        struct Iterable {
-            Iterator begin();
-            Iterator end();
-        };
-
-        static Iterable get_iterable() {
-            return {};
-        }
-
-        // TODO: Make this tweakable by user (this number is pulled out of a hat)
-        static inline constexpr uint32 BLOCK_SIZE = 25; 
+        TD_ASSERT( !component->is_alive(), "Component is still alive when freed");
+        TD_ASSERT( component->is_allocated(), "Component has not been allocated when freed");
         
-    private:
-
-        static RegistryBlock<TComponent>& get_free_block() {
-            for( uint32 i = 0; i < blocks.get_size(); i++ ) {
-                RegistryBlock<TComponent>& block = blocks[i];
-                if( block.has_free_entry() ) return block;
+        RegistryBlock<TComponent>* owning_block = nullptr;
+        for( uint32 i = 0; i < blocks.get_size(); i++ ) {
+            if( blocks[i].component_belongs_to_block(component) ) {
+                owning_block = &blocks[i];
+                break;
             }
+        }
+        
+        TD_ASSERT(owning_block != nullptr, "Component was not part of any block");
+        component->~TComponent();
+        owning_block->free_component(component);
+    }   
 
-            // No blocks are free, so we allocate new
-            blocks.add(RegistryBlock<TComponent>(BLOCK_SIZE));
-            return blocks.get_last();
+    template<typename TComponent>
+    void Registry<TComponent>::clear_block_list() {
+        TD_ASSERT(get_num_components() == 0, "All components must be destroyed before clearing blocks");
+        blocks.clear();
+    }
+
+    template<typename TComponent>
+    uint32 Registry<TComponent>::get_num_components() { 
+        // We can track this when components are created instead, if 
+        // accumulating this when needed becomes a performance issue
+
+        uint32 num_components = 0;
+        for( uint32 i = 0; i < blocks.get_size(); i++ ) {
+            num_components += blocks[i].get_num_allocated_components();
         }
 
-        static inline List<RegistryBlock<TComponent>> blocks;
+        return num_components;
+    }
 
-    };
+    template<typename TComponent>
+    uint32 Registry<TComponent>::get_num_blocks() { return blocks.get_size(); }
+
+    template<typename TComponent>
+    Registry<TComponent>::Iterable Registry<TComponent>::get_all() {
+        return {};
+    }
+
+    template<typename TComponent>   
+    RegistryBlock<TComponent>& Registry<TComponent>::get_free_block() {
+        for( uint32 i = 0; i < blocks.get_size(); i++ ) {
+            RegistryBlock<TComponent>& block = blocks[i];
+            if( block.has_free_entry() ) return block;
+        }
+
+        // No blocks are free, so we allocate new
+        blocks.add(RegistryBlock<TComponent>(BLOCK_SIZE));
+        return blocks.get_last();
+    }
+
+    template<typename TComponent>
+    Registry<TComponent>::Iterator Registry<TComponent>::Iterable::begin() {
+        return Iterator(Iterator::Type::Begin);
+    }
+
+    template<typename TComponent>
+    Registry<TComponent>::Iterator Registry<TComponent>::Iterable::end() {
+        return Iterator(Iterator::Type::End);
+    }
 
 
     template<typename TComponent>
@@ -187,15 +178,5 @@ namespace td::internal {
         BlockIterator block_iterator;
 
     };
-
-    template<typename TComponent>
-    Registry<TComponent>::Iterator Registry<TComponent>::Iterable::begin() {
-        return Iterator(Iterator::Type::Begin);
-    }
-
-    template<typename TComponent>
-    Registry<TComponent>::Iterator Registry<TComponent>::Iterable::end() {
-        return Iterator(Iterator::Type::End);
-    }
 
 };

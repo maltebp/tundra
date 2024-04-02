@@ -75,7 +75,7 @@ namespace td::registry_tests {
         TD_ASSERT(internal::Registry<TestComponent>::get_num_components() == 0, "Registry was not clean when entering test");
         
         int num_iterated_components = 0;
-        for( TestComponent* component : internal::Registry<TestComponent>::get_iterable() ) {
+        for( TestComponent* component : internal::Registry<TestComponent>::get_all() ) {
             static_cast<void>(component);
             num_iterated_components++;
         }
@@ -91,7 +91,7 @@ namespace td::registry_tests {
         }
 
         int num_iterated_components = 0;
-        for( TestComponent* component : internal::Registry<TestComponent>::get_iterable() ) {
+        for( TestComponent* component : internal::Registry<TestComponent>::get_all() ) {
             num_iterated_components++;
             uint32 index_of_component = components.index_of(component);
             TD_TEST_ASSERT_LESS(index_of_component, td::limits::numeric_limits<uint32>::max);
@@ -118,7 +118,7 @@ namespace td::registry_tests {
         }
 
         uint32 num_iterated_components = 0;
-        for( TestComponent* component : internal::Registry<TestComponent>::get_iterable() ) {
+        for( TestComponent* component : internal::Registry<TestComponent>::get_all() ) {
             num_iterated_components++;
             uint32 index_of_component = components.index_of(component);
             TD_TEST_ASSERT_LESS(index_of_component, td::limits::numeric_limits<uint32>::max);
@@ -151,7 +151,7 @@ namespace td::registry_tests {
         components.clear();
 
         int num_iterated_components = 0;
-        for( TestComponent* component : internal::Registry<TestComponent>::get_iterable() ) {
+        for( TestComponent* component : internal::Registry<TestComponent>::get_all() ) {
             static_cast<void>(component);
             num_iterated_components++;
         }
@@ -182,7 +182,7 @@ namespace td::registry_tests {
         remove_all_from_block(2);
 
         uint32 num_iterated_components = 0;
-        for( TestComponent* component : internal::Registry<TestComponent>::get_iterable() ) {
+        for( TestComponent* component : internal::Registry<TestComponent>::get_all() ) {
             static_cast<void>(component);
             num_iterated_components++;
         }
