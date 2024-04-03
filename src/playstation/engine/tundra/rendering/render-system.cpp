@@ -28,7 +28,7 @@ namespace td {
             SetDefDrawEnv( &draw_env, x, y, SCREEN_WIDTH, SCREEN_HEIGHT);
             
 	        draw_env.isbg = 1;
-	        draw_env.dtd = 1; // TODO: Disable dithering
+	        // draw_env.dtd = 1; // TODO: Disable dithering
 
             draw_env.r0 = 155;
             draw_env.g0 = 155;
