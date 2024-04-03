@@ -9,6 +9,10 @@
 
 namespace td {
 
+    OrderingTableLayer::OrderingTableLayer(OrderingTableLayerSettings settings) 
+        :   OrderingTableLayer(settings.resolution, settings.far_plane)
+    { }
+
     OrderingTableLayer::OrderingTableLayer(uint16 resolution, UFixed16<12> far_plane) 
         :   resolution(resolution),
             far_plane(far_plane),

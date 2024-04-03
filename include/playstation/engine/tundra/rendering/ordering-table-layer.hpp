@@ -10,8 +10,15 @@ namespace td {
 
     class OrderingTable;
 
+    struct OrderingTableLayerSettings {
+        uint16 resolution;
+        UFixed16<12> far_plane;
+    };
+
     class OrderingTableLayer {
     public:
+
+        OrderingTableLayer(OrderingTableLayerSettings settings);
 
         OrderingTableLayer(
             uint16 resolution, 

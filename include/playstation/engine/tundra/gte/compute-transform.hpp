@@ -20,4 +20,6 @@ namespace td::gte {
     // Overwrites the rotation and translation matrix registers
     extern Vec3<Fixed32<12>> apply_transform_matrix(const TransformMatrix& m, const Vec3<Fixed32<12>>& v);
 
+    extern TransformMatrix multiply_transform_matrices(const TransformMatrix& m1, const TransformMatrix& m2);
+
 }

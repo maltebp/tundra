@@ -9,8 +9,16 @@
 
 namespace td {
 
-    OrderingTable::OrderingTable(const List<OrderingTableLayer>& layers) 
-        :   layers(layers),
+    List<OrderingTableLayer> create_layers(const List<OrderingTableLayerSettings>& settings) {
+        List<OrderingTableLayer> layers;
+        for( uint32 i = 0; i < settings.get_size(); i++ ) {
+            layers.add({settings[i].resolution, settings[i].far_plane});
+        }
+        return layers;
+    }
+
+    OrderingTable::OrderingTable(const List<OrderingTableLayerSettings>& layers) 
+        :   layers(td::move(create_layers(layers))),
             root_ordering_table(layers.get_size())
     { 
         TD_ASSERT(layers.get_size() > 0, "There must be at least 1 layer");

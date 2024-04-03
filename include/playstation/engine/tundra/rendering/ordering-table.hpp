@@ -11,7 +11,7 @@ namespace td {
     class OrderingTable {
     public:
     
-        OrderingTable(const List<OrderingTableLayer>& layers);
+        OrderingTable(const List<OrderingTableLayerSettings>& layers);
 
         OrderingTable(const OrderingTable&) = delete;
 

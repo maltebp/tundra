@@ -4,10 +4,10 @@ set( TD_TESTS_DIR_SRC ${TD_DIR_TESTS}/manual/playstation/model-rendering )
 
 set( TD_TESTS_SOURCES
 	${TD_TESTS_DIR_SRC}/main.cpp
-    ${TD_TESTS_DIR_SRC}/render-buffer.cpp
-    ${TD_TESTS_DIR_SRC}/renderer.cpp
-    ${TD_TESTS_DIR_SRC}/look-at-camera.cpp
-    ${TD_TESTS_DIR_SRC}/initialize-prim.cpp
+#    ${TD_TESTS_DIR_SRC}/render-buffer.cpp
+#   ${TD_TESTS_DIR_SRC}/renderer.cpp
+#    ${TD_TESTS_DIR_SRC}/look-at-camera.cpp
+#    ${TD_TESTS_DIR_SRC}/initialize-prim.cpp
 )
 
 psn00bsdk_add_executable(td.playstation.tests.manual.model-rendering GPREL ${TD_TESTS_SOURCES})

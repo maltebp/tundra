@@ -1,37 +1,50 @@
 #pragma once
 
-#include <tundra/rendering/ordering-table-layer.hpp>
 #include <tundra/engine/dynamic-transform.hpp>
 #include <tundra/engine/entity-system/component-ref.hpp>
 #include <tundra/engine/entity-system/component.dec.hpp>
+#include <tundra/rendering/double-buffer-id.hpp>
+#include <tundra/rendering/ordering-table-layer.hpp>
 #include <tundra/rendering/ordering-table.hpp>
 
 namespace td {
+
+    struct CameraLayerSettings {
+            
+        CameraLayerSettings(
+            td::uint16 layer_index, 
+            uint16 depth_resolution, 
+            UFixed16<12> max_distance = td::limits::numeric_limits<UFixed16<12>>::max
+        ) 
+            :   layer_index(layer_index),
+                depth_resolution(depth_resolution),
+                max_distance(max_distance)
+        { }
+
+        td::uint16 layer_index;
+        uint16 depth_resolution;
+        UFixed16<12> max_distance = td::limits::numeric_limits<UFixed16<12>>::max;
+    };
 
     class Camera : public Component<Camera> {
     public:
 
         Camera(
             const ComponentRef<DynamicTransform>& transform,
-            const List<uint32>& layers_to_render
-        ) 
-            :   Camera(transform, layers_to_render, List<OrderingTableLayer>{})  
-        { }
-
-        Camera(
-            const ComponentRef<DynamicTransform>& transform,
-            const List<uint32>& layers_to_render,
-            const List<OrderingTableLayer>& layers_settings
+            const List<CameraLayerSettings>& layers_settings
         );
 
-    private:
+        OrderingTableLayer& get_ordering_table_layer(DoubleBufferId ordering_table_id, uint32 layer_id);
+
+        void look_at(const Vec3<Fixed32<12>>& target);
 
         const ComponentRef<DynamicTransform> transform;
 
         const List<uint32> layers_to_render;
 
-        OrderingTable ordering_table_1;
-        OrderingTable ordering_table_2;
+    private:
+
+        OrderingTable ordering_tables[2];
         
     };
 

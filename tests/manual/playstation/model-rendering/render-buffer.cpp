@@ -34,7 +34,7 @@ RenderBuffer::RenderBuffer(
 	/* Enable draw area clear and dither processing */
 	setRGB0( &drawing_environment, 63, 0, 127 );
 	drawing_environment.isbg = 1;
-	drawing_environment.dtd = 1;
+	drawing_environment.dtd = 1; // TODO: Disable dithering
     drawing_environment.r0 = clear_color.r;
     drawing_environment.g0 = clear_color.g;
     drawing_environment.b0 = clear_color.b;

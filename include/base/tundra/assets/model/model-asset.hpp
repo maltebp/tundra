@@ -58,10 +58,10 @@ namespace td {
 		const char* name = nullptr;
 
 		uint16 num_vertices = 0;
-		Vec3<int16>* vertices = nullptr;
+		::Vec3<int16>* vertices = nullptr;
 
 		uint16 num_normals = 0;
-		Vec3<int16>* normals = nullptr;
+		::Vec3<int16>* normals = nullptr;
 
 		uint16 num_parts = 0;
 		ModelPart** model_parts = nullptr;

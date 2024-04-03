@@ -94,6 +94,17 @@ namespace td::gte {
         
         return result;
     }
+    
+    TransformMatrix multiply_transform_matrices(const TransformMatrix& m1, const TransformMatrix& m2) {
+        MATRIX* raw_matrix_1 = const_cast<MATRIX*>(reinterpret_cast<const MATRIX*>(&m1));
+        MATRIX* raw_matrix_2 = const_cast<MATRIX*>(reinterpret_cast<const MATRIX*>(&m2));
+
+        TransformMatrix result;
+        MATRIX* raw_result = const_cast<MATRIX*>(reinterpret_cast<const MATRIX*>(&result));
+
+        CompMatrixLV(raw_matrix_1, raw_matrix_2, raw_result);
+        return result;
+    }
 
     
     Vec3<Fixed32<12>> internal::compute_translation(
