@@ -22,7 +22,7 @@ namespace td {
     void* PrimitiveBuffer::allocate(td::uint32 num_bytes) {
         byte* new_next = next_memory + num_bytes;
         
-        if( new_next <= memory_end ) {
+        if( new_next > memory_end ) {
             // Not enough space to allocate that many bytes
             return nullptr;
         }

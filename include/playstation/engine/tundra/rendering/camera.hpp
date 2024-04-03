@@ -9,6 +9,8 @@
 
 namespace td {
 
+    class RenderSystem;
+
     struct CameraLayerSettings {
             
         CameraLayerSettings(
@@ -45,6 +47,8 @@ namespace td {
     private:
 
         OrderingTable ordering_tables[2];
+
+        friend class RenderSystem;
         
     };
 

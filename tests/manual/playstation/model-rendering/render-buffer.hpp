@@ -13,7 +13,6 @@
 #include "initialize-prim.hpp"
 
 
-
 class RenderBuffer {
 public:
 

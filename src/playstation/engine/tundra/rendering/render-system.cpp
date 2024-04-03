@@ -1,4 +1,6 @@
+#include "tundra/core/types.hpp"
 #include "tundra/rendering/double-buffer-id.hpp"
+#include "tundra/rendering/ordering-table-node.hpp"
 #include <tundra/rendering/render-system.hpp>
 
 #include <psxgpu.h>
@@ -116,6 +118,11 @@ namespace td {
             
             render_model(camera_matrix, model, layer);
         }
+
+        // TODO: Queue the drawing of the camera (now drawing a second will block while waiting)
+        const td::OrderingTableNode* first_ordering_table_node_to_draw =
+            camera->ordering_tables[(uint8)active_buffer].get_first_node_to_draw();
+        DrawOTag((const td::uint32*)first_ordering_table_node_to_draw);
     }
 
     void RenderSystem::render_model(const TransformMatrix& camera_matrix, const Model* model, OrderingTableLayer& ordering_table_layer) {
@@ -136,8 +143,8 @@ namespace td {
         // MulMatrix0(&light_directions, &rotation_matrix, &light_directions_in_model_space);
         // gte_SetLightMatrix( &light_directions_in_model_space );
 
-        gte_SetRotMatrix( &raw_model_to_view_matrix );
-        gte_SetTransMatrix( &raw_model_to_view_matrix );
+        gte_SetRotMatrix( raw_model_to_view_matrix );
+        gte_SetTransMatrix( raw_model_to_view_matrix );
 
         for( int part_index = 0; part_index < model->asset.num_parts; part_index++ ) {
 
@@ -155,7 +162,7 @@ namespace td {
             
                 /* Load the first 3 vertices of a quad to the GTE */
                 gte_ldv3(
-                    &mv0, &mv1, &mv2                 
+                    mv0, mv1, mv2                 
                 );
                     
                 /* Rotation, Translation and Perspective Triple */
@@ -178,7 +185,7 @@ namespace td {
 
                 td::uint32 ordering_table_index_fixed_20_12;
                 gte_stopz(&ordering_table_index_fixed_20_12);
-                td::uint32 ordering_table_index = ordering_table_index_fixed_20_12 >>= 12;
+                td::uint32 ordering_table_index = ordering_table_index_fixed_20_12 >> 12;
 
                 // TODO: Set the layer factor
 
@@ -229,6 +236,10 @@ namespace td {
                 {
                     
                     POLY_G3* triangle_prim = (POLY_G3*)primitive_buffers[(uint8)active_buffer].allocate(sizeof(POLY_G3));
+                    if( triangle_prim == nullptr ) {
+                        // Not enough space for triangle
+                        return;
+                    }
                     setPolyG3(triangle_prim);
                     ordering_table_layer.add_node((OrderingTableNode*)triangle_prim, ordering_table_index_16);
 
@@ -254,7 +265,7 @@ namespace td {
                         SVECTOR* raw_normal = vec3_int16_as_svector(normal);
 
                         // Load vertex normal            
-                        gte_ldv0( &raw_normal );
+                        gte_ldv0( raw_normal );
                         
                         /* Normal Color Single */
                         gte_nccs();

@@ -1,4 +1,3 @@
-#include "tundra/rendering/ordering-table-layer.hpp"
 #include <tundra/core/fixed.hpp>
 
 #include <cstdio>
@@ -63,7 +62,8 @@ int main() {
 
     td::Entity* camera_entity = td::Entity::create();
     td::DynamicTransform* camera_transform = camera_entity->add_component<td::DynamicTransform>();
-    camera_transform->set_translation({0, 3, td::to_fixed(-5.25)});
+    // camera_transform->set_translation({0, 3, td::to_fixed(-5.25)});
+    camera_transform->set_translation({0, 0, -1});
 
     td::List<td::CameraLayerSettings> layer_settings;
     layer_settings.add({LAYER_FOREGROUND, 1});
@@ -77,6 +77,8 @@ int main() {
     SetDispMask(1);
     FntLoad(0, 256);
 
+
+    // Create the fish
     constexpr td::Fixed16<12> MODEL_SIZE = 2;
     td::Fixed32<12> model_distance = 2;
     td::Fixed16<12> model_rotation = 0;
@@ -108,19 +110,19 @@ int main() {
     TD_DEBUG_LOG("Running main loop");
     while(true) {
 
-        camera_y_rotation -= td::to_fixed(0.005);
-        if( camera_y_rotation < 0 ) {
-            camera_y_rotation += 1;            
-        }
+        // camera_y_rotation -= td::to_fixed(0.005);
+        // if( camera_y_rotation < 0 ) {
+        //     camera_y_rotation += 1;            
+        // }
 
-        td::Fixed32<12> camera_x = td::Fixed32<12>::from_raw_fixed_value(isin(camera_y_rotation.get_raw_value())) * CAMERA_XZ_DISTANCE;
-        td::Fixed32<12> camera_z = td::Fixed32<12>::from_raw_fixed_value(icos(camera_y_rotation.get_raw_value())) * CAMERA_XZ_DISTANCE;
+        // td::Fixed32<12> camera_x = td::Fixed32<12>::from_raw_fixed_value(isin(camera_y_rotation.get_raw_value())) * CAMERA_XZ_DISTANCE;
+        // td::Fixed32<12> camera_z = td::Fixed32<12>::from_raw_fixed_value(icos(camera_y_rotation.get_raw_value())) * CAMERA_XZ_DISTANCE;
 
-        camera->transform->set_translation({
-            camera_x.get_raw_value(),
-            CAMERA_HEIGHT.get_raw_value(),
-            camera_z.get_raw_value() 
-        });
+        // camera->transform->set_translation({
+        //     camera_x.get_raw_value(),
+        //     CAMERA_HEIGHT.get_raw_value(),
+        //     camera_z.get_raw_value() 
+        // });
 
         camera->look_at({0, 0, 0});
         
