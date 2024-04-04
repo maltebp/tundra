@@ -2,6 +2,8 @@
 
 #include <tundra/core/list.fwd.hpp>
 
+#include <initializer_list>
+
 #include <tundra/core/types.hpp>
 
 namespace td {  
@@ -11,6 +13,8 @@ namespace td {
     public:
 
         List() = default;
+
+        List(std::initializer_list<T> initial_elements);
 
         // Add num_elements default initialized elements to the list
         List(td::uint32 num_elements);
