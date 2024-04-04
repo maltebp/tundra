@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tundra/core/utility.hpp"
 #include <tundra/core/log.hpp>
 #include <tundra/core/fixed.hpp>
 #include <tundra/test-framework/test.hpp>
@@ -67,6 +68,39 @@ TD_TEST("fixed/to-string/large-integer") {
     };
 
     test_type.template operator()<td::Fixed32<12>>();
+    test_type.template operator()<td::UFixed32<12>>();
+}
+
+// TODO: Fix this bugs
+TD_TEST("fixed/to_string/leading-zeros") {
+    
+    auto test_type = [&]<typename T>() {
+        TD_TEST_ASSERT_EQUAL(td::to_string(T{ td::to_fixed(0.0625) }, 4), "0.0625");
+        
+        if constexpr (td::is_signed<typename T::Type>() ) {
+                TD_TEST_ASSERT_EQUAL(td::to_string(T{ td::to_fixed(-0.0625) }, 4), "-0.0625");
+        }
+    };
+    
+    test_type.template operator()<td::Fixed16<12>>();
+    test_type.template operator()<td::Fixed32<12>>();
+    test_type.template operator()<td::UFixed16<12>>();
+    test_type.template operator()<td::UFixed32<12>>();
+}
+
+TD_TEST("fixed/to_string/smallest") {
+    
+    auto test_type = [&]<typename T>() {
+        TD_TEST_ASSERT_EQUAL(td::to_string(T{ td::to_fixed(0.000244140625) }, 8), "0.00024414");
+        
+        if constexpr (td::is_signed<typename T::Type>() ) {
+        TD_TEST_ASSERT_EQUAL(td::to_string(T{ td::to_fixed(-0.000244140625) }, 8), "-0.00024414");
+        }
+    };
+
+    test_type.template operator()<td::Fixed16<12>>();
+    test_type.template operator()<td::Fixed32<12>>();
+    test_type.template operator()<td::UFixed16<12>>();
     test_type.template operator()<td::UFixed32<12>>();
 }
 

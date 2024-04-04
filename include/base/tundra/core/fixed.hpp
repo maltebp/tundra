@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tundra/core/fixed.hpp"
 #include <tundra/core/fixed.fwd.hpp>
 
 #include <tundra/core/limits.hpp>
@@ -17,173 +18,179 @@ namespace td {
             consteval explicit ConstEvalDouble(long double d) : d(d) { }
             long double d;
         };
-
-    template<typename TDerived, typename TStoreType, typename TIntermediate, int TNumFractionBits>
-    class FixedBase {
-    public:
-
-        using Type = TStoreType;
-
-        static_assert(TNumFractionBits > 0, "TNumFractionBits must be larger than 0 (otherwise use a regular integer format)");
-        
-        static_assert(
-            TNumFractionBits < sizeof(TStoreType) * 8,
-            "Number of fraction bits must be lower than the number of bits in store type (integer part must at least have 1 bit)");
-
-        constexpr FixedBase() = default;
-
-        constexpr FixedBase(const FixedBase& other) = default;
-
-        constexpr FixedBase(FixedBase&& other) = default;
-
-        constexpr ~FixedBase() = default;
-
-        consteval FixedBase(internal::ConstEvalDouble d) : value((TStoreType)(d.d * ONE_RAW)) { }
-
-        // Same type, other number of fraction bits
-        template<typename TOtherDerived, int TOtherNumFractionBits>
-        constexpr explicit FixedBase(const FixedBase<TOtherDerived, TStoreType, TIntermediate, TOtherNumFractionBits>& other) 
-            : value(raw_from_other_fixed_type(other)) { }
-
-        // Different type
-        template<typename TOtherDerived, typename TOtherStoreType, typename TOtherIntermediate, int TOtherNumFractionBits>
-        constexpr explicit FixedBase(const FixedBase<TOtherDerived, TOtherStoreType, TOtherIntermediate, TOtherNumFractionBits>& other) 
-            : value(raw_from_other_fixed_type(other)) { }
-
-        constexpr TDerived& operator=(const FixedBase& other) {
-            value = other.value;
-            return static_cast<TDerived&>(*this);
-        }
-
-        constexpr TDerived& operator=(const TDerived& other) {
-            value = other.value;
-            return static_cast<TDerived&>(*this);
-        }
-
-        constexpr TDerived operator+(const TDerived& other) const {
-            return from_raw_fixed_value(value + other.value);
-        }
-
-        constexpr TDerived& operator+=(const TDerived& other) {
-            value += other.value;
-            return static_cast<TDerived&>(*this);
-        }
-
-        constexpr TDerived operator-() const requires(td::is_signed<TStoreType>()) {
-            return from_raw_fixed_value(-value);
-        }
-
-        constexpr TDerived operator-(const TDerived& other) const {
-            return from_raw_fixed_value(value - other.value);
-        }
-
-        constexpr TDerived& operator-=(const TDerived& other) {
-            value -= other.value;
-            return static_cast<TDerived&>(*this);
-        }
-
-        // Avoids the conversion of the operand to a FixedPoint value (not needed for raw integers)
-        constexpr TDerived operator*(TStoreType other) const {
-            TStoreType new_value = (TStoreType)(value * other);
-            return from_raw_fixed_value(new_value);
-        }
-
-        constexpr TDerived& operator*=(TStoreType other) {
-            value *= other;
-            return static_cast<TDerived&>(*this);
-        }
-
-        constexpr TDerived operator*(const TDerived& other) const {
-            TIntermediate intermediate_value = (TIntermediate)value * (TIntermediate)other.value;
-            TStoreType new_value = (TStoreType)(intermediate_value >> TNumFractionBits);
-            return from_raw_fixed_value(new_value);
-        }
-
-        constexpr TDerived& operator*=(const TDerived& other) {
-            value = (TStoreType)(((TIntermediate)value * (TIntermediate)other.value) >> TNumFractionBits);
-            return static_cast<TDerived&>(*this);
-        }
-
-        constexpr TDerived operator/(TStoreType other) const {
-            TStoreType new_value = (TStoreType)(value / other);
-            return from_raw_fixed_value(new_value);
-        }
-
-        constexpr TDerived& operator/=(TStoreType other) {
-            value /= other;
-            return static_cast<TDerived&>(*this);
-        }
-
-        constexpr TDerived operator/(const TDerived& other) const {
-            TStoreType new_value = (TStoreType)((((TIntermediate)value) << TNumFractionBits) / other.value);
-            return from_raw_fixed_value(new_value);
-        }
-
-        constexpr TDerived& operator/=(const TDerived& other) {
-            value = (TStoreType)((((TIntermediate)value) << TNumFractionBits) / other.value);
-            return static_cast<TDerived&>(*this);
-        }
-
-        [[nodiscard]] constexpr explicit operator TStoreType() const {
-            return value >> TNumFractionBits; 
-        }
-        
-        static constexpr TDerived from_raw_fixed_value(TStoreType value) {
-            TDerived f;
-            f.value  = value;
-            return f; 
-        }
-
-        // Multiplies without storing in intermediate type (expensive for 64-bit intermediate)
-        constexpr TDerived fast_multiply(const TDerived& other) const requires(sizeof(TIntermediate) > 4) {
-            return from_raw_fixed_value((TStoreType)((value * other.value) >> TNumFractionBits));
-        }
-
-        // Divides without storing in intermediate type (expensive for 64-bit intermediate)
-        constexpr TDerived fast_divide(const TDerived& other) const requires(sizeof(TIntermediate) > 4) {
-            return from_raw_fixed_value((TStoreType)((value << TNumFractionBits) / other.value));
-        }
-
-        constexpr TStoreType get_raw_value() const { return value; }
-
-        constexpr TStoreType get_raw_integer() const { return value >> TNumFractionBits; }
-
-        constexpr TStoreType get_raw_fraction() const { return value & FRACTION_MASK; }
-
-        static constexpr TStoreType ONE_RAW = 1 << TNumFractionBits;
-
-        static constexpr TStoreType FRACTION_MASK = ONE_RAW - 1;
-
-    protected:
-
-        constexpr explicit FixedBase(TStoreType t) : value((TStoreType)(t << TNumFractionBits)) { }
-
-        TStoreType value;
-
-    private:
-
-        template<typename TOtherDerived, typename TOtherStoreType, typename TOtherIntermediate, int TOtherNumFractionBits>
-        static constexpr TStoreType raw_from_other_fixed_type(const FixedBase<TOtherDerived, TOtherStoreType, TOtherIntermediate, TOtherNumFractionBits>& other) {
-
-            constexpr int num_fraction_bits_difference = TNumFractionBits - TOtherNumFractionBits;
-            constexpr bool is_converting_to_smaller_fraction = num_fraction_bits_difference < 0;
-
-            if constexpr ( is_converting_to_smaller_fraction ) {
-                return (TStoreType)(other.get_raw_value() >> (TOtherStoreType)(-num_fraction_bits_difference));
-            } 
-            else {
-                return (TStoreType)(((TStoreType)other.get_raw_value()) << (TStoreType)num_fraction_bits_difference);
-            }
-        }
-
-    };
     }
-    
-    
 
     consteval internal::ConstEvalDouble to_fixed(double d) {
         return internal::ConstEvalDouble(d);
     };
+
+    namespace internal {
+
+        template<typename TDerived, typename TStoreType, typename TIntermediate, int TNumFractionBits>
+        class FixedBase {
+        public:
+
+            using Type = TStoreType;
+
+            static_assert(TNumFractionBits > 0, "TNumFractionBits must be larger than 0 (otherwise use a regular integer format)");
+            
+            static_assert(
+                TNumFractionBits < sizeof(TStoreType) * 8,
+                "Number of fraction bits must be lower than the number of bits in store type (integer part must at least have 1 bit)");
+
+            constexpr FixedBase() = default;
+
+            constexpr FixedBase(const FixedBase& other) = default;
+
+            constexpr FixedBase(FixedBase&& other) = default;
+
+            constexpr ~FixedBase() = default;
+
+            consteval FixedBase(internal::ConstEvalDouble d) : value((TStoreType)(d.d * ONE_RAW)) { }
+
+            // Same type, other number of fraction bits
+            template<typename TOtherDerived, int TOtherNumFractionBits>
+            constexpr explicit FixedBase(const FixedBase<TOtherDerived, TStoreType, TIntermediate, TOtherNumFractionBits>& other) 
+                : value(raw_from_other_fixed_type(other)) { }
+
+            // Different type
+            template<typename TOtherDerived, typename TOtherStoreType, typename TOtherIntermediate, int TOtherNumFractionBits>
+            constexpr explicit FixedBase(const FixedBase<TOtherDerived, TOtherStoreType, TOtherIntermediate, TOtherNumFractionBits>& other) 
+                : value(raw_from_other_fixed_type(other)) { }
+
+            constexpr TDerived& operator=(const FixedBase& other) {
+                value = other.value;
+                return static_cast<TDerived&>(*this);
+            }
+
+            constexpr TDerived& operator=(const TDerived& other) {
+                value = other.value;
+                return static_cast<TDerived&>(*this);
+            }
+
+            constexpr TDerived operator+(const TDerived& other) const {
+                return from_raw_fixed_value(value + other.value);
+            }
+
+            constexpr TDerived& operator+=(const TDerived& other) {
+                value += other.value;
+                return static_cast<TDerived&>(*this);
+            }
+
+            constexpr TDerived operator-() const requires(td::is_signed<TStoreType>()) {
+                return from_raw_fixed_value(-value);
+            }
+
+            constexpr TDerived operator-(const TDerived& other) const {
+                return from_raw_fixed_value(value - other.value);
+            }
+
+            constexpr TDerived& operator-=(const TDerived& other) {
+                value -= other.value;
+                return static_cast<TDerived&>(*this);
+            }
+
+            // Avoids the conversion of the operand to a FixedPoint value (not needed for raw integers)
+            constexpr TDerived operator*(TStoreType other) const {
+                TStoreType new_value = (TStoreType)(value * other);
+                return from_raw_fixed_value(new_value);
+            }
+
+            constexpr TDerived& operator*=(TStoreType other) {
+                value *= other;
+                return static_cast<TDerived&>(*this);
+            }
+
+            constexpr TDerived operator*(const TDerived& other) const {
+                TIntermediate intermediate_value = (TIntermediate)value * (TIntermediate)other.value;
+                TStoreType new_value = (TStoreType)(intermediate_value >> TNumFractionBits);
+                return from_raw_fixed_value(new_value);
+            }
+
+            constexpr TDerived& operator*=(const TDerived& other) {
+                value = (TStoreType)(((TIntermediate)value * (TIntermediate)other.value) >> TNumFractionBits);
+                return static_cast<TDerived&>(*this);
+            }
+
+            constexpr TDerived operator/(TStoreType other) const {
+                TStoreType new_value = (TStoreType)(value / other);
+                return from_raw_fixed_value(new_value);
+            }
+
+            constexpr TDerived& operator/=(TStoreType other) {
+                value /= other;
+                return static_cast<TDerived&>(*this);
+            }
+
+            constexpr TDerived operator/(const TDerived& other) const {
+                TStoreType new_value = (TStoreType)((((TIntermediate)value) << TNumFractionBits) / other.value);
+                return from_raw_fixed_value(new_value);
+            }
+
+            constexpr TDerived& operator/=(const TDerived& other) {
+                value = (TStoreType)((((TIntermediate)value) << TNumFractionBits) / other.value);
+                return static_cast<TDerived&>(*this);
+            }
+
+            [[nodiscard]] constexpr explicit operator TStoreType() const {
+                return value >> TNumFractionBits; 
+            }
+            
+            static constexpr TDerived from_raw_fixed_value(TStoreType value) {
+                TDerived f;
+                f.value  = value;
+                return f; 
+            }
+
+            // Multiplies without storing in intermediate type (expensive for 64-bit intermediate)
+            constexpr TDerived fast_multiply(const TDerived& other) const requires(sizeof(TIntermediate) > 4) {
+                return from_raw_fixed_value((TStoreType)((value * other.value) >> TNumFractionBits));
+            }
+
+            // Divides without storing in intermediate type (expensive for 64-bit intermediate)
+            constexpr TDerived fast_divide(const TDerived& other) const requires(sizeof(TIntermediate) > 4) {
+                return from_raw_fixed_value((TStoreType)((value << TNumFractionBits) / other.value));
+            }
+            
+            constexpr TStoreType get_raw_value() const { return value; }
+
+            constexpr TStoreType get_raw_integer() const { return value >> TNumFractionBits; }
+
+            constexpr TStoreType get_raw_fraction() const { return value & FRACTION_MASK; }
+
+            [[nodiscard]] consteval static TDerived get_pi() { return to_fixed(3.14159265358979); }
+
+            [[nodiscard]] consteval static TDerived get_half_pi() { return to_fixed(1.57079632679490); }
+
+            static constexpr TStoreType ONE_RAW = 1 << TNumFractionBits;
+
+            static constexpr TStoreType FRACTION_MASK = ONE_RAW - 1;
+
+        protected:
+
+            constexpr explicit FixedBase(TStoreType t) : value((TStoreType)(t << TNumFractionBits)) { }
+
+            TStoreType value;
+
+        private:
+
+            template<typename TOtherDerived, typename TOtherStoreType, typename TOtherIntermediate, int TOtherNumFractionBits>
+            static constexpr TStoreType raw_from_other_fixed_type(const FixedBase<TOtherDerived, TOtherStoreType, TOtherIntermediate, TOtherNumFractionBits>& other) {
+
+                constexpr int num_fraction_bits_difference = TNumFractionBits - TOtherNumFractionBits;
+                constexpr bool is_converting_to_smaller_fraction = num_fraction_bits_difference < 0;
+
+                if constexpr ( is_converting_to_smaller_fraction ) {
+                    return (TStoreType)(other.get_raw_value() >> (TOtherStoreType)(-num_fraction_bits_difference));
+                } 
+                else {
+                    return (TStoreType)(((TStoreType)other.get_raw_value()) << (TStoreType)num_fraction_bits_difference);
+                }
+            }
+
+        };
+    }
+
 
     template<int TNumFractionBits>
     class Fixed16 : public internal::FixedBase<Fixed16<TNumFractionBits>, td::int16, td::int32, TNumFractionBits> {
@@ -201,7 +208,11 @@ namespace td {
 
         constexpr bool operator<(const Fixed16& other) const { return this->value < other.value; }
 
+        constexpr bool operator<=(const Fixed16& other) const { return *this < other || *this == other; }
+
         constexpr bool operator>(const Fixed16& other) const { return this->value > other.value; }
+
+        constexpr bool operator>=(const Fixed16& other) const { return *this > other || *this == other; }
         
     };
 
@@ -221,7 +232,11 @@ namespace td {
 
         constexpr bool operator<(const UFixed16& other) const { return this->value < other.value; }
 
+        constexpr bool operator<=(const UFixed16& other) const { return *this < other || *this == other; }
+
         constexpr bool operator>(const UFixed16& other) const { return this->value > other.value; }
+
+        constexpr bool operator>=(const UFixed16& other) const { return *this > other || *this == other; }
 
     };
 
@@ -246,6 +261,8 @@ namespace td {
         constexpr bool operator==(const Fixed32& other) const { return this->value == other.value; }
 
         constexpr bool operator<(const Fixed32& other) const { return this->value < other.value; }
+        
+        constexpr bool operator<=(const Fixed32& other) const { return *this == other || *this < other; }
 
         constexpr bool operator>(const Fixed32& other) const { return this->value > other.value; }
 
@@ -362,19 +379,33 @@ namespace td {
             else {
                 fraction_part *= POW_10_RESULTS[precision];
 
+                // The integer fractions first "decimal" (e.g. fraction 0.625 in fixed point is 62.5 
+                // with precision 2, and the fraction's first decimal is 5)
                 uint64 fractions_first_decimal = ((fraction_part & (uint64)TFixedBase::FRACTION_MASK) * 10) >> TNumFractionBits;
+                
                 fraction_part >>= TNumFractionBits;
+                // Fraction part is now in regular integer (e.g. fraction that was 0.625 in fixed point is now 625 in integer)
 
+                // Rounding integer fraction up, if first truncated fraction decimal is above 4 
                 if( fractions_first_decimal > 4 ) {
                     fraction_part++;
                 }
 
-                if( raw_value < 0 ) {
-                    return td::string_util::create_from_format("-%u.%u", (uint32)whole_part, (uint32)fraction_part);
+                char* zeros = new char[precision + 1];
+                uint32 next_zero_index = 0;
+                for( int i = (int)precision; i >= 0; i-- ) {
+                    if( fraction_part >= POW_10_RESULTS[i - 1]) break;
+                    zeros[next_zero_index] = '0';
+                    next_zero_index++;
                 }
-                else {
-                    return td::string_util::create_from_format("%u.%u", (uint32)whole_part, (uint32)fraction_part); 
-                }
+                zeros[next_zero_index] = '\0';
+
+                td::String s = raw_value < 0 
+                    ? td::string_util::create_from_format("-%u.%s%u",(uint32)whole_part, zeros, (uint32)fraction_part)
+                    : td::string_util::create_from_format("%u.%s%u", (uint32)whole_part, zeros, (uint32)fraction_part);
+                delete[] zeros;
+                
+                return s;
             }
         }    
     }
