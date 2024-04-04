@@ -201,6 +201,21 @@ TD_TEST("list/add-with-relocation") {
     TD_TEST_ASSERT_EQUAL(list[2], TestType{20});
 }
 
+TD_TEST("list/initializer-list-constructor") {
+
+    TestType::reset_constructor_counters();
+
+    td::List<TestType> list_2 { { 1, 2, 3, 4 } };
+    TD_TEST_ASSERT_EQUAL(list_2.get_size(), 4U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_constructors_called, 8U);
+    TD_TEST_ASSERT_EQUAL(TestType::num_copy_constructors_called, 4U);
+
+    TD_TEST_ASSERT_EQUAL(list_2[0], TestType{1});
+    TD_TEST_ASSERT_EQUAL(list_2[1], TestType{2});
+    TD_TEST_ASSERT_EQUAL(list_2[2], TestType{3});
+    TD_TEST_ASSERT_EQUAL(list_2[3], TestType{4});
+}
+
 TD_TEST("list/size-constructor") {
 
     TestType::reset_constructor_counters();
@@ -208,7 +223,7 @@ TD_TEST("list/size-constructor") {
     td::List<TestType> list_1;
     TD_TEST_ASSERT_EQUAL(list_1.get_size(), 0U);
 
-    td::List<TestType> list_2 { 3 };
+    td::List<TestType> list_2(3);
     TD_TEST_ASSERT_EQUAL(list_2.get_size(), 3U);
     TD_TEST_ASSERT_EQUAL(TestType::num_default_constructors_called, 3U);
     
