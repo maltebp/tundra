@@ -26,8 +26,11 @@ namespace td {
 
     namespace internal {
 
+        // This is just to be able to check if a type is a fixed point number
+        class FixedNonTemplateBase { };
+
         template<typename TDerived, typename TStoreType, typename TIntermediate, int TNumFractionBits>
-        class FixedBase {
+        class FixedBase : public FixedNonTemplateBase {
         public:
 
             using Type = TStoreType;
