@@ -162,6 +162,9 @@ namespace td {
 
             [[nodiscard]] consteval static TDerived get_half_pi() { return to_fixed(1.57079632679490); }
 
+            // TODO: Require that the Fixed point can even fit this
+            [[nodiscard]] consteval static TDerived get_two_pi() { return to_fixed(6.28318530717959); }
+
             static constexpr TStoreType ONE_RAW = 1 << TNumFractionBits;
 
             static constexpr TStoreType FRACTION_MASK = ONE_RAW - 1;

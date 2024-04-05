@@ -42,7 +42,7 @@ namespace td::component_tests {
             components.remove(component);
         }
 
-        TD_TEST_ASSERT_EQUAL(components.get_size(), 0);
+        TD_TEST_ASSERT_EQUAL(components.get_size(), 0U);
     }
 
 }

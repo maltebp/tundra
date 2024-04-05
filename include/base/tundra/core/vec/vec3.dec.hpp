@@ -35,6 +35,12 @@ namespace td {
 
         [[nodiscard]] constexpr bool operator==(const Vec3& other) const;
 
+        // Only returns true if it is >= is true for all elements
+        [[nodiscard]] constexpr bool operator>=(const Vec3& other) const;
+
+        // Only returns true if it is <= is true for all elements
+        [[nodiscard]] constexpr bool operator<=(const Vec3& other) const;
+
         [[nodiscard]] constexpr Vec3 operator+(const Vec3& other) const;
         constexpr Vec3& operator+=(const Vec3& other);
 

@@ -40,6 +40,18 @@ namespace td {
         return x == other.x && y == other.y && z == other.z;
     }
 
+    // Only returns true if it is >= is true for all elements
+    template<typename T>
+    [[nodiscard]] constexpr bool Vec3<T>::operator>=(const Vec3& other) const {
+        return x >= other.x && y >= other.y && z >= other.z;
+    }
+
+    // Only returns true if it is <= is true for all elements
+    template<typename T>
+    [[nodiscard]] constexpr bool Vec3<T>::operator<=(const Vec3& other) const {
+        return x <= other.x && y <= other.y && z <= other.z;
+    }
+
     template<typename T>
     [[nodiscard]] constexpr Vec3<T> Vec3<T>::operator+(const Vec3& other) const { 
         return Vec3{ x + other.x, y + other.y, z + other.z };
@@ -62,7 +74,7 @@ namespace td {
         return *this;
     }
 
-    template<typename T>
+        template<typename T>
     [[nodiscard]] constexpr Vec3<T> Vec3<T>::operator-() const { 
         return Vec3<T>{ -x, -y, -z };
     }
