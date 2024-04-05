@@ -189,7 +189,6 @@ namespace td {
     [[nodiscard]] constexpr TFixed sin_radians(TFixed x) 
         noexcept requires(std::is_base_of<internal::FixedNonTemplateBase, TFixed>::value) 
     {
-        TD_DEBUG_LOG("  sin: radians = %s", x);
 
         // This sine uses a fifth-order curve-fitting approximation originally
         // described by Jasper Vijn on coranac.com which has a worst-case
@@ -229,9 +228,7 @@ namespace td {
     template <typename TFixed>
     constexpr inline TFixed cos_radians(TFixed radians) noexcept
         requires(std::is_base_of<internal::FixedNonTemplateBase, TFixed>::value) 
-    {
-        TD_DEBUG_LOG("  cos: radians = %s", radians);
-        
+    {        
         if( radians == 0 ) {
             return 1;
         }
