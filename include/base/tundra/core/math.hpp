@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tundra/core/math.hpp"
 #include <type_traits>
 
 #include <tundra/core/assert.hpp>
@@ -7,39 +8,62 @@
 
 namespace td {
 
+    // From https://github.com/MikeLankamp/fpm/blob/master/include/fpm/math.hpp
+    // fitted to td::Fixed use 
+
+    // Source license:
+    // MIT License
+
+    // Copyright (c) 2019 Mike Lankamp
+
+    // Permission is hereby granted, free of charge, to any person obtaining a copy
+    // of this software and associated documentation files (the "Software"), to deal
+    // in the Software without restriction, including without limitation the rights
+    // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    // copies of the Software, and to permit persons to whom the Software is
+    // furnished to do so, subject to the following conditions:
+
+    // The above copyright notice and this permission notice shall be included in all
+    // copies or substantial portions of the Software.
+
+    // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    // SOFTWARE.
+
     namespace internal {
+
+        // Returns the index of the most-signifcant set bit
+        inline unsigned long find_highest_bit(unsigned long long value) noexcept
+        {
+            TD_ASSERT(value != 0, "Value must not be 0");
+            #if defined(_MSC_VER)
+                unsigned long index;
+            #if defined(_WIN64)
+                _BitScanReverse64(&index, value);
+            #else
+                if (_BitScanReverse(&index, static_cast<unsigned long>(value >> 32)) != 0) {
+                    index += 32;
+                } else {
+                    _BitScanReverse(&index, static_cast<unsigned long>(value & 0xfffffffflu));
+                }
+            #endif
+                return index;
+            #elif defined(__GNUC__) || defined(__clang__)
+                return sizeof(value) * 8 - 1 - (size_t)__builtin_clzll(value);
+            #else
+            #   error "your platform does not support find_highest_bit()"
+            #endif
+        }
 
         // Calculates atan(x) assuming that x is in the range [0,1]
         template<typename TFixed>
         [[nodiscard]] constexpr TFixed atan_sanitized(TFixed x) 
             noexcept requires(std::is_base_of<internal::FixedNonTemplateBase, TFixed>::value) 
         {
-
-            // From https://github.com/MikeLankamp/fpm/blob/master/include/fpm/math.hpp
-            // fitted to td::Fixed use 
-
-            // Source license:
-            // MIT License
-
-            // Copyright (c) 2019 Mike Lankamp
-
-            // Permission is hereby granted, free of charge, to any person obtaining a copy
-            // of this software and associated documentation files (the "Software"), to deal
-            // in the Software without restriction, including without limitation the rights
-            // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-            // copies of the Software, and to permit persons to whom the Software is
-            // furnished to do so, subject to the following conditions:
-
-            // The above copyright notice and this permission notice shall be included in all
-            // copies or substantial portions of the Software.
-
-            // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-            // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-            // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-            // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-            // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-            // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-            // SOFTWARE.
 
             TD_ASSERT(x >= TFixed{to_fixed(0)} && x <= TFixed{to_fixed(1)}, "Fixed was not between 0 and 1 (was %s)", to_string(x, 6));
 
@@ -64,33 +88,7 @@ namespace td {
         [[nodiscard]] constexpr TFixed atan_divide(TFixed y, TFixed x)
             noexcept requires(std::is_base_of<internal::FixedNonTemplateBase, TFixed>::value) 
         {
-            // From https://github.com/MikeLankamp/fpm/blob/master/include/fpm/math.hpp
-            // fitted to td::Fixed use 
-
-            // Source license:
-            // MIT License
-
-            // Copyright (c) 2019 Mike Lankamp
-
-            // Permission is hereby granted, free of charge, to any person obtaining a copy
-            // of this software and associated documentation files (the "Software"), to deal
-            // in the Software without restriction, including without limitation the rights
-            // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-            // copies of the Software, and to permit persons to whom the Software is
-            // furnished to do so, subject to the following conditions:
-
-            // The above copyright notice and this permission notice shall be included in all
-            // copies or substantial portions of the Software.
-
-            // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-            // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-            // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-            // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-            // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-            // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-            // SOFTWARE.
-
-            TD_ASSERT(x != TFixed(0), "'x' must not be 0");
+            TD_ASSERT(x != 0, "'x' must not be 0");
 
             // Make sure y and x are positive.
             // If y / x is negative (when y or x, but not both, are negative), negate the result to
@@ -121,6 +119,71 @@ namespace td {
     {
         constexpr TFixed PI_MULTIPLY_FACTOR = to_fixed(0.15915494309189500); // 1 / (2 * PI);
         return radians * PI_MULTIPLY_FACTOR;
+    }
+
+    template<typename TFixed>
+    [[nodiscard]] constexpr TFixed sqrt(TFixed x) 
+        noexcept requires(std::is_base_of<internal::FixedNonTemplateBase, TFixed>::value) 
+    {
+        using TIntermediate = typename TFixed::Type;
+
+        TD_ASSERT(x >= TFixed(0), "Cannot find square root of negative number %s", x);
+        
+        if (x == TFixed(0)) return x;
+
+        // Finding the square root of an integer in base-2, from:
+        // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Binary_numeral_system_.28base_2.29
+
+        // Shift by F first because it's fixed-point.
+        TIntermediate num = (TIntermediate)(TIntermediate{x.get_raw_value()} << TFixed::NUM_FRACTION_BITS);
+        TIntermediate res { 0 };
+
+        // "bit" starts at the greatest power of four that's less than the argument.
+        for( TIntermediate bit = (TIntermediate)(TIntermediate{1} << (((TIntermediate)internal::find_highest_bit(static_cast<unsigned long long>(x.get_raw_value())) + TFixed::NUM_FRACTION_BITS) / 2 * 2));
+             bit != 0;
+            bit >>= 2
+        ) {
+            const TIntermediate val = res + bit;
+            res >>= 1;
+            if (num >= val)
+            {
+                num -= val;
+                res += bit;
+            }
+        }
+
+        // Round the last digit up if necessary
+        if (num > res)
+        {
+            res++;
+        }
+
+        return TFixed::from_raw_fixed_value(static_cast<TFixed::Type>(res));
+    }
+
+    template<typename TFixed>
+    [[nodiscard]] constexpr TFixed abs(TFixed x) noexcept {
+        return x < 0 ? -x : x;
+    }
+
+    template<typename TFixed>
+    [[nodiscard]] constexpr TFixed asin_radians(TFixed x) 
+        noexcept requires(std::is_base_of<internal::FixedNonTemplateBase, TFixed>::value) 
+    {
+        TD_ASSERT(x >= TFixed(-1) && x <= TFixed(+1), "x must be between -1 and 1 (was %s)", x);
+
+        const TFixed yy = TFixed(1) - x * x;
+        if (yy == TFixed(0)) {
+            return x < 0 ? -TFixed::get_half_pi() : TFixed::get_half_pi();
+        }
+        return internal::atan_divide(x, sqrt(yy));
+    }
+
+    template<typename TFixed>
+    [[nodiscard]] constexpr TFixed asin(TFixed x) 
+        noexcept requires(std::is_base_of<internal::FixedNonTemplateBase, TFixed>::value) 
+    {
+        return radians_to_revolutions(asin_radians(x));
     }
 
     // Returns angle in same fixed point format in radians
