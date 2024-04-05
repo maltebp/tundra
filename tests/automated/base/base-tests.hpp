@@ -13,5 +13,6 @@
 #include <engine/entity-system/entity.tests.hpp>
 #include <engine/entity-system/component.tests.hpp>
 #include <engine/entity-system/component-ref.tests.hpp>
+#include <engine/entity-system/chaotic-test.hpp>
 
 #include <engine/dynamic-transform.tests.hpp>
