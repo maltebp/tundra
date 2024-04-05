@@ -1,7 +1,9 @@
 #pragma once
 
+#include <type_traits>
+
 #include <tundra/core/vec/vec3.dec.hpp>
-#include <tundra/core/string.hpp> // TODO: Use
+#include <tundra/core/string.hpp>
 #include <tundra/core/string-util.hpp>
 
 namespace td {
@@ -12,10 +14,11 @@ namespace td {
     template<typename T>
     constexpr Vec3<T>::Vec3(const T& x, const T& y, const T& z) : x(x), y(y), z(z) { }
 
-    // TODO: Only enable this if an implicit conversion exists
-    // template<typename T>
-    // template<typename TOther>
-    // constexpr Vec3<T>::Vec3(const Vec3<TOther>& other) : x(other.x), y(other.y), z(other.z) { }
+    template<typename T>
+    template<typename TOther>
+    constexpr Vec3<T>::Vec3(const Vec3<TOther>& other) requires (std::is_convertible<TOther, T>::value) 
+        :   x(other.x), y(other.y), z(other.z)
+    { }
 
     template<typename T>
     constexpr Vec3<T>& Vec3<T>::operator=(const Vec3& other) {
@@ -106,7 +109,7 @@ namespace td {
     }
 
     template<typename T>
-    [[nodiscard]] constexpr Vec3<T> Vec3<T>::cross(const Vec3& other) const {
+    [[nodiscard]] constexpr Vec3<T> Vec3<T>::cross(const Vec3<T>& other) const {
         // TODO: For Fixed16 I think it might be faster to subtract in the intermediate format
         return Vec3{
             y * other.z - z * other.y,

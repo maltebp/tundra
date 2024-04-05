@@ -2,6 +2,7 @@
 
 #include <tundra/core/vec/vec2.dec.hpp>
 #include <tundra/core/vec/vec3.fwd.hpp>
+#include <type_traits>
 
 namespace td {
 
@@ -21,9 +22,8 @@ namespace td {
 
         constexpr Vec3(const T& x, const T& y, const T& z);
 
-        // TODO: Only enable this if an implicit conversion exists
-        // template<typename TOther>
-        // constexpr Vec3(const Vec3<TOther>& other);
+        template<typename TOther>
+        constexpr Vec3(const Vec3<TOther>& other) requires (std::is_convertible<TOther, T>::value);
 
         constexpr Vec3& operator=(const Vec3& other);
 
