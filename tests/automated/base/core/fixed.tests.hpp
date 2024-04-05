@@ -71,7 +71,6 @@ TD_TEST("fixed/to-string/large-integer") {
     test_type.template operator()<td::UFixed32<12>>();
 }
 
-// TODO: Fix this bugs
 TD_TEST("fixed/to_string/leading-zeros") {
     
     auto test_type = [&]<typename T>() {

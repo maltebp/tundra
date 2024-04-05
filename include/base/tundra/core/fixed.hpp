@@ -26,8 +26,11 @@ namespace td {
 
     namespace internal {
 
+        // This is just to be able to check if a type is a fixed point number
+        class FixedNonTemplateBase { };
+
         template<typename TDerived, typename TStoreType, typename TIntermediate, int TNumFractionBits>
-        class FixedBase {
+        class FixedBase : public FixedNonTemplateBase {
         public:
 
             using Type = TStoreType;
@@ -169,6 +172,8 @@ namespace td {
 
             static constexpr TStoreType FRACTION_MASK = ONE_RAW - 1;
 
+            static constexpr int NUM_FRACTION_BITS = TNumFractionBits;
+
         protected:
 
             constexpr explicit FixedBase(TStoreType t) : value((TStoreType)(t << TNumFractionBits)) { }
@@ -272,6 +277,8 @@ namespace td {
         constexpr bool operator>=(const Fixed32& other) const { return *this == other || *this > other; }
 
     };
+
+    
 
     template<int TNumFractionBits>
     class UFixed32 : public internal::FixedBase<UFixed32<TNumFractionBits>, td::uint32, td::uint64, TNumFractionBits> {
