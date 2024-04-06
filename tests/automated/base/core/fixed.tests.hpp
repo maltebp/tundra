@@ -130,9 +130,9 @@ TD_TEST("fixed/to_string/max-decimal") {
         TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 5), "0.99976");
         
         if constexpr (td::is_signed<typename T::Type>() ) {
-            TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 3), "-1.000");
-            TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 4), "-0.9998");
-            TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 5), "-0.99976");
+            TD_TEST_ASSERT_EQUAL(td::to_string(-T::from_raw_fixed_value(T::FRACTION_MASK), 3), "-1.000");
+            TD_TEST_ASSERT_EQUAL(td::to_string(-T::from_raw_fixed_value(T::FRACTION_MASK), 4), "-0.9998");
+            TD_TEST_ASSERT_EQUAL(td::to_string(-T::from_raw_fixed_value(T::FRACTION_MASK), 5), "-0.99976");
         }
     };
     

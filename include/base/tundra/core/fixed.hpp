@@ -399,12 +399,22 @@ namespace td {
                 // Rounding integer fraction up, if first truncated fraction decimal is above 4 
                 if( fractions_first_decimal > 4 ) {
                     fraction_part++;
+
+                    if( fraction_part >= POW_10_RESULTS[precision] ) {
+                        whole_part++;
+                        fraction_part -= POW_10_RESULTS[precision];
+                    }
                 }
 
                 char* zeros = new char[precision + 1];
                 uint32 next_zero_index = 0;
-                for( int i = (int)precision; i >= 0; i-- ) {
-                    if( fraction_part >= POW_10_RESULTS[i - 1]) break;
+                for( int i = (int)precision - 1; i > 0; i-- ) {
+                    // We skip i = 0, because the last digit of the fraction is
+                    // printed by the fraction_part (e.g. if the fraction_part 
+                    // is 0 and the precision is 3, the zeros will be 00 and the
+                    // fraction 0 (thus .000 in total).
+                    // )
+                    if( fraction_part >= POW_10_RESULTS[i]) break;
                     zeros[next_zero_index] = '0';
                     next_zero_index++;
                 }
