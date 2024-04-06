@@ -33,7 +33,9 @@ namespace td {
 
     String::String(char* c_string, uint32 size)
         :   characters(c_string), size(size)
-    { }
+    { 
+        TD_ASSERT(c_string[size] == '\0', "Character buffer must end in termination character");
+    }
 
     String::String(const String& other) {
         this->size = other.size;

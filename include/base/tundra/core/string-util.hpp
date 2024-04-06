@@ -34,7 +34,7 @@ namespace td {
 
             // Copy buffer
             char* designated_buffer = new char[(uint32)num_written_characters];
-            for( uint32 i = 0; i < (uint32)num_written_characters; i++ ) {
+            for( uint32 i = 0; i < (uint32)num_written_characters + 1; i++ ) {
                 designated_buffer[i] = internal::create_from_format_buffer[i];
             }
 
