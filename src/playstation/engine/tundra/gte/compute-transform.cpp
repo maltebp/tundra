@@ -1,5 +1,6 @@
 #include "tundra/core/assert.hpp"
 #include "tundra/core/fixed.hpp"
+#include "tundra/core/vec/vec3.dec.hpp"
 #include "tundra/engine/static-transform.hpp"
 #include <tundra/gte/compute-transform.hpp>
 
@@ -13,6 +14,7 @@
 #include <tundra/core/vec/vec3.hpp>
 #include <tundra/core/mat/mat3x3.hpp>
 #include <tundra/engine/entity-system/entity.hpp>
+#include <tundra/rendering/camera.hpp>
 
 namespace td::gte { 
 
@@ -77,6 +79,36 @@ namespace td::gte {
             internal::compute_scale_rotation(scale, rotation, parent_matrix),
             internal::compute_translation(translation, parent_matrix)    
         };
+    }
+
+    extern TransformMatrix compute_camera_matrix(const Camera* camera) {
+        const DynamicTransform* transform = camera->transform;
+        TD_ASSERT(transform != nullptr, "Camera transform has been deleted");
+        TD_ASSERT(transform->get_parent() == nullptr, "Camera currently does not support having a parent (to be implemented)");
+
+        TransformMatrix camera_matrix;
+
+        if( transform->get_rotation() == Vec3<Fixed16<12>>{0} ) {
+            camera_matrix.scale_and_rotation = Mat3x3<Fixed16<12>>::get_identity();
+            camera_matrix.translation = -transform->get_translation();
+        }
+        else {
+            camera_matrix.scale_and_rotation = gte::rotation_matrix(-transform->get_rotation());
+            camera_matrix.translation = gte::multiply(camera_matrix.scale_and_rotation, -transform->get_translation());
+        }
+
+        // Flip the y-coordinate because screen has its y-axis pointing downwards
+        TransformMatrix world_to_screen_axes {
+            {
+                1, 0, 0,
+                0, -1, 0,
+                0, 0, 1
+            },
+            {}
+        };
+        camera_matrix = gte::multiply_transform_matrices(world_to_screen_axes, camera_matrix);
+
+        return camera_matrix;
     }
 
     Vec3<Fixed32<12>> apply_transform_matrix(const TransformMatrix& m, const Vec3<Fixed32<12>>& v) {
@@ -183,5 +215,4 @@ namespace td::gte {
             }
         }
     }
-
 }

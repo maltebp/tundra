@@ -1,3 +1,4 @@
+#include "tundra/core/log.hpp"
 #include "tundra/core/types.hpp"
 #include "tundra/rendering/double-buffer-id.hpp"
 #include "tundra/rendering/ordering-table-node.hpp"
@@ -29,6 +30,7 @@ namespace td {
             
 	        draw_env.isbg = 1;
 	        // draw_env.dtd = 1; // TODO: Disable dithering
+            draw_env.dtd = 0;
 
             draw_env.r0 = 155;
             draw_env.g0 = 155;
@@ -79,13 +81,18 @@ namespace td {
         // TODO: Expose this
         gte_SetBackColor( 140, 80, 60 );
 
+        primitive_buffers[(uint8)active_buffer].clear();
+
         for(td::Camera* camera : Camera::get_all()) {
+            camera->ordering_tables[(uint8)active_buffer].clear();
             this->render_camera(camera);
         }
 
         // TODO: Set lights
         MATRIX* raw_color = const_cast<MATRIX*>(reinterpret_cast<const MATRIX*>(&light_directions));
         gte_SetColorMatrix( &raw_color );
+
+        // Flush
 
         DrawSync(0);
 	    VSync(0);
@@ -96,8 +103,8 @@ namespace td {
 
         DoubleBufferId inactive_buffer = active_buffer == DoubleBufferId::First ? DoubleBufferId::Second : DoubleBufferId::First;
 
-        PutDrawEnv( &internal::draw_settings[(uint8)active_buffer] );
         PutDispEnv( &internal::display_settings[(uint8)inactive_buffer] );
+        PutDrawEnv( &internal::draw_settings[(uint8)active_buffer] );
 
         // We now submit to the ordering table of the buffer being displayed,
         // while the other one is being drawn to and not displayed
@@ -108,7 +115,7 @@ namespace td {
 
         TD_ASSERT(camera->transform != nullptr, "Camera's transform is nullptr");
 
-        const TransformMatrix& camera_matrix = gte::compute_world_matrix(camera->transform);
+        const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
 
         for( Model* model : Model::get_all() ) {
 
@@ -190,10 +197,16 @@ namespace td {
                 // TODO: Set the layer factor
 
                 // In front, or on, near-plane
-                if( ordering_table_index == 0 ) continue;
+                if( ordering_table_index == 0 ) {
+                    //TD_DEBUG_LOG("Behind camera");
+                    continue;
+                }
 
                 // Behind far-plane
-                if( ordering_table_index >= ordering_table_layer.get_resolution() ) continue;
+                if( ordering_table_index >= ordering_table_layer.get_resolution() ) {
+                    //TD_DEBUG_LOG("Too far away");
+                    continue;
+                } 
 
                 uint16 ordering_table_index_16 = (uint16)ordering_table_index;
             
@@ -207,6 +220,7 @@ namespace td {
                 gte_stsxy2( &v2 );
             
                 if( !internal::screen_triangle_is_in_screen(&v0, &v1, &v2)) {
+                    //TD_DEBUG_LOG("Not in screen");
                     continue;
                 }        
 
@@ -237,6 +251,7 @@ namespace td {
                     
                     POLY_G3* triangle_prim = (POLY_G3*)primitive_buffers[(uint8)active_buffer].allocate(sizeof(POLY_G3));
                     if( triangle_prim == nullptr ) {
+                        TD_DEBUG_LOG("Not enough space");
                         // Not enough space for triangle
                         return;
                     }

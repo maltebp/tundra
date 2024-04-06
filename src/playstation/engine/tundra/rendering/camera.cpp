@@ -1,7 +1,12 @@
+#include "tundra/core/fixed.hpp"
+#include "tundra/core/log.hpp"
+#include "tundra/gte/operations.hpp"
 #include <tundra/rendering/camera.hpp>
 
 #include <tundra/core/vec/vec3.hpp>
+#include <tundra/core/mat/mat3x3.hpp>
 #include <tundra/core/assert.hpp>
+#include <tundra/core/math.hpp>
 
 #include <tundra/rendering/double-buffer-id.hpp>
 #include <tundra/rendering/ordering-table-layer.hpp>
@@ -41,9 +46,28 @@ namespace td {
         return ordering_tables[(uint8)ordering_table_id].get_layer(layer_id);
     }
 
-    void Camera::look_at(const Vec3<Fixed32<12>>&) {
+    void Camera::look_at(const Vec3<Fixed32<12>>& target) {
+        // TODO: Should be moved to GTE
+        TD_ASSERT(transform != nullptr, "Camera transform has been destroyed");
+        TD_ASSERT(target != transform->get_translation(), "Cannot look at target when it is the same as position");
+
+        // TODO: Is this normalization necessary? (I don't think so)
+        Vec3<Fixed16<12>> direction_to_target = gte::normalize(target - transform->get_translation());
+        TD_ASSERT(direction_to_target.x != 0 || direction_to_target.z != 0, "Camera cannot look at target directly above it");
         
-        // TODO: Implement
+        // Find y_angle by finding the angle of the direction when looking down the y-axis (i.e.
+        // viewing from below, so z-axis points to the right and x-axis points up)
+        // We do this because atan2 assumes counter-clockwise rotation in its 2D grid, but looking
+        // from above (down the negative y-axis) the rotation around y-axis is clockwise
+        Fixed16<12> y_angle = atan2(direction_to_target.x, direction_to_target.z);
+
+        Fixed16<12> c = cos(-y_angle);
+        Fixed16<12> s = sin(-y_angle);
+        Fixed16<12> local_z_after_y_rotate = c * direction_to_target.z - s * direction_to_target.x;
+
+        Fixed16<12> x_angle = 
+            direction_to_target.y == 0 ? 0 : -atan2(direction_to_target.y, local_z_after_y_rotate);
+        transform->set_rotation({x_angle, y_angle, transform->get_rotation().z});        
     }
     
 }

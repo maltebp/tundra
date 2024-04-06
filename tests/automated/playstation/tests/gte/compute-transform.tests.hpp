@@ -1,7 +1,7 @@
 #pragma once
 
 #include "tundra/core/fixed.hpp"
-#include "tundra/engine/entity-system/internal/registry.hpp"
+#include "tundra/core/vec/vec3.dec.hpp"
 #include "tundra/engine/static-transform.hpp"
 #include <tundra/test-framework/test.hpp>
 #include <tundra/test-framework/test-assert.hpp>
@@ -10,8 +10,9 @@
 #include <tundra/engine/entity-system/entity.hpp>
 #include <tundra/gte/compute-transform.hpp>
 #include <tundra/engine/dynamic-transform.hpp>
+#include <tundra/rendering/camera.hpp>
 
-namespace td::gte_operations_tests {
+namespace td::compute_transform_tests {
 
     TD_TEST("gte/compute-transform/default") {
 
@@ -327,6 +328,66 @@ namespace td::gte_operations_tests {
         TD_TEST_ASSERT_EQUAL(result, expected); 
 
         e->destroy();
+    }
+
+    static Camera* create_test_camera() {
+        Entity* entity = Entity::create();
+        DynamicTransform* transform = entity->add_component<DynamicTransform>();
+        List<CameraLayerSettings> layer_settings;
+        layer_settings.add(CameraLayerSettings{0, 1});
+        Camera* camera = entity->add_component<Camera>(transform, layer_settings);
+        return camera;
+    }
+
+    TD_TEST("gte/compute_transform/compute_camera_matrix/identity") {
+     
+        Camera* camera = create_test_camera(); 
+
+        Vec3<td::Fixed32<12>> some_position { 1, 1, 1 };
+
+        const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
+        Vec3<td::Fixed32<12>> transformed_position = gte::apply_transform_matrix(camera_matrix, some_position);
+        TD_TEST_ASSERT_EQUAL(transformed_position, some_position);
+    }
+
+    TD_TEST("gte/compute_transform/compute_camera_matrix/translation") {
+     
+        Camera* camera = create_test_camera();
+        Vec3<td::Fixed32<12>> some_position { 1, 1, 1 };
+
+        camera->transform->set_translation(Vec3<Fixed32<12>>{2, -1, -2}); 
+
+        const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
+        Vec3<td::Fixed32<12>> transformed_position = gte::apply_transform_matrix(camera_matrix, some_position);
+        Vec3<td::Fixed32<12>> expected { -1, 2, 3 };
+        TD_TEST_ASSERT_EQUAL(transformed_position, expected);
+    }
+
+    TD_TEST("gte/compute_transform/compute_camera_matrix/rotation") {
+     
+        Camera* camera = create_test_camera();
+        Vec3<td::Fixed32<12>> some_position { 1, 1, 1 };
+
+        camera->transform->set_rotation(Vec3<Fixed16<12>>{0, td::to_fixed(0.5), 0}); 
+
+        const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
+        Vec3<td::Fixed32<12>> transformed_position = gte::apply_transform_matrix(camera_matrix, some_position);
+        Vec3<td::Fixed32<12>> expected { -1, 1, -1 };
+        TD_TEST_ASSERT_EQUAL(transformed_position, expected);
+    }
+
+    TD_TEST("gte/compute_transform/compute_camera_matrix/rotation_and_translation") {
+     
+        Camera* camera = create_test_camera();
+        Vec3<td::Fixed32<12>> some_position { 1, 1, 1 };
+
+        camera->transform->set_translation(Vec3<Fixed32<12>>{0, 1, 2});
+        camera->transform->set_rotation(Vec3<Fixed16<12>>{0, to_fixed(0.5), 0 }); 
+
+        const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
+        Vec3<td::Fixed32<12>> transformed_position = gte::apply_transform_matrix(camera_matrix, some_position);
+        Vec3<td::Fixed32<12>> expected { -1, 0, 1};
+        TD_TEST_ASSERT_EQUAL(transformed_position, expected);
     }
 
 }

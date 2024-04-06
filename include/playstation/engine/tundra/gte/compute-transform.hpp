@@ -3,6 +3,7 @@
 #include "tundra/core/fixed.hpp"
 #include "tundra/core/vec/vec3.dec.hpp"
 #include <tundra/engine/dynamic-transform.hpp>
+#include <tundra/rendering/camera.fwd.hpp>
 
 namespace td::gte {
 
@@ -16,6 +17,12 @@ namespace td::gte {
         Vec3<Fixed16<12>> rotation, 
         Vec3<Fixed32<12>> translation, 
         const Transform* transform_parent = nullptr);
+
+    // This is not cached
+    extern TransformMatrix compute_world_matrix_inverse(const DynamicTransform* transform);
+
+    // The transform is not cached
+    extern TransformMatrix compute_camera_matrix(const Camera* camera);
 
     // Overwrites the rotation and translation matrix registers
     extern Vec3<Fixed32<12>> apply_transform_matrix(const TransformMatrix& m, const Vec3<Fixed32<12>>& v);

@@ -1,3 +1,5 @@
+#include "tundra/core/math.hpp"
+#include <cstdlib>
 #include <tundra/core/fixed.hpp>
 
 #include <cstdio>
@@ -38,6 +40,15 @@ namespace assets {
     extern "C" const uint8_t mdl_fish[];
 }
 
+// template <typename T>
+// void print_bytes(const char* prefix, const T& t ) {
+//     std::printf("%s: ", prefix);
+//     for( td::byte* ptr = ((td::byte*)(&t + 1)) - 1; ptr >= (td::byte*)&t; ptr-- ) {
+//         std::printf("%02x", *ptr);
+//     }
+//     std::printf("\n");
+// }
+
 int main() {
 
     std::printf("hello\n");
@@ -62,7 +73,8 @@ int main() {
 
     td::Entity* camera_entity = td::Entity::create();
     td::DynamicTransform* camera_transform = camera_entity->add_component<td::DynamicTransform>();
-    // camera_transform->set_translation({0, 3, td::to_fixed(-5.25)});
+    //TD_DEBUG_LOG("transform: %p", camera_transform);
+    camera_transform->set_translation({0, 3, td::to_fixed(-5.25)});
     camera_transform->set_translation({0, 0, -1});
 
     td::List<td::CameraLayerSettings> layer_settings;
@@ -71,16 +83,18 @@ int main() {
     layer_settings.add({LAYER_BACKGROUND, 1});
 
     td::Camera* camera = camera_entity->add_component<td::Camera>(camera_transform, layer_settings);
+    TD_DEBUG_LOG("camera: %p", camera);
+    //TD_DEBUG_LOG("camera addr.: %p", &camera);
+    TD_DEBUG_LOG("transform: %p", &*camera->transform);
 
     TD_DEBUG_LOG("Initializing rendering data");
 
     SetDispMask(1);
     FntLoad(0, 256);
 
-
     // Create the fish
-    constexpr td::Fixed16<12> MODEL_SIZE = 2;
-    td::Fixed32<12> model_distance = 2;
+    constexpr td::Fixed16<12> MODEL_SIZE { td::to_fixed(0.1) };
+    td::Fixed32<12> model_distance = td::to_fixed(0.05);
     td::Fixed16<12> model_rotation = 0;
 
     for( td::int32 model_x = -1; model_x < 2; model_x++ ) {
@@ -101,31 +115,34 @@ int main() {
             model->color = {80, 255, 150};
         }   
     }
+
+    TD_DEBUG_LOG("transform: %p", &*camera->transform);
         
-    const td::Fixed32<12> CAMERA_HEIGHT = 2;
-    const td::Fixed32<12> CAMERA_XZ_DISTANCE = 5;
+    const td::Fixed32<12> CAMERA_HEIGHT { td::to_fixed(0.1) };
+    const td::Fixed32<12> CAMERA_XZ_DISTANCE {td::to_fixed(0.2)};
     const td::Vec3<td::Fixed32<12>> CAMERA_TARGET { 0 };
-    td::Fixed16<12> camera_y_rotation = 0;
+    
+    td::Fixed32<12> camera_y_rotation = 1;
 
     TD_DEBUG_LOG("Running main loop");
+    
+    camera->transform->set_translation({0, CAMERA_HEIGHT, 0});
+
     while(true) {
 
-        // camera_y_rotation -= td::to_fixed(0.005);
-        // if( camera_y_rotation < 0 ) {
-        //     camera_y_rotation += 1;            
-        // }
+        camera_y_rotation -= td::to_fixed(0.005);
+        if( camera_y_rotation < 0 ) {
+            camera_y_rotation += 1;            
+        }
 
-        // td::Fixed32<12> camera_x = td::Fixed32<12>::from_raw_fixed_value(isin(camera_y_rotation.get_raw_value())) * CAMERA_XZ_DISTANCE;
-        // td::Fixed32<12> camera_z = td::Fixed32<12>::from_raw_fixed_value(icos(camera_y_rotation.get_raw_value())) * CAMERA_XZ_DISTANCE;
+        td::Fixed32<12> camera_x = td::cos(camera_y_rotation) * CAMERA_XZ_DISTANCE;
+        td::Fixed32<12> camera_z = td::sin(camera_y_rotation) * CAMERA_XZ_DISTANCE;
 
-        // camera->transform->set_translation({
-        //     camera_x.get_raw_value(),
-        //     CAMERA_HEIGHT.get_raw_value(),
-        //     camera_z.get_raw_value() 
-        // });
+        camera->transform->set_translation({camera_x, CAMERA_HEIGHT, camera_z});
+        camera->look_at(CAMERA_TARGET);
 
-        camera->look_at({0, 0, 0});
-        
+        TD_DEBUG_LOG("y_rot = %s, T = %s, R = %s", camera_y_rotation, camera->transform->get_translation(), camera->transform->get_rotation());
+
         render_system.render();
     }
 
