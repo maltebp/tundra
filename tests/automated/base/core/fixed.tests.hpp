@@ -122,26 +122,25 @@ TD_TEST("fixed/to_string/smallest") {
     test_type.template operator()<td::UFixed32<12>>();
 }
 
-// TODO: Fix Fixed so these pass
-// TD_TEST("fixed/to_string/max-decimal") {
+TD_TEST("fixed/to_string/max-decimal") {
     
-//     auto test_type = [&]<typename T>() {
-//         TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 3), "1.000");
-//         TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 4), "0.9998");
-//         TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 5), "0.99976");
+    auto test_type = [&]<typename T>() {
+        TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 3), "1.000");
+        TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 4), "0.9998");
+        TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 5), "0.99976");
         
-//         if constexpr (td::is_signed<typename T::Type>() ) {
-//             TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 3), "-1.000");
-//             TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 4), "-0.9998");
-//             TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 5), "-0.99976");
-//         }
-//     };
+        if constexpr (td::is_signed<typename T::Type>() ) {
+            TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 3), "-1.000");
+            TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 4), "-0.9998");
+            TD_TEST_ASSERT_EQUAL(td::to_string(T::from_raw_fixed_value(T::FRACTION_MASK), 5), "-0.99976");
+        }
+    };
     
-//     test_type.template operator()<td::Fixed16<12>>();
-//     test_type.template operator()<td::Fixed32<12>>();
-//     test_type.template operator()<td::UFixed16<12>>();
-//     test_type.template operator()<td::UFixed32<12>>();
-// }
+    test_type.template operator()<td::Fixed16<12>>();
+    test_type.template operator()<td::Fixed32<12>>();
+    test_type.template operator()<td::UFixed16<12>>();
+    test_type.template operator()<td::UFixed32<12>>();
+}
 
 TD_TEST("fixed/equality") {
     auto test_type = [&]<typename T>() {
