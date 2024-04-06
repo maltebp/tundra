@@ -116,6 +116,17 @@ namespace td {
     }
 
     template<typename T>
+    [[nodiscard]] constexpr Vec3<T> Vec3<T>::operator/(const T& value) const {
+        return Vec3<T>{x / value, y / value, z / value };
+    }
+
+    template<typename T>
+    constexpr Vec3<T>& Vec3<T>::operator/=(const T& value) {
+        x /= value; y /= value; z /= value;
+        return *this;
+    }
+
+    template<typename T>
     [[nodiscard]] constexpr T Vec3<T>::dot(const Vec3& other) const {
         return x * other.x + y * other.y + z * other.z;
     }

@@ -58,6 +58,9 @@ namespace td {
         [[nodiscard]] constexpr Vec3 operator/(const Vec3& other) const;
         constexpr Vec3& operator/=(const Vec3& other);
 
+        [[nodiscard]] constexpr Vec3 operator/(const T& value) const ;
+        constexpr Vec3& operator/=(const T& value);
+
         [[nodiscard]] constexpr T dot(const Vec3& other) const;
 
         [[nodiscard]] constexpr Vec3 cross(const Vec3& other) const;

@@ -29,4 +29,8 @@ namespace td::gte {
 
     extern TransformMatrix multiply_transform_matrices(const TransformMatrix& m1, const TransformMatrix& m2);
 
+    // Extracts a matrix that describe only the rotation of the transform matrix,
+    // by normalizing the first 3 column in the scale-rotation matrix.
+    extern Mat3x3<Fixed16<12>> extract_rotation_matrix(const TransformMatrix& transform_matrix);
+
 }

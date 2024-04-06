@@ -1,5 +1,7 @@
 #include "tundra/core/log.hpp"
+#include "tundra/core/mat/mat3x3.dec.hpp"
 #include "tundra/core/types.hpp"
+#include "tundra/gte/operations.hpp"
 #include "tundra/rendering/double-buffer-id.hpp"
 #include "tundra/rendering/ordering-table-node.hpp"
 #include <tundra/rendering/render-system.hpp>
@@ -15,6 +17,7 @@
 #include <tundra/engine/transform-matrix.hpp>
 #include <tundra/rendering/camera.hpp>
 #include <tundra/rendering/model.hpp>
+#include <tundra/gte/cast.hpp>
 #include <tundra/gte/compute-transform.hpp>
 
 namespace td {
@@ -67,19 +70,16 @@ namespace td {
     )
         :   primitive_buffers{primitive_buffer_size, primitive_buffer_size},
             clear_color(clear_color),
-
-            // Set this to some more sensible values (or none at all?s)
-            light_directions(
-                Vec3<Fixed16<12>>{1},
-                Vec3<Fixed16<12>>{0},
-                Vec3<Fixed16<12>>{0}
-            )
+            light_directions(0), // All lights disabled by default
+            light_colors(128) // Default all values to some gray
     { }
 
     void RenderSystem::render() {
 
         // TODO: Expose this
-        gte_SetBackColor( 140, 80, 60 );
+        gte_SetBackColor( this->ambient_color.x, this->ambient_color.y, this->ambient_color.z );
+
+        gte_SetColorMatrix(&gte::to_gte_matrix_ref(light_colors));
 
         primitive_buffers[(uint8)active_buffer].clear();
 
@@ -87,10 +87,6 @@ namespace td {
             camera->ordering_tables[(uint8)active_buffer].clear();
             this->render_camera(camera);
         }
-
-        // TODO: Set lights
-        MATRIX* raw_color = const_cast<MATRIX*>(reinterpret_cast<const MATRIX*>(&light_directions));
-        gte_SetColorMatrix( &raw_color );
 
         // Flush
 
@@ -109,6 +105,24 @@ namespace td {
         // We now submit to the ordering table of the buffer being displayed,
         // while the other one is being drawn to and not displayed
         active_buffer = inactive_buffer;
+    }
+
+    void RenderSystem::set_ambient_light(Vec3<uint8> color) {
+        this->ambient_color = color;
+    }
+
+    void RenderSystem::set_light_direction(uint8 light_index, Vec3<Fixed16<12>> direction) {
+        TD_ASSERT(light_index < 3, "Light index must be between 0 and 2 (was %d)", light_index);
+        light_directions.set_row(light_index, direction);
+    }
+
+    void RenderSystem::set_light_color(uint8 light_index, Vec3<uint8> color) {
+        TD_ASSERT(light_index < 3, "Light index must be between 0 and 2 (was %d)", light_index);
+        
+        // TODO: This could be a multiplication instead
+        light_colors.set_column(
+            light_index,
+            Vec3<Fixed16<12>>( Vec3<Fixed32<12>>{color} / (255) ));
     }
 
     void RenderSystem::render_camera(Camera* camera) {
@@ -137,21 +151,22 @@ namespace td {
         // TODO: Add radius cull distance
 
         const TransformMatrix& model_matrix = gte::compute_world_matrix(model->transform);
-        
         TransformMatrix model_to_view_matrix = gte::multiply_transform_matrices(camera_matrix, model_matrix);
-        MATRIX* raw_model_to_view_matrix = const_cast<MATRIX*>(reinterpret_cast<const MATRIX*>(&model_to_view_matrix));
 
-        // TODO: Add lights
         // Multiplying the light directions as row vectors (which they are) with the
         // model matrix is equivalent to multiplying wih transpose (i.e. inverse) of
         // model matrix. This means light directions are now in model-space, so we
         // don't have to transform each normal of the face.
-        // WARNING: This sets the rotation matrix registers, so it overrides SetRotMatrix
-        // MulMatrix0(&light_directions, &rotation_matrix, &light_directions_in_model_space);
-        // gte_SetLightMatrix( &light_directions_in_model_space );
-
-        gte_SetRotMatrix( raw_model_to_view_matrix );
-        gte_SetTransMatrix( raw_model_to_view_matrix );
+        // Note: This sets the rotation matrix registers, so it overrides SetRotMatrix
+        Mat3x3<Fixed16<12>> model_rotation_matrix = gte::extract_rotation_matrix(model_matrix);
+        Mat3x3<Fixed16<12>> light_directions_in_model_space =
+            gte::multiply(light_directions, model_rotation_matrix);
+        gte_SetLightMatrix( &gte::to_gte_matrix_ref(light_directions_in_model_space) );
+        // TODO: Optimization: we could avoid doing all of this if there are no lights enabled, but
+        // I think the far most likely scenario is that at least one light is enabled.
+        
+        gte_SetRotMatrix( &gte::to_gte_matrix_ref(model_to_view_matrix) );
+        gte_SetTransMatrix( &gte::to_gte_matrix_ref(model_to_view_matrix) );
 
         for( int part_index = 0; part_index < model->asset.num_parts; part_index++ ) {
 

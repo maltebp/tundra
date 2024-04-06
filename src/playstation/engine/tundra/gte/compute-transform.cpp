@@ -138,6 +138,25 @@ namespace td::gte {
         return result;
     }
 
+
+    extern Mat3x3<Fixed16<12>> extract_rotation_matrix(const TransformMatrix& transform_matrix) {
+        // TODO: This could probably be optimized
+
+        Mat3x3<Fixed16<12>> rotation_matrix;
+
+        rotation_matrix.set_column(0, gte::normalize(
+            transform_matrix.scale_and_rotation.get_column(0)));
+            
+        rotation_matrix.set_column(1, gte::normalize(
+            transform_matrix.scale_and_rotation.get_column(1)));
+            
+        rotation_matrix.set_column(2, gte::normalize(
+            transform_matrix.scale_and_rotation.get_column(2)));
+            
+
+        return rotation_matrix;
+    }
+
     
     Vec3<Fixed32<12>> internal::compute_translation(
             Vec3<Fixed32<12>> translation, 

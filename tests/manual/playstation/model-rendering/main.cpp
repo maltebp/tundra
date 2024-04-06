@@ -32,6 +32,23 @@ constexpr td::uint32 PRIMIIVES_BUFFER_SIZE = 30000; // bytes
 
 constexpr td::Vec3<td::uint8> CLEAR_COLOR = { 200, 60, 30 };
 
+constexpr td::Vec3<td::uint8> AMBIENT_COLOR =
+    { 150, 100, 40 };
+    // { 200, 60, 30 };
+    // { 200, 60, 30 };
+
+constexpr td::Vec3<td::Fixed16<12>> DIRECTIONAL_LIGHT_DIRECTIONS[3] {
+    td::Vec3<td::Fixed16<12>>{  td::to_fixed(-0.71), 0, td::to_fixed(-0.71) },
+    td::Vec3<td::Fixed16<12>>{ 0 },
+    td::Vec3<td::Fixed16<12>>{ 0 }
+};
+
+constexpr td::Vec3<td::uint8> DIRECTIONAL_LIGHT_COLORS[3] {
+    td::Vec3<td::uint8>{  255, 225, 200 },
+    td::Vec3<td::uint8>{ 0 },
+    td::Vec3<td::uint8>{ 0 }
+};
+
 constexpr td::uint32 LAYER_FOREGROUND = 0;
 constexpr td::uint32 LAYER_MIDDLE = 1;
 constexpr td::uint32 LAYER_BACKGROUND = 2;
@@ -39,15 +56,6 @@ constexpr td::uint32 LAYER_BACKGROUND = 2;
 namespace assets {
     extern "C" const uint8_t mdl_fish[];
 }
-
-// template <typename T>
-// void print_bytes(const char* prefix, const T& t ) {
-//     std::printf("%s: ", prefix);
-//     for( td::byte* ptr = ((td::byte*)(&t + 1)) - 1; ptr >= (td::byte*)&t; ptr-- ) {
-//         std::printf("%02x", *ptr);
-//     }
-//     std::printf("\n");
-// }
 
 int main() {
 
@@ -67,9 +75,15 @@ int main() {
     td::ModelAsset* fish_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_fish);
     TD_DEBUG_LOG("  Model triangles: %d", fish_model->get_total_num_triangles());
 
-    // TD_DEBUG_LOG("Setting up renderer");
     TD_DEBUG_LOG("Initializing RenderSystem");
     td::RenderSystem render_system{PRIMIIVES_BUFFER_SIZE, CLEAR_COLOR};
+    render_system.set_ambient_light(AMBIENT_COLOR);
+    render_system.set_light_direction(0, DIRECTIONAL_LIGHT_DIRECTIONS[0]);
+    render_system.set_light_direction(1, DIRECTIONAL_LIGHT_DIRECTIONS[1]);
+    render_system.set_light_direction(2, DIRECTIONAL_LIGHT_DIRECTIONS[2]);
+    render_system.set_light_color(0, DIRECTIONAL_LIGHT_COLORS[0]);
+    render_system.set_light_color(1, DIRECTIONAL_LIGHT_COLORS[1]);
+    render_system.set_light_color(2, DIRECTIONAL_LIGHT_COLORS[2]);
 
     td::Entity* camera_entity = td::Entity::create();
     td::DynamicTransform* camera_transform = camera_entity->add_component<td::DynamicTransform>();
@@ -94,7 +108,7 @@ int main() {
 
     // Create the fish
     constexpr td::Fixed16<12> MODEL_SIZE { td::to_fixed(0.1) };
-    td::Fixed32<12> model_distance = td::to_fixed(0.05);
+    td::Fixed32<12> model_distance = td::to_fixed(0.1);
     td::Fixed16<12> model_rotation = 0;
 
     for( td::int32 model_x = -1; model_x < 2; model_x++ ) {
@@ -111,13 +125,10 @@ int main() {
             
             model_rotation += td::to_fixed(0.15);
 
-            td::Model* model = fish->add_component<td::Model>(*fish_model, LAYER_MIDDLE, transform);
-            model->color = {80, 255, 150};
+            fish->add_component<td::Model>(*fish_model, LAYER_MIDDLE, transform);
         }   
     }
 
-    TD_DEBUG_LOG("transform: %p", &*camera->transform);
-        
     const td::Fixed32<12> CAMERA_HEIGHT { td::to_fixed(0.1) };
     const td::Fixed32<12> CAMERA_XZ_DISTANCE {td::to_fixed(0.2)};
     const td::Vec3<td::Fixed32<12>> CAMERA_TARGET { 0 };
@@ -141,7 +152,7 @@ int main() {
         camera->transform->set_translation({camera_x, CAMERA_HEIGHT, camera_z});
         camera->look_at(CAMERA_TARGET);
 
-        TD_DEBUG_LOG("y_rot = %s, T = %s, R = %s", camera_y_rotation, camera->transform->get_translation(), camera->transform->get_rotation());
+        // TD_DEBUG_LOG("y_rot = %s, T = %s, R = %s", camera_y_rotation, camera->transform->get_translation(), camera->transform->get_rotation());
 
         render_system.render();
     }
