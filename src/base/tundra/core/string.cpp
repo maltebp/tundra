@@ -110,6 +110,11 @@ namespace td {
         if( other.size == 0 ) return *this;
         
         char* new_c_string = concat_to_new(other.characters, other.size);
+        
+        if( this->characters != nullptr ) {
+            delete[] characters;    
+        }
+
         this->characters = new_c_string;
         this->size = this->size + other.size;
 
@@ -121,6 +126,11 @@ namespace td {
         if( c_string_size == 0 ) return *this;
         
         char* new_c_string = concat_to_new(c_string, c_string_size);
+
+        if( this->characters != nullptr ) {
+            delete[] characters;    
+        }
+
         this->characters = new_c_string;
         this->size = this->size + c_string_size;
 
