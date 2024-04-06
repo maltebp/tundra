@@ -22,6 +22,8 @@ set( TD_BASE_DIR_SRC ${TD_DIR_SRC}/base )
 set( TD_BASE_SOURCES
 
     ${TD_BASE_DIR_SRC}/tundra/core/string.cpp
+    ${TD_BASE_DIR_SRC}/tundra/core/string-util.cpp
+
     ${TD_BASE_DIR_SRC}/tundra/assets/model/model-asset.cpp
     ${TD_BASE_DIR_SRC}/tundra/assets/model/model-deserializer.cpp
 

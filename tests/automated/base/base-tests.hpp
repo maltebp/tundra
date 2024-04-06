@@ -1,6 +1,7 @@
 #pragma once
     
 #include <core/string.tests.hpp>
+#include <core/string-util.tests.hpp>
 #include <core/list.tests.hpp>
 #include <core/fixed.tests.hpp>
 #include <core/vec3.tests.hpp>
