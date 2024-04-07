@@ -161,12 +161,13 @@ namespace td {
 
             constexpr TStoreType get_raw_fraction() const { return value & FRACTION_MASK; }
 
-            [[nodiscard]] consteval static TDerived get_pi() { return to_fixed(3.14159265358979); }
+            [[nodiscard]] constexpr static TDerived get_pi() { return TDerived{ to_fixed(3.14159265358979) }; }
 
-            [[nodiscard]] consteval static TDerived get_half_pi() { return to_fixed(1.57079632679490); }
+            [[nodiscard]] constexpr static TDerived get_half_pi() { return TDerived{ to_fixed(1.57079632679490) }; }
 
             // TODO: Require that the Fixed point can even fit this
-            [[nodiscard]] consteval static TDerived get_two_pi() { return to_fixed(6.28318530717959); }
+            [[nodiscard]] constexpr static TDerived get_two_pi() { return TDerived{ to_fixed(6.28318530717959) };
+        }
 
             static constexpr TStoreType ONE_RAW = 1 << TNumFractionBits;
 

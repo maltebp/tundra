@@ -18,8 +18,8 @@ void* operator new(size_t count, void* address) noexcept;
 template<typename T>
 td::List<T>::List(std::initializer_list<T> initial_elements) 
     :   elements(initial_elements.size() == 0 ? nullptr : (T*)::operator new(sizeof(T) * initial_elements.size())),
-        capacity(initial_elements.size()),
-        size(initial_elements.size())
+        capacity((uint32)initial_elements.size()),
+        size((uint32)initial_elements.size())
 {
     uint32 i = 0;
     for( auto it = initial_elements.begin(); it < initial_elements.end(); it++) {

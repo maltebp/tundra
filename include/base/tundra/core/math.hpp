@@ -66,7 +66,7 @@ namespace td {
             noexcept requires(std::is_base_of<internal::FixedNonTemplateBase, TFixed>::value) 
         {
 
-            TD_ASSERT(x >= TFixed{to_fixed(0)} && x <= TFixed{to_fixed(1)}, "Fixed was not between 0 and 1 (was %s)", to_string(x, 6));
+            TD_ASSERT(x >= TFixed{to_fixed(0)} && x <= TFixed{to_fixed(1)}, "Fixed was not between 0 and 1 (was %s)", to_string(x, 6).get_c_string());
 
             // Malte: I had to tweak how these are generated (i.e. using double literals, instead of
             // already converted raw fixed point integer liteals), and I am unsure if it has any
