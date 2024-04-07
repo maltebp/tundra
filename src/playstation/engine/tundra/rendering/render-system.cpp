@@ -113,7 +113,7 @@ namespace td {
 
     void RenderSystem::set_light_direction(uint8 light_index, Vec3<Fixed16<12>> direction) {
         TD_ASSERT(light_index < 3, "Light index must be between 0 and 2 (was %d)", light_index);
-        light_directions.set_row(light_index, direction);
+        light_directions.set_row(light_index, -direction);
     }
 
     void RenderSystem::set_light_color(uint8 light_index, Vec3<uint8> color) {
@@ -239,7 +239,7 @@ namespace td {
                     continue;
                 }        
 
-                // if( model.mesh.normalsType == TriangleMesh::NormalsType::FACE ) {
+                // if( model_part->smooth ) {
                 //     POLY_F3* triangle_prim = active_render_buffer->create_and_add_prim<POLY_F3>(
                 //         low_precision_average_z); 
 
@@ -297,7 +297,6 @@ namespace td {
                         // Load vertex normal            
                         gte_ldv0( raw_normal );
                         
-                        /* Normal Color Single */
                         gte_nccs();
 
                         // Retrieve color
@@ -310,7 +309,6 @@ namespace td {
                 }
             }
         }
-
     }
 
     bool internal::screen_triangle_is_in_screen(

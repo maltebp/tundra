@@ -1,13 +1,10 @@
 #include "tundra/core/math.hpp"
-#include <cstdlib>
-#include <tundra/core/fixed.hpp>
-
-#include <cstdio>
 
 #include <psxgpu.h>
 #include <psxgte.h>
 #include <inline_c.h>
 
+#include <tundra/core/fixed.hpp>
 #include <tundra/core/log.hpp>
 #include <tundra/core/list.hpp>
 #include <tundra/core/fixed.hpp>
@@ -38,7 +35,7 @@ constexpr td::Vec3<td::uint8> AMBIENT_COLOR =
     // { 200, 60, 30 };
 
 constexpr td::Vec3<td::Fixed16<12>> DIRECTIONAL_LIGHT_DIRECTIONS[3] {
-    td::Vec3<td::Fixed16<12>>{  td::to_fixed(-0.71), 0, td::to_fixed(-0.71) },
+    td::Vec3<td::Fixed16<12>>{  td::to_fixed(-0.71), td::to_fixed(-0.71), 0 },
     td::Vec3<td::Fixed16<12>>{ 0 },
     td::Vec3<td::Fixed16<12>>{ 0 }
 };
@@ -55,11 +52,10 @@ constexpr td::uint32 LAYER_BACKGROUND = 2;
 
 namespace assets {
     extern "C" const uint8_t mdl_fish[];
+    extern "C" const uint8_t mdl_sphere[];
 }
 
 int main() {
-
-    std::printf("hello\n");
 
     TD_DEBUG_LOG("Initializing %d", 1);
     ResetGraph(0);
@@ -71,9 +67,13 @@ int main() {
 	// Set screen depth (basically FOV control, W/2 works best)
 	gte_SetGeomScreen(320 / 2);
 
-    TD_DEBUG_LOG("Loading Suzanne");
+    TD_DEBUG_LOG("Loading models..");
+    
     td::ModelAsset* fish_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_fish);
-    TD_DEBUG_LOG("  Model triangles: %d", fish_model->get_total_num_triangles());
+    TD_DEBUG_LOG("  Fish triangles: %d", fish_model->get_total_num_triangles());
+
+    td::ModelAsset* sphere_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere);
+    TD_DEBUG_LOG("  Sphere triangles: %d", sphere_model->get_total_num_triangles());
 
     TD_DEBUG_LOG("Initializing RenderSystem");
     td::RenderSystem render_system{PRIMIIVES_BUFFER_SIZE, CLEAR_COLOR};
@@ -87,7 +87,6 @@ int main() {
 
     td::Entity* camera_entity = td::Entity::create();
     td::DynamicTransform* camera_transform = camera_entity->add_component<td::DynamicTransform>();
-    //TD_DEBUG_LOG("transform: %p", camera_transform);
     camera_transform->set_translation({0, 3, td::to_fixed(-5.25)});
     camera_transform->set_translation({0, 0, -1});
 
@@ -97,35 +96,45 @@ int main() {
     layer_settings.add({LAYER_BACKGROUND, 1});
 
     td::Camera* camera = camera_entity->add_component<td::Camera>(camera_transform, layer_settings);
-    TD_DEBUG_LOG("camera: %p", camera);
-    //TD_DEBUG_LOG("camera addr.: %p", &camera);
-    TD_DEBUG_LOG("transform: %p", &*camera->transform);
 
     TD_DEBUG_LOG("Initializing rendering data");
 
     SetDispMask(1);
     FntLoad(0, 256);
 
-    // Create the fish
-    constexpr td::Fixed16<12> MODEL_SIZE { td::to_fixed(0.1) };
+    // Create the models
     td::Fixed32<12> model_distance = td::to_fixed(0.1);
     td::Fixed16<12> model_rotation = 0;
 
     for( td::int32 model_x = -1; model_x < 2; model_x++ ) {
         for( td::int32 model_z = -1; model_z < 2; model_z++ ) {
 
-            td::Entity* fish = td::Entity::create();
-            td::StaticTransform* transform = fish->add_component<td::StaticTransform>(
-                td::gte::compute_world_matrix(
-                    td::Vec3<td::Fixed32<12>>{ MODEL_SIZE },
-                    td::Vec3<td::Fixed16<12>>{ 0, model_rotation,  0},
-                    td::Vec3<td::Fixed32<12>>{ model_distance * model_x, 0, model_distance * model_z }
-                )
-            );
-            
-            model_rotation += td::to_fixed(0.15);
+            if( model_x == 0 && model_z == 0 ) {
+                td::Entity* sphere = td::Entity::create();
+                td::StaticTransform* transform = sphere->add_component<td::StaticTransform>(
+                    td::gte::compute_world_matrix(
+                        td::Vec3<td::Fixed32<12>>{ td::Fixed32<12>{td::to_fixed(0.75)} },
+                        td::Vec3<td::Fixed16<12>>{ 0, model_rotation,  0},
+                        td::Vec3<td::Fixed32<12>>{ model_distance * model_x, 0, model_distance * model_z }
+                    )
+                );
 
-            fish->add_component<td::Model>(*fish_model, LAYER_MIDDLE, transform);
+                sphere->add_component<td::Model>(*sphere_model, LAYER_MIDDLE, transform);
+                model_rotation += td::to_fixed(0.15);
+            }
+            else {
+                td::Entity* fish = td::Entity::create();
+                td::StaticTransform* transform = fish->add_component<td::StaticTransform>(
+                    td::gte::compute_world_matrix(
+                        td::Vec3<td::Fixed32<12>>{ td::to_fixed(0.1) },
+                        td::Vec3<td::Fixed16<12>>{ 0, model_rotation,  0},
+                        td::Vec3<td::Fixed32<12>>{ model_distance * model_x, 0, model_distance * model_z }
+                    )
+                );
+
+                fish->add_component<td::Model>(*fish_model, LAYER_MIDDLE, transform);
+                model_rotation += td::to_fixed(0.15);
+            }
         }   
     }
 
