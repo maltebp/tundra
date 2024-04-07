@@ -9,17 +9,22 @@
 namespace td {
 
 	template<typename T>
-	T& read_bytes(const byte*& data) {
-		T* read_data = (T*)data;
-		data = (const byte*)(read_data + 1);
-		return *read_data;
+	void read_bytes(const byte*& data, T* target) {
+		byte* target_as_byte = (byte*)target;
+		for( std::size_t i = 0; i < sizeof(T); i++ ) {
+			*target_as_byte = *data;
+			target_as_byte++;
+			data++;
+		}
 	}
 
 	ModelAsset* ModelDeserializer::deserialize(const byte* data) const {
 		const byte* next_data = data;
 		ModelAsset* model_asset = new ModelAsset();
 
-		ModelFileHeader& file_header = read_bytes<ModelFileHeader>(next_data);
+		ModelFileHeader file_header;
+		read_bytes(next_data, &file_header);
+
 		TD_ASSERT(file_header.is_valid(), "Deserialized ModelFileHeader was not valid");
 		
 		model_asset->num_vertices = file_header.num_vertices;
@@ -31,28 +36,31 @@ namespace td {
 		model_asset->model_parts = new ModelPart*[model_asset->num_parts];
 
 		for( int i = 0; i < model_asset->num_vertices; i++ ) {
-			model_asset->vertices[i] = read_bytes<Vec3<int16>>(next_data);
+			read_bytes<Vec3<int16>>(next_data, &model_asset->vertices[i]);
 		}
 
 		for( int i = 0; i < model_asset->num_normals; i++ ) {
-			model_asset->normals[i] = read_bytes<Vec3<int16>>(next_data);
+			read_bytes<Vec3<int16>>(next_data, &model_asset->normals[i]);
 		}
 
 		for( int i = 0; i < model_asset->num_parts; i++ ) {
 
 			ModelPart* model_part = new ModelPart();
 
-			ModelFilePartHeader& part_header = read_bytes<ModelFilePartHeader>(next_data);
+			ModelFilePartHeader part_header;
+			read_bytes(next_data, &part_header);
+			
+			model_part->is_smooth_shaded = part_header.is_smooth_shaded;
 			model_part->num_triangles = part_header.num_triangles;
 			model_part->vertex_indices = new Vec3<uint16>[model_part->num_triangles];
 			model_part->normal_indices = new Vec3<uint16>[model_part->num_triangles];
 
 			for( int j = 0; j < part_header.num_triangles; j++ ) {
-				model_part->vertex_indices[j] = read_bytes<Vec3<uint16>>(next_data);
+				read_bytes(next_data, &model_part->vertex_indices[j]); 
 			}
 
 			for( int j = 0; j < part_header.num_triangles; j++ ) {
-				model_part->normal_indices[j] = read_bytes<Vec3<uint16>>(next_data);
+				read_bytes(next_data, &model_part->normal_indices[j]);
 			}
 
 			model_asset->model_parts[i] = model_part;

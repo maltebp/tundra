@@ -5,12 +5,17 @@ class Vec2 {
 public:
 	T x;
 	T y;
-	T z;
 };
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4324)
+#endif
+
 template<typename T>
-class Vec3 {
+class alignas(4) Vec3 {
 public: 
+	
 	T x;
 	T y;
 	T z;
@@ -23,3 +28,7 @@ public:
 		return !(*this == other);
 	}
 };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif

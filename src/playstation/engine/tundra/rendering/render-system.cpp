@@ -239,31 +239,39 @@ namespace td {
                     continue;
                 }        
 
-                // if( model_part->smooth ) {
-                //     POLY_F3* triangle_prim = active_render_buffer->create_and_add_prim<POLY_F3>(
-                //         low_precision_average_z); 
+                if( !model_part->is_smooth_shaded ) {
 
-                //     triangle_prim->r0 = model.color.r;
-                //     triangle_prim->g0 = model.color.g;
-                //     triangle_prim->b0 = model.color.b;
+                    POLY_F3* triangle_prim = (POLY_F3*)primitive_buffers[(uint8)active_buffer].allocate(sizeof(POLY_F3));
+                    if( triangle_prim == nullptr ) {
+                        TD_DEBUG_LOG("Not enough space for flat-shaded triangle");
+                        // Not enough space for triangle
+                        return;
+                    }
 
-                //     *(DVECTOR*)(&triangle_prim->x0) = v0;
-                //     *(DVECTOR*)(&triangle_prim->x1) = v1;
-                //     *(DVECTOR*)(&triangle_prim->x2) = v2;
+                    setPolyF3(triangle_prim);
+                    ordering_table_layer.add_node((OrderingTableNode*)triangle_prim, ordering_table_index_16);
 
-                //     gte_ldrgb( &triangle_prim->r0 );
+                    triangle_prim->r0 = model->color.x;
+                    triangle_prim->g0 = model->color.y;
+                    triangle_prim->b0 = model->color.z;
+
+                    *(DVECTOR*)(&triangle_prim->x0) = v0;
+                    *(DVECTOR*)(&triangle_prim->x1) = v1;
+                    *(DVECTOR*)(&triangle_prim->x2) = v2;
+
+                    gte_ldrgb( &triangle_prim->r0 );
                     
-                //     /* Load the face normal */
-                //     gte_ldv0( &model.mesh.normals[i] );
+                    // TODO: Use the single normal instead of the first, when we only have 1 normal per face
+                    SVECTOR* raw_normal = vec3_int16_as_svector(model->asset.normals[model_part->normal_indices[i].x - 1]);
+                    gte_ldv0( raw_normal );
                     
-                //     /* Normal Color Single */
-                //     gte_nccs();
+                    /* Normal Color Single */
+                    gte_nccs();
 
-                //     gte_strgb( &triangle_prim->r0 );
-                // }
-                // else
+                    gte_strgb( &triangle_prim->r0 );
+                }
+                else
                 {
-                    
                     POLY_G3* triangle_prim = (POLY_G3*)primitive_buffers[(uint8)active_buffer].allocate(sizeof(POLY_G3));
                     if( triangle_prim == nullptr ) {
                         TD_DEBUG_LOG("Not enough space");

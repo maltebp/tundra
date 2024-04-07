@@ -96,7 +96,29 @@ namespace td::ac {
 		ObjObjectPart* current_object_part = new ObjObjectPart();
 		current_object->parts.push_back(current_object_part);
 
+		std::string current_material = "";
+		bool current_smooth_shading_flag = false;
+
 		std::string line;
+
+		auto start_new_object_part = [&]() mutable {
+			bool current_is_unused = current_object_part->faces.size() == 0;
+			if( current_object_part_is_default && current_is_unused ) {
+				// Re-use the default
+				current_object_part->material_name = current_material;
+				current_object_part->is_smooth_shaded = current_smooth_shading_flag;
+				current_object_part_is_default = false;
+			}
+			else
+			{
+				td::ac::input_assert_warning(current_object_part->faces.size() > 0, "Object part has no faces");
+				current_object_part = new ObjObjectPart();
+				current_object_part->material_name = current_material;
+				current_object_part->is_smooth_shaded = current_smooth_shading_flag;
+				current_object->parts.push_back(current_object_part);
+				current_object_part_is_default = false;
+			}
+		};
 		
 		while (!obj_file.eof()) {
 			TD_ASSERT(!obj_file.fail(), "Stream has failed");
@@ -137,6 +159,21 @@ namespace td::ac {
 				current_object_part_is_default = true;
 			}
 
+			if( tokens[0] == "s" ) {
+				td::ac::input_assert(tokens.size() == 2, "'s' must be followed by an 0 or 1 (was followed by %d token)", tokens.size() - 1);
+				td::ac::input_assert(current_object != nullptr, "'s' used before an object/group has been defined (we currently don't support this)");
+
+				try {
+					int i = std::stoi(tokens[1]);
+					td::ac::input_assert(i == 0 || i == 1, "Invalid argument %d for 's' token (must be 0 or 1)", i);
+					current_smooth_shading_flag = (bool)i;
+					start_new_object_part();
+				}
+				catch( std::invalid_argument& ) {
+					td::ac::input_assert(false, "Invalid argument %s for 's' (smooth shading) option (must be 0 or 1)", tokens[1]);
+				}
+			}
+
 			if( tokens[0] == "usemtl" ) {
 				td::ac::input_assert(current_object != nullptr, "'usemtl' used before an object/group has been defined (we currently don't support this)");
 
@@ -148,22 +185,10 @@ namespace td::ac {
 					}
 				}
 
-				td::ac::input_assert(!material_name.empty(), "'usemtl' has not name");
+				td::ac::input_assert(!material_name.empty(), "'usemtl' has no name");
+				current_material = material_name;
 
-				bool current_is_unused = current_object_part->faces.size() == 0;
-				if( current_object_part_is_default && current_is_unused ) {
-					// Re-use the defaul
-					current_object_part->material_name = material_name;
-					current_object_part_is_default = false;
-				}
-				else
-				{
-					td::ac::input_assert_warning(current_object_part->faces.size() > 0, "Object part has no faces");
-					current_object_part = new ObjObjectPart();
-					current_object_part->material_name = material_name;
-					current_object->parts.push_back(current_object_part);
-					current_object_part_is_default = false;
-				}
+				start_new_object_part();
 			}
 
 			if( tokens[0] == "v" ) {
@@ -209,6 +234,10 @@ namespace td::ac {
 				}   
 
 				current_object_part->faces.push_back(face);
+			}
+
+			if( tokens[0] == "l" ) {
+				td::ac::input_assert(false, "lines elements ('l' token) are not supported");
 			}
 		}
 

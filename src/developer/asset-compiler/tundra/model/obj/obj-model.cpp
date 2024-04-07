@@ -49,45 +49,52 @@ namespace td::ac {
 			};
 		}
 
-		// Name, list of vertices
-		std::unordered_map<std::string, std::vector<ObjFace>> triangles_grouped_by_material;
+		std::unordered_map<std::string, std::unordered_map<bool, std::vector<ObjFace>>> triangles_grouped_by_material;
 
 		for( ObjObject* obj_object : this->obj_objects ) {
 			for( ObjObjectPart* obj_object_part : obj_object->parts ) {
-				std::vector<ObjFace>& face_list = triangles_grouped_by_material[obj_object_part->material_name];
+				std::vector<ObjFace>& face_list = triangles_grouped_by_material[obj_object_part->material_name][obj_object_part->is_smooth_shaded];
 				for( ObjFace& face : obj_object_part->faces ) {
 					face_list.push_back(triangulate_face(face));
 				}
 			}
 		}
+		
+		std::vector<ModelPart*> model_parts;
 
-		model_asset->num_parts = (uint16)triangles_grouped_by_material.size();
+		for( auto& [material_name, smoothing_groups] : triangles_grouped_by_material ) {
+			for( auto& [is_smooth_shaded, triangles] : smoothing_groups ) {
+				if( triangles.size() == 0 ) continue;
+
+				ModelPart* model_part = new ModelPart();
+				model_part->is_smooth_shaded = is_smooth_shaded;
+				model_part->num_triangles = (uint16)triangles.size();
+				model_part->vertex_indices = new Vec3<uint16>[model_part->num_triangles];
+				model_part->normal_indices = new Vec3<uint16>[model_part->num_triangles];
+
+				for( int i = 0; i < model_part->num_triangles; i++ ) {
+					model_part->vertex_indices[i] = {
+						(uint16)(triangles[i].indices[0].x),
+						(uint16)(triangles[i].indices[1].x),
+						(uint16)(triangles[i].indices[2].x),
+					};
+
+					model_part->normal_indices[i] = {
+						(uint16)(triangles[i].indices[0].z),
+						(uint16)(triangles[i].indices[1].z),
+						(uint16)(triangles[i].indices[2].z)
+					};
+				}
+
+				model_parts.push_back(model_part);
+			}
+		}
+
+		model_asset->num_parts = (uint16)model_parts.size();
 		model_asset->model_parts = new ModelPart*[model_asset->num_parts];
 
-		int j = 0;
-		for( auto& [material_name, triangles] : triangles_grouped_by_material ) {
-			
-			ModelPart* model_part = new ModelPart();
-			model_part->num_triangles = (uint16)triangles.size();
-			model_part->vertex_indices = new Vec3<uint16>[model_part->num_triangles];
-			model_part->normal_indices = new Vec3<uint16>[model_part->num_triangles];
-
-			for( int i = 0; i < model_part->num_triangles; i++ ) {
-				model_part->vertex_indices[i] = {
-					(uint16)(triangles[i].indices[0].x),
-					(uint16)(triangles[i].indices[1].x),
-					(uint16)(triangles[i].indices[2].x),
-				};
-
-				model_part->normal_indices[i] = {
-					(uint16)(triangles[i].indices[0].z),
-					(uint16)(triangles[i].indices[1].z),
-					(uint16)(triangles[i].indices[2].z)
-				};
-			}
-
-			model_asset->model_parts[j] = model_part;
-			j++;
+		for( std::size_t i = 0; i < model_parts.size(); i++ ) {
+			model_asset->model_parts[i] = model_parts[i];
 		}
 
 		return model_asset;

@@ -80,6 +80,7 @@ namespace td::ac {
 		for( int i = 0; i < model->num_parts; i++ ) {
 			const ModelPart* part = model->model_parts[i];
 			ModelFilePartHeader part_header{};
+			part_header.is_smooth_shaded = part->is_smooth_shaded;
 			part_header.num_triangles = part->num_triangles;
 			serialized_data.append_bytes(part_header);
 			serialized_data.append_bytes_array(part->vertex_indices, part_header.num_triangles);

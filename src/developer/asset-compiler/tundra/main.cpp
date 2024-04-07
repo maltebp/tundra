@@ -93,7 +93,7 @@ int main(int argc, const char* argv[]) try {
     for( td::ac::ObjObject* object : obj_model->obj_objects ) {
         std::cout << "\tObject: " << object->name << " (parts: " << object->parts.size() << ", total faces: " << object->num_total_faces() << ")" << std::endl;
         for( td::ac::ObjObjectPart* part : object->parts ) {
-            std::cout << "\t\tPart: material = " << part->material_name << ", faces = " << part->faces.size() << std::endl;
+            std::cout << "\t\tPart: material = " << part->material_name << ", faces = " << part->faces.size() << ", smooth = " << (part->is_smooth_shaded ? "true" : "false") << std::endl;
         }
     }
 
@@ -105,7 +105,8 @@ int main(int argc, const char* argv[]) try {
     std::cout << "  Normals: " << model_asset->num_normals << std::endl;
     std::cout << "  Parts: " << model_asset->num_parts << std::endl;
     for( int i = 0; i < model_asset->num_parts; i++ ) {
-        std::cout << "    Triangles: " << model_asset->model_parts[i]->num_triangles << std::endl;
+        td::ModelPart* part = model_asset->model_parts[i];
+        std::cout << "    Triangles: " << part->num_triangles << ", Smooth = " << part->is_smooth_shaded << std::endl;
     }
 
     /*for( int i = 0; i < model_asset->num_vertices; i++ ) {

@@ -1,4 +1,5 @@
 #include "tundra/core/math.hpp"
+#include "tundra/core/vector.hpp"
 
 #include <psxgpu.h>
 #include <psxgte.h>
@@ -53,6 +54,7 @@ constexpr td::uint32 LAYER_BACKGROUND = 2;
 namespace assets {
     extern "C" const uint8_t mdl_fish[];
     extern "C" const uint8_t mdl_sphere[];
+    extern "C" const uint8_t mdl_sphere_box[];
 }
 
 int main() {
@@ -74,6 +76,9 @@ int main() {
 
     td::ModelAsset* sphere_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere);
     TD_DEBUG_LOG("  Sphere triangles: %d", sphere_model->get_total_num_triangles());
+
+    td::ModelAsset* sphere_box_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere_box);
+    TD_DEBUG_LOG("  Sphere-Box triangles: %d", sphere_model->get_total_num_triangles());
 
     TD_DEBUG_LOG("Initializing RenderSystem");
     td::RenderSystem render_system{PRIMIIVES_BUFFER_SIZE, CLEAR_COLOR};
@@ -108,12 +113,25 @@ int main() {
 
     for( td::int32 model_x = -1; model_x < 2; model_x++ ) {
         for( td::int32 model_z = -1; model_z < 2; model_z++ ) {
-
+            
             if( model_x == 0 && model_z == 0 ) {
+                td::Entity* sphere_box = td::Entity::create();
+                td::StaticTransform* transform = sphere_box->add_component<td::StaticTransform>(
+                    td::gte::compute_world_matrix(
+                        td::Vec3<td::Fixed32<12>>{ td::Fixed32<12>{td::to_fixed(0.5)} },
+                        td::Vec3<td::Fixed16<12>>{ 0, 0,  0},
+                        td::Vec3<td::Fixed32<12>>{ model_distance * model_x, 0, model_distance * model_z }
+                    )
+                );
+
+                sphere_box->add_component<td::Model>(*sphere_box_model, LAYER_MIDDLE, transform);
+                model_rotation += td::to_fixed(0.15);
+            }
+            else if( (model_x == -1 || model_x == 1) && (model_z == -1 || model_z == 1) ) {
                 td::Entity* sphere = td::Entity::create();
                 td::StaticTransform* transform = sphere->add_component<td::StaticTransform>(
                     td::gte::compute_world_matrix(
-                        td::Vec3<td::Fixed32<12>>{ td::Fixed32<12>{td::to_fixed(0.75)} },
+                        td::Vec3<td::Fixed32<12>>{ td::Fixed32<12>{td::to_fixed(0.5)} },
                         td::Vec3<td::Fixed16<12>>{ 0, model_rotation,  0},
                         td::Vec3<td::Fixed32<12>>{ model_distance * model_x, 0, model_distance * model_z }
                     )
@@ -132,7 +150,8 @@ int main() {
                     )
                 );
 
-                fish->add_component<td::Model>(*fish_model, LAYER_MIDDLE, transform);
+                td::Model* model = fish->add_component<td::Model>(*fish_model, LAYER_MIDDLE, transform);
+                model->color = { 100, 100, 255 };
                 model_rotation += td::to_fixed(0.15);
             }
         }   

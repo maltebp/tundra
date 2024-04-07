@@ -22,7 +22,6 @@ set( TD_BASE_TESTS_HEADERS
     ${TD_BASE_TESTS_DIR}/engine/entity-system/registry-block.tests.hpp
     ${TD_BASE_TESTS_DIR}/engine/entity-system/registry.tests.hpp
 
-    ${TD_BASE_TESTS_DIR}/engine/rendering/camera.tests.hpp
     ${TD_BASE_TESTS_DIR}/engine/dynamic-transform.tests.hpp
 
     ${TD_BASE_TESTS_DIR}/base-tests.hpp

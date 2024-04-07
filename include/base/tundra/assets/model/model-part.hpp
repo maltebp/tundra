@@ -33,7 +33,7 @@ namespace td {
 		::Vec3<uint16>* vertex_indices;
 		::Vec3<uint16>* normal_indices;
 
-		bool smooth = false;
+		bool is_smooth_shaded = false;
 	};
 
 }

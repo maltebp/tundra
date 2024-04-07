@@ -12,7 +12,10 @@ namespace td :: ac {
 
 		// TODO: Add material
 
+
 		std::string material_name;
+
+		bool is_smooth_shaded = false;
 
 		std::vector<ObjFace> faces;
 
