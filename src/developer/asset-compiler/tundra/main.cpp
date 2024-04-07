@@ -25,13 +25,21 @@ namespace {
     };
 
     Arguments parse_args(int argc, const char* argv[]) {
-        td::ac::input_assert(argc == 3, "Invalid number of arguments (was %d)", argc - 1);
+        int actual_argc = argc - 1;
+        td::ac::input_assert(argc >= 1 && argc <= 2, "Expected %d to %d argumentes (was %d)", 1, 2, actual_argc);
 
         std::filesystem::path input_file_path { argv[1] };
         td::ac::input_assert(std::filesystem::exists(input_file_path), "Input path does not exit: '%s'", input_file_path.string().c_str());
 
-        std::filesystem::path output_file_path{ argv[2] };
-
+        std::filesystem::path output_file_path;
+        if( actual_argc == 2 ) {
+            output_file_path = { argv[2] };
+        }
+        else {
+            output_file_path = input_file_path;
+            output_file_path.replace_extension("td_model");
+        }
+        
         return { input_file_path, output_file_path };
     }
 
@@ -58,6 +66,8 @@ namespace {
 int main(int argc, const char* argv[]) try {
 
     Arguments parsed_args = parse_args(argc, argv);
+
+    std::cout << "Compiling asset: '" << parsed_args.input_file_path << "'" << std::endl;
 
     td::ac::ObjParser obj_parser;
     td::ac::ObjModel* obj_model = obj_parser.parse(parsed_args.input_file_path);
