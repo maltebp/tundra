@@ -47,6 +47,11 @@ constexpr td::Vec3<td::uint8> DIRECTIONAL_LIGHT_COLORS[3] {
     td::Vec3<td::uint8>{ 0 }
 };
 
+
+constexpr td::Fixed32<12> CAMERA_HEIGHT { td::to_fixed(0.1) };
+constexpr td::Fixed32<12> CAMERA_XZ_DISTANCE {td::to_fixed(0.2)};
+constexpr td::Vec3<td::Fixed32<12>> CAMERA_TARGET { 0 };
+
 constexpr td::uint32 LAYER_FOREGROUND = 0;
 constexpr td::uint32 LAYER_MIDDLE = 1;
 constexpr td::uint32 LAYER_BACKGROUND = 2;
@@ -104,9 +109,6 @@ int main() {
 
     TD_DEBUG_LOG("Initializing rendering data");
 
-    SetDispMask(1);
-    FntLoad(0, 256);
-
     // Create the models
     td::Fixed32<12> model_distance = td::to_fixed(0.1);
     td::Fixed16<12> model_rotation = 0;
@@ -156,17 +158,13 @@ int main() {
             }
         }   
     }
-
-    const td::Fixed32<12> CAMERA_HEIGHT { td::to_fixed(0.1) };
-    const td::Fixed32<12> CAMERA_XZ_DISTANCE {td::to_fixed(0.2)};
-    const td::Vec3<td::Fixed32<12>> CAMERA_TARGET { 0 };
     
     td::Fixed32<12> camera_y_rotation = 1;
+    
+    SetDispMask(1);
+    FntLoad(0, 256);
 
     TD_DEBUG_LOG("Running main loop");
-    
-    camera->transform->set_translation({0, CAMERA_HEIGHT, 0});
-
     while(true) {
 
         camera_y_rotation -= td::to_fixed(0.005);
