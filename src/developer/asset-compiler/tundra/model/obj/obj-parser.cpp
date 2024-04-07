@@ -163,15 +163,17 @@ namespace td::ac {
 				td::ac::input_assert(tokens.size() == 2, "'s' must be followed by an 0 or 1 (was followed by %d token)", tokens.size() - 1);
 				td::ac::input_assert(current_object != nullptr, "'s' used before an object/group has been defined (we currently don't support this)");
 
-				try {
-					int i = std::stoi(tokens[1]);
-					td::ac::input_assert(i == 0 || i == 1, "Invalid argument %d for 's' token (must be 0 or 1)", i);
-					current_smooth_shading_flag = (bool)i;
-					start_new_object_part();
+				if( tokens[1] == "1" || tokens[1] == "on" ) {
+					current_smooth_shading_flag = true;
 				}
-				catch( std::invalid_argument& ) {
-					td::ac::input_assert(false, "Invalid argument %s for 's' (smooth shading) option (must be 0 or 1)", tokens[1]);
+				else if( tokens[1] == "0" || tokens[1] == "off" ) {
+					current_smooth_shading_flag = false;
 				}
+				else {
+					td::ac::input_assert(false, "Invalid argument %d for 's' token (must be 0, 1, on or off)");
+				}
+
+				start_new_object_part();
 			}
 
 			if( tokens[0] == "usemtl" ) {

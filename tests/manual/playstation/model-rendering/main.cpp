@@ -60,6 +60,7 @@ namespace assets {
     extern "C" const uint8_t mdl_fish[];
     extern "C" const uint8_t mdl_sphere[];
     extern "C" const uint8_t mdl_sphere_box[];
+    extern "C" const uint8_t mdl_car[];
 }
 
 int main() {
@@ -84,6 +85,9 @@ int main() {
 
     td::ModelAsset* sphere_box_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere_box);
     TD_DEBUG_LOG("  Sphere-Box triangles: %d", sphere_model->get_total_num_triangles());
+
+    td::ModelAsset* car_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_car);
+    TD_DEBUG_LOG("  Car triangles: %d", car_model->get_total_num_triangles());
 
     TD_DEBUG_LOG("Initializing RenderSystem");
     td::RenderSystem render_system{PRIMIIVES_BUFFER_SIZE, CLEAR_COLOR};
@@ -117,10 +121,23 @@ int main() {
         for( td::int32 model_z = -1; model_z < 2; model_z++ ) {
             
             if( model_x == 0 && model_z == 0 ) {
+                td::Entity* car = td::Entity::create();
+                td::StaticTransform* transform = car->add_component<td::StaticTransform>(
+                    td::gte::compute_world_matrix(
+                        td::Vec3<td::Fixed32<12>>{ td::Fixed32<12>{td::to_fixed(0.2)} },
+                        td::Vec3<td::Fixed16<12>>{ 0, td::to_fixed(0.125), 0},
+                        td::Vec3<td::Fixed32<12>>{ model_distance * model_x, 0, model_distance * model_z }
+                    )
+                );
+
+                car->add_component<td::Model>(*car_model, LAYER_MIDDLE, transform);
+                model_rotation += td::to_fixed(0.15);
+            }
+            else if( model_x == 1 && model_z == 1 ) {
                 td::Entity* sphere_box = td::Entity::create();
                 td::StaticTransform* transform = sphere_box->add_component<td::StaticTransform>(
                     td::gte::compute_world_matrix(
-                        td::Vec3<td::Fixed32<12>>{ td::Fixed32<12>{td::to_fixed(0.5)} },
+                        td::Vec3<td::Fixed32<12>>{ td::Fixed32<12>{td::to_fixed(0.2)} },
                         td::Vec3<td::Fixed16<12>>{ 0, 0,  0},
                         td::Vec3<td::Fixed32<12>>{ model_distance * model_x, 0, model_distance * model_z }
                     )

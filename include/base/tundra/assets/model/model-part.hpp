@@ -15,6 +15,7 @@ namespace td {
 
 		bool operator==(const ModelPart& other) const {
 			if( num_triangles != other.num_triangles ) return false;
+			if( is_smooth_shaded != other.is_smooth_shaded ) return false;
 			
 			for( int i = 0; i < num_triangles; i++ ) {
 				if( vertex_indices[i] != other.vertex_indices[i] ) return false;

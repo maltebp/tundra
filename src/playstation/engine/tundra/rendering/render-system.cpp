@@ -217,13 +217,13 @@ namespace td {
 
                 // In front, or on, near-plane
                 if( ordering_table_index == 0 ) {
-                    //TD_DEBUG_LOG("Behind camera");
+                    TD_DEBUG_LOG("Behind camera");
                     continue;
                 }
 
                 // Behind far-plane
                 if( ordering_table_index >= ordering_table_layer.get_resolution() ) {
-                    //TD_DEBUG_LOG("Too far away");
+                    TD_DEBUG_LOG("Too far away");
                     continue;
                 } 
 

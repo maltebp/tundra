@@ -11,6 +11,7 @@ psn00bsdk_add_executable(td.playstation.tests.manual.model-rendering GPREL ${TD_
 psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE mdl_sphere ${TD_DIR_TESTS}/data/sphere.td_model)
 psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE mdl_sphere_box ${TD_DIR_TESTS}/data/sphere-box.td_model)
 psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE mdl_fish ${TD_DIR_TESTS}/data/fish.td_model)
+psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE mdl_car ${TD_DIR_TESTS}/data/car.td_model)
 
 target_link_libraries(td.playstation.tests.manual.model-rendering PRIVATE td.base)
 target_link_libraries(td.playstation.tests.manual.model-rendering PRIVATE td.playstation.engine)

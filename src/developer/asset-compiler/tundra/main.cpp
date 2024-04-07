@@ -6,6 +6,8 @@
 
 #include <tundra/core/types.hpp>
 #include <tundra/core/assert.hpp>
+#include <tundra/core/fixed.hpp>
+#include <tundra/core/vec/vec3.hpp>
 #include <tundra/assets/model/model-asset.hpp>
 #include <tundra/assets/model/model-part.hpp>
 #include <tundra/assets/model/model-deserializer.hpp>
@@ -15,6 +17,7 @@
 #include "tundra/model/obj/obj-model.hpp"
 #include "tundra/model/obj/obj-object-part.hpp"
 #include "tundra/model/obj/obj-parser.hpp"
+
 
 
 namespace {
@@ -109,17 +112,20 @@ int main(int argc, const char* argv[]) try {
         std::cout << "    Triangles: " << part->num_triangles << ", Smooth = " << part->is_smooth_shaded << std::endl;
     }
 
-    /*for( int i = 0; i < model_asset->num_vertices; i++ ) {
+    std::cout << "Vertices: " << std::endl;
+    for( int i = 0; i < model_asset->num_vertices; i++ ) {
         Vec3<td::int16> vertex = model_asset->vertices[i];
-        std::cout << vertex.x << ", " << vertex.y << ", " << vertex.z << std::endl;
-    }*/
+        td::Vec3<td::Fixed16<12>> v{ td::Fixed16<12>::from_raw_fixed_value(vertex.x), td::Fixed16<12>::from_raw_fixed_value(vertex.y), td::Fixed16<12>::from_raw_fixed_value(vertex.z) };
+        std::cout << td::to_string(v).get_c_string() << std::endl;
+    }
 
-    //for( int i = 0; i < model_asset->num_parts; i++ ) {
-    //    for( int j = 0; j < model_asset->model_parts[i]->num_triangles; j++ ) {
-    //        Vec3<td::uint16> vertex_indices = model_asset->model_parts[i]->vertex_indices[j];
-    //        std::cout << vertex_indices.x << ", " << vertex_indices.y << ", " << vertex_indices.z << std::endl;
-    //    }
-    //}
+    std::cout << "Indices: " << std::endl;
+    for( int i = 0; i < model_asset->num_parts; i++ ) {
+        for( int j = 0; j < model_asset->model_parts[i]->num_triangles; j++ ) {
+            Vec3<td::uint16> vertex_indices = model_asset->model_parts[i]->vertex_indices[j];
+            std::cout << "  " << vertex_indices.x << ", " << vertex_indices.y << ", " << vertex_indices.z << std::endl;
+        }
+    }
 
     std::cout << "Testing equality operator...";
     TD_ASSERT((*model_asset) == (*model_asset), "ModelAsset operator== failed (object is not equal to itself)");
