@@ -4,11 +4,11 @@
 #include <stdexcept>
 #include <fstream>
 
-#include "tundra/core/types.hpp"
-#include "tundra/core/assert.hpp"
-#include "tundra/assets/model/model-asset.hpp"
-#include "tundra/assets/model/model-part.hpp"
-#include "tundra/assets/model/model-deserializer.hpp"
+#include <tundra/core/types.hpp>
+#include <tundra/core/assert.hpp>
+#include <tundra/assets/model/model-asset.hpp>
+#include <tundra/assets/model/model-part.hpp>
+#include <tundra/assets/model/model-deserializer.hpp>
 
 #include "tundra/assert-input.hpp"
 #include "tundra/model/model-serializer.hpp"

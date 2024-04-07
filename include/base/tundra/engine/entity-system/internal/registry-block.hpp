@@ -219,17 +219,6 @@ namespace td::internal {
     }
 
     template<typename TComponent>
-    RegistryBlock<TComponent>::Iterator RegistryBlock<TComponent>::begin() {
-        return RegistryBlock<TComponent>::Iterator(this, Iterator::Type::Begin);
-    }
-
-    template<typename TComponent>
-    RegistryBlock<TComponent>::Iterator RegistryBlock<TComponent>::end() {
-        return RegistryBlock<TComponent>::Iterator(this, Iterator::Type::End);
-    }
-
-
-    template<typename TComponent>
     class RegistryBlock<TComponent>::Iterator {
     public:
 
@@ -293,5 +282,15 @@ namespace td::internal {
         TComponent* component;
 
     };
+
+    template<typename TComponent>
+    RegistryBlock<TComponent>::Iterator RegistryBlock<TComponent>::begin() {
+        return RegistryBlock<TComponent>::Iterator(this, Iterator::Type::Begin);
+    }
+
+    template<typename TComponent>
+    RegistryBlock<TComponent>::Iterator RegistryBlock<TComponent>::end() {
+        return RegistryBlock<TComponent>::Iterator(this, Iterator::Type::End);
+    }
 
 }

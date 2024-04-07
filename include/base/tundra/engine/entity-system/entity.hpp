@@ -5,6 +5,7 @@
 #include <tundra/engine/entity-system/internal/component-flags.hpp>
 #include <tundra/engine/entity-system/internal/registry.hpp>
 #include <tundra/engine/entity-system/internal/component-meta-data.hpp>
+#include <tundra/engine/entity-system/internal/registry-block.hpp>
 
 namespace td {
 
