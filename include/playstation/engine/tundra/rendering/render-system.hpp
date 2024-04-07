@@ -44,7 +44,7 @@ namespace td {
         DoubleBufferId active_buffer = DoubleBufferId::First;
 
         PrimitiveBuffer primitive_buffers[2];
-        Vec3<uint16> clear_color;
+        Vec3<uint8> clear_color;
 
         Vec3<uint8> ambient_color;
         

@@ -28,7 +28,7 @@
 constexpr td::uint16 ORDERING_TABLE_SIZE = 2048; // entries
 constexpr td::uint32 PRIMIIVES_BUFFER_SIZE = 30000; // bytes
 
-constexpr td::Vec3<td::uint8> CLEAR_COLOR = { 200, 60, 30 };
+constexpr td::Vec3<td::uint8> CLEAR_COLOR = { 255, 100, 50 };
 
 constexpr td::Vec3<td::uint8> AMBIENT_COLOR =
     { 150, 100, 40 };

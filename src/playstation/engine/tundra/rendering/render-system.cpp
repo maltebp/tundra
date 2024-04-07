@@ -76,7 +76,6 @@ namespace td {
 
     void RenderSystem::render() {
 
-        // TODO: Expose this
         gte_SetBackColor( this->ambient_color.x, this->ambient_color.y, this->ambient_color.z );
 
         gte_SetColorMatrix(&gte::to_gte_matrix_ref(light_colors));
@@ -100,7 +99,12 @@ namespace td {
         DoubleBufferId inactive_buffer = active_buffer == DoubleBufferId::First ? DoubleBufferId::Second : DoubleBufferId::First;
 
         PutDispEnv( &internal::display_settings[(uint8)inactive_buffer] );
-        PutDrawEnv( &internal::draw_settings[(uint8)active_buffer] );
+
+        DRAWENV& draw_env_to_activate = internal::draw_settings[(uint8)active_buffer];
+        draw_env_to_activate.r0 = clear_color.x;
+        draw_env_to_activate.g0 = clear_color.y;
+        draw_env_to_activate.b0 = clear_color.z;
+        PutDrawEnv( &draw_env_to_activate );
 
         // We now submit to the ordering table of the buffer being displayed,
         // while the other one is being drawn to and not displayed
