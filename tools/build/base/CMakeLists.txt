@@ -4,6 +4,7 @@ set( TD_BASE_DIR_INCLUDE ${TD_DIR_INCLUDE}/base )
 
 set( TD_BASE_HEADERS 
     ${TD_BASE_DIR_INCLUDE}/tundra/core/assert.hpp
+    ${TD_BASE_DIR_INCLUDE}/tundra/core/grid-allocator.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/core/log.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/core/macro-util.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/core/types.hpp
@@ -23,6 +24,7 @@ set( TD_BASE_SOURCES
 
     ${TD_BASE_DIR_SRC}/tundra/core/string.cpp
     ${TD_BASE_DIR_SRC}/tundra/core/string-util.cpp
+    ${TD_BASE_DIR_SRC}/tundra/core/grid-allocator.cpp
 
     ${TD_BASE_DIR_SRC}/tundra/assets/model/model-asset.cpp
     ${TD_BASE_DIR_SRC}/tundra/assets/model/model-deserializer.cpp
