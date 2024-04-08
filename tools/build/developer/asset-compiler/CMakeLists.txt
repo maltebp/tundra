@@ -20,6 +20,7 @@ set( TD_ASSET_COMPILER_SOURCES
 	${TD_ASSET_COMPILER_DIR_SRC}/tundra/model/obj/obj-object.hpp
 	${TD_ASSET_COMPILER_DIR_SRC}/tundra/model/obj/obj-parser.cpp
 	${TD_ASSET_COMPILER_DIR_SRC}/tundra/model/obj/obj-parser.hpp
+	${TD_ASSET_COMPILER_DIR_SRC}/tundra/model/obj/obj-material.hpp
 
 )
 

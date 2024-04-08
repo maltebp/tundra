@@ -35,6 +35,11 @@ namespace td {
 		::Vec3<uint16>* normal_indices;
 
 		bool is_smooth_shaded = false;
+
+		// Starting from 1 (0 zero means no index)
+		uint8 texture_index = 0;
+		
+		::Vec3<uint8> color { 255, 255, 255 };
 	};
 
 }

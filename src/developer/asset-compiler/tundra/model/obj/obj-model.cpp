@@ -5,6 +5,8 @@
 #include <tundra/assets/model/model-asset.hpp>
 #include <tundra/assets/model/model-part.hpp>
 
+#include "tundra/model/obj/obj-material.hpp"
+
 namespace td::ac {
 
 	ObjFace triangulate_face(const ObjFace& face) {
@@ -26,6 +28,16 @@ namespace td::ac {
 	ModelAsset* ObjModel::to_model_asset() const {
 		
 		const int16 FIXED_4_12_ONE = 1 << 12;
+
+		std::unordered_map<ObjMaterial*, std::unordered_map<bool, std::vector<ObjFace>>> triangles_grouped_by_material;
+		for( ObjObject* obj_object : this->obj_objects ) {
+			for( ObjObjectPart* obj_object_part : obj_object->parts ) {
+				std::vector<ObjFace>& face_list = triangles_grouped_by_material[obj_object_part->material][obj_object_part->is_smooth_shaded];
+				for( ObjFace& face : obj_object_part->faces ) {
+					face_list.push_back(triangulate_face(face));
+				}
+			}
+		}
 
 		ModelAsset* model_asset = new ModelAsset();
 
@@ -49,25 +61,20 @@ namespace td::ac {
 			};
 		}
 
-		std::unordered_map<std::string, std::unordered_map<bool, std::vector<ObjFace>>> triangles_grouped_by_material;
+		model_asset->num_materials = triangles_grouped_by_material.size();
 
-		for( ObjObject* obj_object : this->obj_objects ) {
-			for( ObjObjectPart* obj_object_part : obj_object->parts ) {
-				std::vector<ObjFace>& face_list = triangles_grouped_by_material[obj_object_part->material_name][obj_object_part->is_smooth_shaded];
-				for( ObjFace& face : obj_object_part->faces ) {
-					face_list.push_back(triangulate_face(face));
-				}
-			}
-		}
-		
 		std::vector<ModelPart*> model_parts;
 
-		for( auto& [material_name, smoothing_groups] : triangles_grouped_by_material ) {
+		for( auto& [material, smoothing_groups] : triangles_grouped_by_material ) {
+			int material_index = 1;
 			for( auto& [is_smooth_shaded, triangles] : smoothing_groups ) {
 				if( triangles.size() == 0 ) continue;
 
 				ModelPart* model_part = new ModelPart();
+				
 				model_part->is_smooth_shaded = is_smooth_shaded;
+				model_part->material_index = material_index;
+
 				model_part->num_triangles = (uint16)triangles.size();
 				model_part->vertex_indices = new Vec3<uint16>[model_part->num_triangles];
 				model_part->normal_indices = new Vec3<uint16>[model_part->num_triangles];
@@ -88,6 +95,8 @@ namespace td::ac {
 
 				model_parts.push_back(model_part);
 			}
+
+			material_index++;
 		}
 
 		model_asset->num_parts = (uint16)model_parts.size();

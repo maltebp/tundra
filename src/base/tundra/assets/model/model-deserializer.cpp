@@ -51,6 +51,8 @@ namespace td {
 			read_bytes(next_data, &part_header);
 			
 			model_part->is_smooth_shaded = part_header.is_smooth_shaded;
+			model_part->is_smooth_shaded = part_header.is_smooth_shaded;
+
 			model_part->num_triangles = part_header.num_triangles;
 			model_part->vertex_indices = new Vec3<uint16>[model_part->num_triangles];
 			model_part->normal_indices = new Vec3<uint16>[model_part->num_triangles];

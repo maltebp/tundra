@@ -14,6 +14,7 @@
 #include "tundra/model/obj/obj-model.hpp"
 #include "tundra/model/obj/obj-object.hpp"
 #include "tundra/model/obj/obj-object-part.hpp"
+#include "tundra/model/obj/obj-material.hpp"
 
 
 std::vector<std::string> parse_line(std::ifstream& stream) {
@@ -80,7 +81,11 @@ td::Int3 parse_index(const std::string& index_token) {
 	return { vertex_index, texture_index, normal_index };
 }
 
+
+
 namespace td::ac {
+
+	std::vector<ObjMaterial*> parse_material_lib(std::filesystem::path material_lib_path);
 
 	ObjModel* ObjParser::parse(const std::filesystem::path& obj_file_path) {
 
@@ -96,7 +101,9 @@ namespace td::ac {
 		ObjObjectPart* current_object_part = new ObjObjectPart();
 		current_object->parts.push_back(current_object_part);
 
-		std::string current_material = "";
+		std::vector<ObjMaterial*> materials;
+
+		ObjMaterial* current_material = nullptr;
 		bool current_smooth_shading_flag = false;
 
 		std::string line;
@@ -105,7 +112,7 @@ namespace td::ac {
 			bool current_is_unused = current_object_part->faces.size() == 0;
 			if( current_object_part_is_default && current_is_unused ) {
 				// Re-use the default
-				current_object_part->material_name = current_material;
+				current_object_part->material = current_material;
 				current_object_part->is_smooth_shaded = current_smooth_shading_flag;
 				current_object_part_is_default = false;
 			}
@@ -113,7 +120,7 @@ namespace td::ac {
 			{
 				td::ac::input_assert_warning(current_object_part->faces.size() > 0, "Object part has no faces");
 				current_object_part = new ObjObjectPart();
-				current_object_part->material_name = current_material;
+				current_object_part->material = current_material;
 				current_object_part->is_smooth_shaded = current_smooth_shading_flag;
 				current_object->parts.push_back(current_object_part);
 				current_object_part_is_default = false;
@@ -127,6 +134,19 @@ namespace td::ac {
 
 			if( tokens.size() == 0 ) {
 				continue;
+			}
+
+			if( tokens[0] == "mtllib" ) {
+				std::filesystem::path material_lib_path = tokens[1];
+				if( material_lib_path.is_relative() ) {
+					obj_file_path.parent_path() / material_lib_path;
+				}
+
+				td::ac::input_assert(std::filesystem::exists(material_lib_path), "Cannot find material lib '%s'", material_lib_path.string().c_str());
+				td::ac::input_assert(!std::filesystem::is_directory(material_lib_path), "Material lib '%s' is a directory, not a file", material_lib_path.string().c_str());
+
+				std::vector<ObjMaterial*> materials_in_lib = parse_material_lib(material_lib_path);
+				materials.insert(materials.end(), materials_in_lib.begin(), materials_in_lib.end());
 			}
 
 			if( tokens[0] == "g" || tokens[0] == "o" ) {
@@ -178,6 +198,7 @@ namespace td::ac {
 
 			if( tokens[0] == "usemtl" ) {
 				td::ac::input_assert(current_object != nullptr, "'usemtl' used before an object/group has been defined (we currently don't support this)");
+				td::ac::input_assert(materials.size() > 0, "'usemtl' before any materials has been loaded");
 
 				std::string material_name;
 				for( int i = 1; i < tokens.size(); i++ ) {
@@ -188,7 +209,11 @@ namespace td::ac {
 				}
 
 				td::ac::input_assert(!material_name.empty(), "'usemtl' has no name");
-				current_material = material_name;
+
+				auto it = std::find_if(materials.begin(), materials.end(), [&material_name](ObjMaterial* m) { return m->name == material_name; });
+				td::ac::input_assert(it != materials.end(), "Found no material named '%s' in material lib", material_name);
+
+				current_material = *it;
 
 				start_new_object_part();
 			}
@@ -250,6 +275,10 @@ namespace td::ac {
 		}
 
 		return model;
+	}
+
+	std::vector<ObjMaterial*> parse_material_lib(std::filesystem::path material_lib_path) {
+		// TODO: Implement
 	}
 
 }

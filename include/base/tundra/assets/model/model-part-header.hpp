@@ -8,6 +8,7 @@ namespace td {
 	public: 
 		
 		bool is_smooth_shaded;
+
 		uint16 num_triangles;
 
 	};

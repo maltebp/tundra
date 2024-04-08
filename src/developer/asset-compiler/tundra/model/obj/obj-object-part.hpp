@@ -10,10 +10,7 @@ namespace td :: ac {
 	class ObjObjectPart {
 	public:
 
-		// TODO: Add material
-
-
-		std::string material_name;
+		ObjMaterial* material = nullptr;
 
 		bool is_smooth_shaded = false;
 
