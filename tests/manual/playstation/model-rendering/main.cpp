@@ -1,3 +1,4 @@
+#include "tundra/rendering/sprite.hpp"
 #include <psxgpu.h>
 #include <psxgte.h>
 #include <inline_c.h>
@@ -208,7 +209,22 @@ int main() {
             }
         }   
     }
-    
+
+    // Create sprites
+    auto create_sprite = [&](td::Vec2<td::Fixed32<12>> position, td::Vec2<td::Fixed32<12>> size, td::Vec3<td::uint8> color) {
+        td::Entity* e = td::Entity::create();
+        td::Sprite* sprite = e->add_component<td::Sprite>(LAYER_MIDDLE);
+        sprite->texture = ball_texture;
+        sprite->color = color;
+        sprite->position = position;
+        sprite->size = size;
+    };
+
+    create_sprite({24, 24}, {16, 16}, {255U, 255U, 255U});
+    create_sprite({320 - 26, 26}, {20, 20}, { 0, 255U, 255U});
+    create_sprite({320 - 32, 240 - 32}, {32, 32}, { 255U, 255U, 0});
+    create_sprite({36, 240 - 36}, {40, 40}, { 120U, 255U, 120U});
+
     td::Fixed32<12> camera_y_rotation = 1;
     
     SetDispMask(1);
@@ -216,6 +232,13 @@ int main() {
 
     TD_DEBUG_LOG("Running main loop");
     while(true) {
+
+        for( td::Sprite* sprite : td::Sprite::get_all() ) {
+            sprite->rotation += td::to_fixed(0.005);
+            if( sprite->rotation > 1 ) {
+                sprite->rotation -= 1;
+            }
+        }
 
         camera_y_rotation -= td::to_fixed(0.005);
         if( camera_y_rotation < 0 ) {

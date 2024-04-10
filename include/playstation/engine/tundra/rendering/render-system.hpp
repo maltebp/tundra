@@ -17,6 +17,7 @@
 namespace td {
 
     class Model;
+    class Sprite;
 
     class RenderSystem {
     public:
@@ -42,6 +43,8 @@ namespace td {
     private:
 
         void render_camera(Camera* camera);    
+
+        void render_sprite(const Sprite* model, OrderingTableLayer& ordering_table_layer);
 
         void render_model(const TransformMatrix& camera_matrix, const Model* model, OrderingTableLayer& ordering_table_layer);
         

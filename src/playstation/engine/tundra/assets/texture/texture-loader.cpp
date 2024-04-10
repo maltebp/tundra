@@ -65,6 +65,7 @@ namespace td {
             // Load CLUT to VRAM
             LoadImage(&clut_vram_rect, tim.caddr);
 
+            // TODO: x must be a multiple of 16 units
             asset->load_info->clut_id = (uint16)getClut(clut_vram_rect.x, clut_vram_rect.y); 
         }
 
