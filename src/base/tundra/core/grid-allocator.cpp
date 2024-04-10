@@ -47,9 +47,12 @@ namespace td {
 
             if( smallest_rect == nullptr ) return true;
 
+            if( rect.area > smallest_rect->area ) return false;
+            if( rect.area < smallest_rect->area ) return true;
+
             if( is_rect_exact_aligned(rect) && !is_rect_exact_aligned(*smallest_rect) ) return true;
 
-            return rect.area < smallest_rect->area;
+            return false;
         };
         
         for( uint32 i = 0; i < free_rects.get_size(); i++ ) {
