@@ -213,7 +213,7 @@ int main() {
     // Create sprites
     auto create_sprite = [&](td::Vec2<td::Fixed32<12>> position, td::Vec2<td::Fixed32<12>> size, td::Vec3<td::uint8> color) {
         td::Entity* e = td::Entity::create();
-        td::Sprite* sprite = e->add_component<td::Sprite>(LAYER_MIDDLE);
+        td::Sprite* sprite = e->add_component<td::Sprite>(LAYER_FOREGROUND);
         sprite->texture = ball_texture;
         sprite->color = color;
         sprite->position = position;
