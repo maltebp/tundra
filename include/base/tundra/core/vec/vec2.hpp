@@ -47,8 +47,8 @@ namespace td {
     }
 
     template<typename T>
-    [[nodiscard]] constexpr Vec2<T> Vec2<T>::operator+(const Vec2& other) const { 
-        return Vec2{ x + other.x, y + other.y };
+    [[nodiscard]] constexpr Vec2<T> Vec2<T>::operator+(const Vec2<T>& other) const { 
+        return Vec2{ (T)(x + other.x), (T)(y + other.y) };
     }
 
     template<typename T>

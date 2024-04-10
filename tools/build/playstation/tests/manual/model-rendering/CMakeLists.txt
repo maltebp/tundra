@@ -13,6 +13,7 @@ psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE mdl_
 psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE mdl_fish ${TD_DIR_TESTS}/data/fish.td_model)
 psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE mdl_car ${TD_DIR_TESTS}/data/car.td_model)
 psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE tex_ball ${TD_DIR_TESTS}/data/ball.tim)
+psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE tex_dumbass ${TD_DIR_TESTS}/data/dumbass.tim)
 
 target_link_libraries(td.playstation.tests.manual.model-rendering PRIVATE td.base)
 target_link_libraries(td.playstation.tests.manual.model-rendering PRIVATE td.playstation.engine)

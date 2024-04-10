@@ -9,6 +9,7 @@
 
 #include <tundra/engine/transform-matrix.hpp>
 
+#include <tundra/rendering/vram-allocator.hpp>
 #include <tundra/rendering/double-buffer-id.hpp>
 #include <tundra/rendering/primitive-buffer.hpp>
 #include <tundra/rendering/ordering-table.hpp>
@@ -23,7 +24,7 @@ namespace td {
     public:
 
         RenderSystem(
-            GridAllocator& vram_allocator,
+            VramAllocator& vram_allocator,
             uint32 primitive_buffer_size,
             Vec3<uint8> clear_color
         );

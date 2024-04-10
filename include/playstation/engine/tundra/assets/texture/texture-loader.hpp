@@ -9,7 +9,7 @@ namespace td {
 
     namespace texture_loader {
     
-        extern const ::td::TextureAsset* load_texture(GridAllocator& vram_allocator, const byte* raw_data);
+        extern const ::td::TextureAsset* load_texture(VramAllocator& vram_allocator, const byte* raw_data);
     
     }
 

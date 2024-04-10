@@ -1,4 +1,5 @@
 #include "tundra/core/math.hpp"
+#include "tundra/rendering/vram-allocator.hpp"
 #include <tundra/rendering/render-system.hpp>
 
 #include <psxgpu.h>
@@ -36,21 +37,18 @@ namespace td {
         const uint16 SCREEN_WIDTH = 320;
         const uint16 SCREEN_HEIGHT = 240;
 
-        Vec2<uint16> allocate_vram_position(GridAllocator& vram_allocator) {
-            GridAllocator::Result result = vram_allocator.allocate(SCREEN_WIDTH, SCREEN_HEIGHT);
-            TD_ASSERT(result.success, "Failed to allocate VRAM buffer");
-            return (Vec2<uint16>)result.position;
-        }
-
         bool screen_triangle_is_in_screen(const DVECTOR* v0, const DVECTOR* v1, const DVECTOR* v2);
     }
 
     RenderSystem::RenderSystem(
-        GridAllocator& vram_allocator,
+        VramAllocator& vram_allocator,
         uint32 primitive_buffer_size,
         Vec3<uint8> clear_color
     )
-        :   frame_buffer_positions{internal::allocate_vram_position(vram_allocator), internal::allocate_vram_position(vram_allocator)},
+        :   frame_buffer_positions{
+                vram_allocator.frame_buffer_1_position, 
+                vram_allocator.frame_buffer_2_position
+            },
             primitive_buffers{primitive_buffer_size, primitive_buffer_size},
             clear_color(clear_color),
             light_directions(0), // All lights disabled by default
@@ -205,16 +203,16 @@ namespace td {
         v2 += { sprite->position.x, sprite->position.y };
         v3 += { sprite->position.x, sprite->position.y };
 
-        POLY_F4* primitive = (POLY_F4*)primitive_buffers[(uint8)active_buffer].allocate(sizeof(POLY_F4));
+        POLY_FT4* primitive = (POLY_FT4*)primitive_buffers[(uint8)active_buffer].allocate(sizeof(POLY_FT4));
         if( primitive == nullptr ) {
             TD_DEBUG_LOG("Not enough space for Sprite primitive");
             return;
         }
 
-        setPolyF4(primitive);
+        setPolyFT4(primitive);
 
         // TODO: Should there be z-depth to sprites?
-        ordering_table_layer.add_node((OrderingTableNode*)primitive, 0);
+        ordering_table_layer.add_to_front((OrderingTableNode*)primitive);
         
         // We use static cast to preserve the bit pattern (I believe the primitive members are
         // wrongly unsigned values - they should be signed, but this is only the case for x0, y0)
@@ -230,20 +228,26 @@ namespace td {
         primitive->x3 = (int16)v3.x.get_raw_integer();
         primitive->y3 = (int16)v3.y.get_raw_integer();
         
-        // primitive->tpage = 0;//sprite->texture->load_info->texture_page_id;
-        // primitive->clut = 0;//sprite->texture->load_info->clut_id;
-        
-        // primitive->u0 = 0;
-        // primitive->v0 = 0;
+        primitive->tpage = sprite->texture->load_info->texture_page_id;
+        primitive->clut = sprite->texture->load_info->clut_id;
+       
+        uint8 uv_u0 = sprite->texture->load_info->texture_page_offset.x;
+        uint8 uv_v0 = sprite->texture->load_info->texture_page_offset.y;
 
-        // primitive->u1 = (uint8)sprite->texture->pixels_width;
-        // primitive->v1 = 0;
+        uint8 uv_u1 = sprite->texture->load_info->texture_page_offset.x + sprite->texture->pixels_width;
+        uint8 uv_v1 = sprite->texture->load_info->texture_page_offset.y + sprite->texture->pixels_height;
 
-        // primitive->u2 = 0;
-        // primitive->v2 = (uint8)sprite->texture->pixels_height;
+        primitive->u0 = uv_u0;
+        primitive->v0 = uv_v0;
 
-        // primitive->u3 = (uint8)sprite->texture->pixels_width;
-        // primitive->v3 = (uint8)sprite->texture->pixels_height;        
+        primitive->u1 = uv_u1;
+        primitive->v1 = uv_v0;
+
+        primitive->u2 = uv_u0;
+        primitive->v2 = uv_v1;
+
+        primitive->u3 = uv_u1;
+        primitive->v3 = uv_v1;
 
         primitive->r0 = sprite->color.x;
         primitive->g0 = sprite->color.y;

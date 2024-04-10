@@ -1,4 +1,5 @@
 #include "tundra/rendering/sprite.hpp"
+#include "tundra/rendering/vram-allocator.hpp"
 #include <psxgpu.h>
 #include <psxgte.h>
 #include <inline_c.h>
@@ -64,6 +65,7 @@ namespace assets {
     extern "C" const uint8_t mdl_sphere_box[];
     extern "C" const uint8_t mdl_car[];
     extern "C" const uint8_t tex_ball[];
+    extern "C" const uint8_t tex_dumbass[];
 }
 
 int main() {
@@ -78,7 +80,7 @@ int main() {
 	// Set screen depth (basically FOV control, W/2 works best)
 	gte_SetGeomScreen(320 / 2);
 
-    td::GridAllocator vram_allocator{ 1024, 1024 };
+    td::VramAllocator vram_allocator;
 
     TD_DEBUG_LOG("Initializing RenderSystem");
     td::RenderSystem render_system{vram_allocator, PRIMIIVES_BUFFER_SIZE, CLEAR_COLOR};
@@ -117,30 +119,32 @@ int main() {
     TD_DEBUG_LOG("  Car triangles: %d", car_model->get_total_num_triangles());
 
     const td::TextureAsset* ball_texture = td::texture_loader::load_texture(vram_allocator, (td::byte*)assets::tex_ball);
+    const td::TextureAsset* dumbass_texture = td::texture_loader::load_texture(vram_allocator, (td::byte*)assets::tex_dumbass);
 
     // Print VRAM statistics
+    // TODO: This need to be adjusted to the new VRAM class
     {
         td::int32 max_area = 0;
         const td::GridAllocator::Rect* max_rect = nullptr;
-        for( td::uint32 i = 0; i < vram_allocator.get_free_rects().get_size(); i++ ) {
-            if( vram_allocator.get_free_rects()[i].area > max_area ) {
-                max_area = vram_allocator.get_free_rects()[i].area;
-                max_rect = &vram_allocator.get_free_rects()[i];
+        for( td::uint32 i = 0; i < vram_allocator.get_global_allocator().get_free_rects().get_size(); i++ ) {
+            if( vram_allocator.get_global_allocator().get_free_rects()[i].area > max_area ) {
+                max_area = vram_allocator.get_global_allocator().get_free_rects()[i].area;
+                max_rect = &vram_allocator.get_global_allocator().get_free_rects()[i];
             }
         }
 
-        td::UFixed32<10> allocated_percentage = td::UFixed32<10>(vram_allocator.get_num_bytes_allocated()) / td::UFixed32<10>(1024U*1024U);
+        td::UFixed32<10> allocated_percentage = td::UFixed32<10>(vram_allocator.get_global_allocator().get_num_bytes_allocated()) / td::UFixed32<10>(1024U*1024U);
         allocated_percentage *= 100;
 
         if( max_rect != nullptr ) {
             TD_DEBUG_LOG(
                 "VRAM used: %d bytes (%d%%), %d rects remain (biggest is %dx%d)",
-                vram_allocator.get_num_bytes_allocated(), allocated_percentage.get_raw_integer(), vram_allocator.get_free_rects().get_size(), max_rect->size.x, max_rect->size.y);
+                vram_allocator.get_global_allocator().get_num_bytes_allocated(), allocated_percentage.get_raw_integer(), vram_allocator.get_global_allocator().get_free_rects().get_size(), max_rect->size.x, max_rect->size.y);
         }
         else {
             TD_DEBUG_LOG(
                 "VRAM used: %d bytes (%d%%), 0 rects remain",
-                vram_allocator.get_num_bytes_allocated(), allocated_percentage.get_raw_integer());
+                vram_allocator.get_global_allocator().get_num_bytes_allocated(), allocated_percentage.get_raw_integer());
         }
     }
     
@@ -211,7 +215,7 @@ int main() {
     }
 
     // Create sprites
-    auto create_sprite = [&](td::Vec2<td::Fixed32<12>> position, td::Vec2<td::Fixed32<12>> size, td::Vec3<td::uint8> color) {
+    auto create_ball = [&](td::Vec2<td::Fixed32<12>> position, td::Vec2<td::Fixed32<12>> size, td::Vec3<td::uint8> color) {
         td::Entity* e = td::Entity::create();
         td::Sprite* sprite = e->add_component<td::Sprite>(LAYER_FOREGROUND);
         sprite->texture = ball_texture;
@@ -220,15 +224,25 @@ int main() {
         sprite->size = size;
     };
 
-    create_sprite({24, 24}, {16, 16}, {255U, 255U, 255U});
-    create_sprite({320 - 26, 26}, {20, 20}, { 0, 255U, 255U});
-    create_sprite({320 - 32, 240 - 32}, {32, 32}, { 255U, 255U, 0});
-    create_sprite({36, 240 - 36}, {40, 40}, { 120U, 255U, 120U});
+    create_ball({24, 24}, {16, 16}, {255U, 255U, 255U});
+    create_ball({320 - 26, 26}, {20, 20}, { 0, 255U, 255U});
+    create_ball({320 - 32, 240 - 32}, {32, 32}, { 255U, 255U, 0});
+    create_ball({36, 240 - 36}, {40, 40}, { 120U, 255U, 120U});
+
+    auto create_dumbass = [&](td::Vec2<td::Fixed32<12>> position, td::Vec2<td::Fixed32<12>> size) {
+        td::Entity* e = td::Entity::create();
+        td::Sprite* sprite = e->add_component<td::Sprite>(LAYER_FOREGROUND);
+        sprite->texture = dumbass_texture;
+        sprite->position = position;
+        sprite->size = size;
+    };
+
+    create_dumbass({ 160, 24 }, {32, 32});
 
     td::Fixed32<12> camera_y_rotation = 1;
     
     SetDispMask(1);
-    FntLoad(0, 256);
+    // FntLoad(0, 256);
 
     TD_DEBUG_LOG("Running main loop");
     while(true) {

@@ -1,4 +1,5 @@
 #include "tundra/core/log.hpp"
+#include "tundra/rendering/vram-allocator.hpp"
 #include <tundra/assets/texture/texture-loader.hpp>
 
 #include <psxgpu.h>
@@ -6,17 +7,31 @@
 #include <tundra/core/assert.hpp>
 #include <tundra/core/limits.hpp>
 #include <tundra/core/grid-allocator.hpp>
+#include <tundra/core/vec/vec2.hpp>
 
 #include <tundra/assets/texture/texture-asset.hpp>
 #include <tundra/assets/texture/texture-asset-load-info.hpp>
 
 namespace td {
 
-    const uint32 TIM_TYPE_TRUE_COLOR = 0x08;
-    const uint32 TIM_TYPE_PALETTE_4_BIT = 0x09;
-    const uint32 TIM_TYPE_PALETTE_8_BIT = 0x02;
+    const uint32 TIM_TYPE_TRUE_COLOR = 0x02;
+    const uint32 TIM_TYPE_PALETTE_4_BIT = 0x08;
+    const uint32 TIM_TYPE_PALETTE_8_BIT = 0x09;
 
     namespace internal {
+
+        constexpr TextureMode tim_mode_to_texture_mode(uint32 tim_mode) {
+
+            switch(tim_mode) {
+                case TIM_TYPE_TRUE_COLOR: return TextureMode::TrueColor;
+                case TIM_TYPE_PALETTE_4_BIT: return TextureMode::Palette4Bit;
+                case TIM_TYPE_PALETTE_8_BIT: return TextureMode::Palette8Bit;
+            }
+
+            TD_ASSERT(false, "Unknown tim_mode %d", tim_mode);
+
+            return TextureMode::TrueColor;
+        }
 
         constexpr uint16 get_texture_page(uint32 tp, uint32 abr, uint32 x, uint32 y) {
             // Own implementation of getTPage, because it had signedness warnings
@@ -37,58 +52,65 @@ namespace td {
 
     }
 
-    extern const TextureAsset* texture_loader::load_texture(GridAllocator& vram_allocator, const byte* raw_data) {
+    extern const TextureAsset* texture_loader::load_texture(VramAllocator& vram_allocator, const byte* raw_data) {
         TD_ASSERT(raw_data != nullptr, "Texture raw data must not be nullptr");
 
         TextureAsset* asset = new TextureAsset();
         asset->load_info = new TextureAssetLoadInfo();
 
         TIM_IMAGE tim;
-
         GetTimInfo((const uint32*)raw_data, &tim);
 
-        bool has_clut = tim.mode == TIM_TYPE_PALETTE_4_BIT || tim.mode == TIM_TYPE_PALETTE_8_BIT;
-        if( has_clut ) {
-            GridAllocator::Result clut_vram_allocation_result = vram_allocator.allocate(
-                (uint16)tim.crect->w, 
-                (uint16)tim.crect->h
-            );
+        asset->mode = internal::tim_mode_to_texture_mode(tim.mode);
 
-            TD_ASSERT(clut_vram_allocation_result.success, "Failed to allocate texture's CLUT in VRAM of size %d x %d", tim.crect->w, tim.crect->h);
+        RECT* prect = tim.prect;
+        TD_DEBUG_LOG("%u, %u, %u, %u", prect->x, prect->y, prect->w, prect->h);
+
+        bool has_clut = asset->mode == TextureMode::Palette4Bit || asset->mode == TextureMode::Palette8Bit;
+        if( has_clut ) {
+            Vec2<uint16> clut_position = asset->mode == TextureMode::Palette4Bit ? vram_allocator.allocate_clut_4() : vram_allocator.allocate_clut_8();
 
             RECT clut_vram_rect;
-            clut_vram_rect.x = clut_vram_allocation_result.position.x;
-            clut_vram_rect.y = clut_vram_allocation_result.position.y;
+            clut_vram_rect.x = (int16)clut_position.x;
+            clut_vram_rect.y = (int16)clut_position.y;
             clut_vram_rect.w = tim.crect->w;
             clut_vram_rect.h = tim.crect->h;
 
             // Load CLUT to VRAM
             LoadImage(&clut_vram_rect, tim.caddr);
 
-            // TODO: x must be a multiple of 16 units
             asset->load_info->clut_id = (uint16)getClut(clut_vram_rect.x, clut_vram_rect.y); 
         }
 
-        GridAllocator::Result pixels_vram_allocation_result = vram_allocator.allocate(
-            (uint16)tim.prect->w, 
-            (uint16)tim.prect->h
-        );
-
-        TD_ASSERT(pixels_vram_allocation_result.success, "Failed to allocate texture's pixels in VRAM of size %d x %d", tim.prect->w, tim.prect->h);
+        TextureAllocationResult texture_page_allocation = vram_allocator.allocate_texture(asset->mode, (uint8)tim.prect->w, (uint8)tim.prect->h);
 
         RECT pixels_vram_rect;
-        pixels_vram_rect.x = pixels_vram_allocation_result.position.x;
-        pixels_vram_rect.y = pixels_vram_allocation_result.position.y;
+        pixels_vram_rect.x = (int16)texture_page_allocation.position_in_vram.x;
+        pixels_vram_rect.y = (int16)texture_page_allocation.position_in_vram.y;
         pixels_vram_rect.w = tim.prect->w;
         pixels_vram_rect.h = tim.prect->h;
+
+        asset->load_info->texture_page_offset = {
+            (uint8)texture_page_allocation.position_in_texture_page.x ,
+            (uint8)texture_page_allocation.position_in_texture_page.y
+        };
         
         // Load pixels to VRAM
         LoadImage(&pixels_vram_rect, tim.paddr);
 
-        asset->load_info->texture_page_id = (uint16)internal::get_texture_page(tim.mode, 1, (uint16)pixels_vram_rect.x, (uint16)pixels_vram_rect.y);
+        asset->load_info->texture_page_id = internal::get_texture_page(tim.mode, 1, (uint16)pixels_vram_rect.x, (uint16)pixels_vram_rect.y);
 
-        asset->pixels_width = (uint16)tim.prect->w;
-        asset->pixels_height = (uint16)tim.prect->h;
+        asset->pixels_width = (uint8)tim.prect->w;
+        asset->pixels_height = (uint8)tim.prect->h;
+
+        if( asset->mode == TextureMode::Palette4Bit ) {
+            asset->pixels_width <<= 2;
+            asset->load_info->texture_page_offset.x <<= 2;
+        }
+        if( asset->mode == TextureMode::Palette8Bit ) {
+            asset->pixels_width <<= 1;
+            asset->load_info->texture_page_offset.x <<= 1;
+        }
 
         switch(tim.mode) {
             case TIM_TYPE_TRUE_COLOR:
