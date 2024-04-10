@@ -2,7 +2,7 @@
 
 #include <tundra/core/types.hpp>
 #include <tundra/core/vec/vec2.dec.hpp>
-#include <tundra/core/list.hpp>
+#include <tundra/core/list.dec.hpp>
 
 namespace td {
 

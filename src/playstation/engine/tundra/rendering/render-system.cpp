@@ -1,3 +1,4 @@
+#include "tundra/core/grid-allocator.hpp"
 #include "tundra/core/log.hpp"
 #include "tundra/core/mat/mat3x3.dec.hpp"
 #include "tundra/core/types.hpp"
@@ -11,6 +12,7 @@
 #include <inline_c.h>
 
 #include <tundra/core/assert.hpp>
+#include <tundra/core/vec/vec2.hpp>
 #include <tundra/core/mat/mat3x3.hpp>
 #include <tundra/core/fixed.hpp>
 
@@ -27,48 +29,22 @@ namespace td {
         const uint16 SCREEN_WIDTH = 320;
         const uint16 SCREEN_HEIGHT = 240;
 
-        DRAWENV create_draw_env(int32 x, int32 y) {
-            DRAWENV draw_env;
-            SetDefDrawEnv( &draw_env, x, y, SCREEN_WIDTH, SCREEN_HEIGHT);
-            
-	        draw_env.isbg = 1;
-	        // draw_env.dtd = 1; // TODO: Disable dithering
-            draw_env.dtd = 0;
-
-            draw_env.r0 = 155;
-            draw_env.g0 = 155;
-            draw_env.b0 = 155;
-
-            return draw_env;
+        Vec2<uint16> allocate_vram_position(GridAllocator& vram_allocator) {
+            GridAllocator::Result result = vram_allocator.allocate(SCREEN_WIDTH, SCREEN_HEIGHT);
+            TD_ASSERT(result.success, "Failed to allocate VRAM buffer");
+            return (Vec2<uint16>)result.position;
         }
 
-        DISPENV create_display_env(int32 x, int32 y) {
-            DISPENV display_env;
-            SetDefDispEnv( &display_env, x, y, SCREEN_WIDTH, SCREEN_HEIGHT);
-            return display_env;
-        }
-
-        // TODO: This should probably be re-designed
-        DRAWENV draw_settings[2] {
-            create_draw_env(0, 0),
-            create_draw_env(SCREEN_WIDTH, 0)
-        };
-
-        DISPENV display_settings[2] {
-            create_display_env(0, 0),
-            create_display_env(SCREEN_WIDTH, 0)
-        };
-
-        bool screen_triangle_is_in_screen(
-            const DVECTOR* v0, const DVECTOR* v1, const DVECTOR* v2
-        );
+        bool screen_triangle_is_in_screen(const DVECTOR* v0, const DVECTOR* v1, const DVECTOR* v2);
     }
 
     RenderSystem::RenderSystem(
-            uint32 primitive_buffer_size,
-            Vec3<uint8> clear_color
+        GridAllocator& vram_allocator,
+        uint32 primitive_buffer_size,
+        Vec3<uint8> clear_color
     )
-        :   primitive_buffers{primitive_buffer_size, primitive_buffer_size},
+        :   frame_buffer_positions{internal::allocate_vram_position(vram_allocator), internal::allocate_vram_position(vram_allocator)},
+            primitive_buffers{primitive_buffer_size, primitive_buffer_size},
             clear_color(clear_color),
             light_directions(0), // All lights disabled by default
             light_colors(128) // Default all values to some gray
@@ -98,13 +74,20 @@ namespace td {
 
         DoubleBufferId inactive_buffer = active_buffer == DoubleBufferId::First ? DoubleBufferId::Second : DoubleBufferId::First;
 
-        PutDispEnv( &internal::display_settings[(uint8)inactive_buffer] );
+        Vec2<uint16> display_vram_position = frame_buffer_positions[(uint8)inactive_buffer];
+        DISPENV display_env;
+        SetDefDispEnv( &display_env, display_vram_position.x, display_vram_position.y, internal::SCREEN_WIDTH, internal::SCREEN_HEIGHT);
+        PutDispEnv( &display_env );        
 
-        DRAWENV& draw_env_to_activate = internal::draw_settings[(uint8)active_buffer];
-        draw_env_to_activate.r0 = clear_color.x;
-        draw_env_to_activate.g0 = clear_color.y;
-        draw_env_to_activate.b0 = clear_color.z;
-        PutDrawEnv( &draw_env_to_activate );
+        Vec2<uint16> draw_vram_position = frame_buffer_positions[(uint8)active_buffer];
+        DRAWENV draw_env;
+        SetDefDrawEnv(&draw_env, display_vram_position.x, display_vram_position.y, internal::SCREEN_WIDTH, internal::SCREEN_HEIGHT);
+        draw_env.isbg = 1;
+        draw_env.dtd = 0;
+        draw_env.r0 = clear_color.x;
+        draw_env.g0 = clear_color.y;
+        draw_env.b0 = clear_color.z;
+        PutDrawEnv( &draw_env );
 
         // We now submit to the ordering table of the buffer being displayed,
         // while the other one is being drawn to and not displayed

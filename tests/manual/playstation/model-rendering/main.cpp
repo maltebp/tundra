@@ -1,6 +1,3 @@
-#include "tundra/core/math.hpp"
-#include "tundra/core/vector.hpp"
-
 #include <psxgpu.h>
 #include <psxgte.h>
 #include <inline_c.h>
@@ -9,6 +6,8 @@
 #include <tundra/core/log.hpp>
 #include <tundra/core/list.hpp>
 #include <tundra/core/fixed.hpp>
+#include <tundra/core/math.hpp>
+#include <tundra/core/grid-allocator.hpp>
 
 #include <tundra/assets/model/model-asset.hpp>
 #include <tundra/assets/model/model-deserializer.hpp>
@@ -75,6 +74,8 @@ int main() {
 	// Set screen depth (basically FOV control, W/2 works best)
 	gte_SetGeomScreen(320 / 2);
 
+    td::GridAllocator vram_allocator{ 1024, 1024 };
+
     TD_DEBUG_LOG("Loading models..");
     
     td::ModelAsset* fish_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_fish);
@@ -90,7 +91,7 @@ int main() {
     TD_DEBUG_LOG("  Car triangles: %d", car_model->get_total_num_triangles());
 
     TD_DEBUG_LOG("Initializing RenderSystem");
-    td::RenderSystem render_system{PRIMIIVES_BUFFER_SIZE, CLEAR_COLOR};
+    td::RenderSystem render_system{vram_allocator, PRIMIIVES_BUFFER_SIZE, CLEAR_COLOR};
     render_system.set_ambient_light(AMBIENT_COLOR);
     render_system.set_light_direction(0, DIRECTIONAL_LIGHT_DIRECTIONS[0]);
     render_system.set_light_direction(1, DIRECTIONAL_LIGHT_DIRECTIONS[1]);

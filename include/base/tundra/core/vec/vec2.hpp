@@ -3,6 +3,7 @@
 #include <tundra/core/string-util.hpp>
 #include <tundra/core/string.hpp>
 #include <tundra/core/vec/vec3.dec.hpp>
+#include <type_traits>
 
 namespace td {
 
@@ -15,7 +16,12 @@ namespace td {
     // TODO: Only enable this if an implicit conversion exists
     template<typename T>
     template<typename TOther>
-    constexpr Vec2<T>::Vec2(const Vec2<TOther>& other) : x(other.x), y(other.y) { }
+    constexpr Vec2<T>::Vec2(const Vec2<TOther>& other) 
+        requires( 
+                std::is_convertible<TOther, T>::value 
+            && (std::is_unsigned<T>::value == std::is_unsigned<TOther>::value 
+                    || sizeof(T) > sizeof(TOther))) 
+        : x(other.x), y(other.y) { }
 
     template<typename T>
     constexpr Vec2<T>& Vec2<T>::operator=(const Vec2& other) {
@@ -26,13 +32,13 @@ namespace td {
     template<typename T>
     template<typename TOther>
     [[nodiscard]] constexpr Vec2<T>::operator Vec2<TOther>() const {
-        return Vec2{ x, y };
+        return Vec2<TOther>{ static_cast<TOther>(x), static_cast<TOther>(y) };
     }
 
     template<typename T>
     template<typename TOther>
     [[nodiscard]] constexpr Vec2<T>::operator Vec3<TOther>() const {
-        return Vec3{ x, y, TOther{} };
+        return Vec3{ static_cast<TOther>(x), static_cast<TOther>(y), TOther{} };
     }
 
     template<typename T>

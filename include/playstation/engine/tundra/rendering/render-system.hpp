@@ -1,8 +1,11 @@
 #pragma once
 
-#include "tundra/core/fixed.hpp"
-#include "tundra/core/vec/vec3.dec.hpp"
+#include <psxgpu.h>
+
+#include <tundra/core/fixed.hpp>
+#include <tundra/core/vec/vec3.dec.hpp>
 #include <tundra/core/vec/vec3.hpp>
+#include <tundra/core/grid-allocator.fwd.hpp>
 
 #include <tundra/engine/transform-matrix.hpp>
 
@@ -19,6 +22,7 @@ namespace td {
     public:
 
         RenderSystem(
+            GridAllocator& vram_allocator,
             uint32 primitive_buffer_size,
             Vec3<uint8> clear_color
         );
@@ -40,7 +44,9 @@ namespace td {
         void render_camera(Camera* camera);    
 
         void render_model(const TransformMatrix& camera_matrix, const Model* model, OrderingTableLayer& ordering_table_layer);
-
+        
+        const Vec2<uint16> frame_buffer_positions[2];
+        
         DoubleBufferId active_buffer = DoubleBufferId::First;
 
         PrimitiveBuffer primitive_buffers[2];
