@@ -64,7 +64,6 @@ namespace td {
         asset->mode = internal::tim_mode_to_texture_mode(tim.mode);
 
         RECT* prect = tim.prect;
-        TD_DEBUG_LOG("%u, %u, %u, %u", prect->x, prect->y, prect->w, prect->h);
 
         bool has_clut = asset->mode == TextureMode::Palette4Bit || asset->mode == TextureMode::Palette8Bit;
         if( has_clut ) {
