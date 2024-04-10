@@ -16,6 +16,8 @@ set( TD_BASE_HEADERS
     ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-deserializer.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-part-header.hpp
     ${TD_BASE_DIR_INCLUDE}/tundra/assets/model/model-part.hpp
+
+    ${TD_BASE_DIR_INCLUDE}/tundra/assets/texture/texture-asset.hpp
 )
 
 set( TD_BASE_DIR_SRC ${TD_DIR_SRC}/base )

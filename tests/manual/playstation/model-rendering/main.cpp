@@ -9,6 +9,8 @@
 #include <tundra/core/math.hpp>
 #include <tundra/core/grid-allocator.hpp>
 
+#include <tundra/assets/texture/texture-asset.hpp>
+#include <tundra/assets/texture/texture-loader.hpp>
 #include <tundra/assets/model/model-asset.hpp>
 #include <tundra/assets/model/model-deserializer.hpp>
 
@@ -60,6 +62,7 @@ namespace assets {
     extern "C" const uint8_t mdl_sphere[];
     extern "C" const uint8_t mdl_sphere_box[];
     extern "C" const uint8_t mdl_car[];
+    extern "C" const uint8_t tex_ball[];
 }
 
 int main() {
@@ -75,20 +78,6 @@ int main() {
 	gte_SetGeomScreen(320 / 2);
 
     td::GridAllocator vram_allocator{ 1024, 1024 };
-
-    TD_DEBUG_LOG("Loading models..");
-    
-    td::ModelAsset* fish_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_fish);
-    TD_DEBUG_LOG("  Fish triangles: %d", fish_model->get_total_num_triangles());
-
-    td::ModelAsset* sphere_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere);
-    TD_DEBUG_LOG("  Sphere triangles: %d", sphere_model->get_total_num_triangles());
-
-    td::ModelAsset* sphere_box_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere_box);
-    TD_DEBUG_LOG("  Sphere-Box triangles: %d", sphere_model->get_total_num_triangles());
-
-    td::ModelAsset* car_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_car);
-    TD_DEBUG_LOG("  Car triangles: %d", car_model->get_total_num_triangles());
 
     TD_DEBUG_LOG("Initializing RenderSystem");
     td::RenderSystem render_system{vram_allocator, PRIMIIVES_BUFFER_SIZE, CLEAR_COLOR};
@@ -111,6 +100,49 @@ int main() {
     layer_settings.add({LAYER_BACKGROUND, 1});
 
     td::Camera* camera = camera_entity->add_component<td::Camera>(camera_transform, layer_settings);
+
+    TD_DEBUG_LOG("Loading models..");
+    
+    td::ModelAsset* fish_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_fish);
+    TD_DEBUG_LOG("  Fish triangles: %d", fish_model->get_total_num_triangles());
+
+    td::ModelAsset* sphere_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere);
+    TD_DEBUG_LOG("  Sphere triangles: %d", sphere_model->get_total_num_triangles());
+
+    td::ModelAsset* sphere_box_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere_box);
+    TD_DEBUG_LOG("  Sphere-Box triangles: %d", sphere_model->get_total_num_triangles());
+
+    td::ModelAsset* car_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_car);
+    TD_DEBUG_LOG("  Car triangles: %d", car_model->get_total_num_triangles());
+
+    const td::TextureAsset* ball_texture = td::texture_loader::load_texture(vram_allocator, (td::byte*)assets::tex_ball);
+
+    // Print VRAM statistics
+    {
+        td::int32 max_area = 0;
+        const td::GridAllocator::Rect* max_rect = nullptr;
+        for( td::uint32 i = 0; i < vram_allocator.get_free_rects().get_size(); i++ ) {
+            if( vram_allocator.get_free_rects()[i].area > max_area ) {
+                max_area = vram_allocator.get_free_rects()[i].area;
+                max_rect = &vram_allocator.get_free_rects()[i];
+            }
+        }
+
+        td::UFixed32<10> allocated_percentage = td::UFixed32<10>(vram_allocator.get_num_bytes_allocated()) / td::UFixed32<10>(1024U*1024U);
+        allocated_percentage *= 100;
+
+        if( max_rect != nullptr ) {
+            TD_DEBUG_LOG(
+                "VRAM used: %d bytes (%d%%), %d rects remain (biggest is %dx%d)",
+                vram_allocator.get_num_bytes_allocated(), allocated_percentage.get_raw_integer(), vram_allocator.get_free_rects().get_size(), max_rect->size.x, max_rect->size.y);
+        }
+        else {
+            TD_DEBUG_LOG(
+                "VRAM used: %d bytes (%d%%), 0 rects remain",
+                vram_allocator.get_num_bytes_allocated(), allocated_percentage.get_raw_integer());
+        }
+    }
+    
 
     TD_DEBUG_LOG("Initializing rendering data");
 
