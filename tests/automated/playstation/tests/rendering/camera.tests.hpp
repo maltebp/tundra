@@ -32,7 +32,7 @@ namespace td::camera_tests {
 
         Camera* camera = create_test_camera(); 
 
-        Vec3<td::Fixed32<12>> some_position { 1, 1, 1 };
+        Vec3<td::Fixed16<12>> some_position { 1, 1, 1 };
 
         // No change
         {

@@ -10,6 +10,7 @@ namespace td {
     // of a packer really)
     // OPTIMIZATION: This needs a more proper algorithm (right now, it is just for
     // allocating once at start-up)
+    // TODO: Rename to Box or Allocator2D or similar (Grid sounds like it can store fixed sizes only)
     class GridAllocator {
     public:
 
@@ -26,7 +27,8 @@ namespace td {
 
         GridAllocator(uint16 width, uint16 height);
 
-        [[nodiscard]] Result allocate(uint16 width, uint16 height);
+        // The actual byte alignment is 2^power
+        [[nodiscard]] Result allocate(uint16 width, uint16 height, uint16 x_alignment_power = 0, uint16 y_alignment_power = 0);
 
         [[nodiscard]] uint32 get_num_allocations() const;
 
