@@ -347,7 +347,8 @@ namespace td::compute_transform_tests {
 
         const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
         Vec3<td::Fixed32<12>> transformed_position = gte::apply_transform_matrix(camera_matrix, some_position);
-        TD_TEST_ASSERT_EQUAL(transformed_position, some_position);
+        Vec3<td::Fixed32<12>> expected { some_position.x, -some_position.y, some_position.z }; 
+        TD_TEST_ASSERT_EQUAL(transformed_position, expected);
     }
 
     TD_TEST("gte/compute_transform/compute_camera_matrix/translation") {
@@ -359,7 +360,7 @@ namespace td::compute_transform_tests {
 
         const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
         Vec3<td::Fixed32<12>> transformed_position = gte::apply_transform_matrix(camera_matrix, some_position);
-        Vec3<td::Fixed32<12>> expected { -1, 2, 3 };
+        Vec3<td::Fixed32<12>> expected { -1, -2, 3 };
         TD_TEST_ASSERT_EQUAL(transformed_position, expected);
     }
 
@@ -372,7 +373,7 @@ namespace td::compute_transform_tests {
 
         const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
         Vec3<td::Fixed32<12>> transformed_position = gte::apply_transform_matrix(camera_matrix, some_position);
-        Vec3<td::Fixed32<12>> expected { -1, 1, -1 };
+        Vec3<td::Fixed32<12>> expected { -1, -1, -1 };
         TD_TEST_ASSERT_EQUAL(transformed_position, expected);
     }
 

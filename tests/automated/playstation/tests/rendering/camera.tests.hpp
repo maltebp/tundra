@@ -38,7 +38,7 @@ namespace td::camera_tests {
         {
             Vec3<td::Fixed32<12>> translation { 0 };
             Vec3<td::Fixed32<12>> look_at_target { 0, 0, 1}; 
-            Vec3<td::Fixed32<12>> expected = some_position;
+            Vec3<td::Fixed32<12>> expected { some_position.x, -some_position.y, some_position.z };
 
             camera->transform->set_translation(translation);
             camera->look_at(look_at_target);
@@ -52,7 +52,7 @@ namespace td::camera_tests {
         {
             Vec3<td::Fixed32<12>> translation { 0, 0, 2 };
             Vec3<td::Fixed32<12>> look_at_target { 0, 0, 0}; 
-            Vec3<td::Fixed32<12>> expected = { -1, 1, 1};
+            Vec3<td::Fixed32<12>> expected = { -1, -1, 1};
 
             camera->transform->set_translation(translation);
             camera->look_at(look_at_target);
@@ -66,7 +66,7 @@ namespace td::camera_tests {
         {
             Vec3<td::Fixed32<12>> translation { 2, 0, 0 };
             Vec3<td::Fixed32<12>> look_at_target { 0, 0, 0}; 
-            Vec3<td::Fixed32<12>> expected = { 1, 1, 1};
+            Vec3<td::Fixed32<12>> expected = { 1, -1, 1};
 
             camera->transform->set_translation(translation);
             camera->look_at(look_at_target);
