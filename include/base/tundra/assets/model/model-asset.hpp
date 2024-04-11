@@ -68,27 +68,7 @@ namespace td {
 			return total_num_triangles;
 		}
 
-		void set_texture(const TextureAsset* texture) {
-			TD_ASSERT(texture != nullptr, "Texture must not be nullptr");
-			TD_ASSERT(this->num_textures > 0, "ModelAsset does not need any textures");
-			TD_ASSERT(this->num_uvs > 0, "ModelAsset has no UVs");
-			TD_ASSERT(this->uvs != nullptr, "ModelAsset's UV list is nullptr");
-			TD_ASSERT(this->texture == nullptr, "ModelAsset already has is texture set");
-
-			this->texture = texture;
-			
-			for( uint16 i = 0; i < num_uvs; i++ ) {
-				td::Vec2<Fixed16<12>> uv {
-					Fixed16<12>::from_raw_fixed_value(uvs[i].x),
-					Fixed16<12>::from_raw_fixed_value(uvs[i].y),
-				};
-
-				mapped_uvs.add({
-					(uint8)td::round(uv.x * texture->pixels_width).get_raw_integer(),
-					(uint8)td::round(uv.x * texture->pixels_width).get_raw_integer()
-				});
-			}
-		}
+		void map_to_texture(const TextureAsset* texture);
 
 		const char* name = nullptr;
 

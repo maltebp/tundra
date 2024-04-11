@@ -1,4 +1,7 @@
+#include "tundra/assets/texture/texture-asset.hpp"
 #include "tundra/core/math.hpp"
+#include "tundra/rendering/ordering-table-layer.hpp"
+#include "tundra/rendering/primitive-buffer.hpp"
 #include "tundra/rendering/vram-allocator.hpp"
 #include <tundra/rendering/render-system.hpp>
 
@@ -37,7 +40,89 @@ namespace td {
         const uint16 SCREEN_WIDTH = 320;
         const uint16 SCREEN_HEIGHT = 240;
 
+        SVECTOR* vec3_int16_as_svector(const ::Vec3<td::int16>& vec3) {
+            return const_cast<SVECTOR*>(reinterpret_cast<const SVECTOR*>(&vec3));
+        };
+
         bool screen_triangle_is_in_screen(const DVECTOR* v0, const DVECTOR* v1, const DVECTOR* v2);
+
+        template<typename TPrim>
+        void set_prim_color(TPrim* prim, const Vec3<uint8>& color) {
+            prim->r0 = color.x;
+            prim->g0 = color.y;
+            prim->b0 = color.z;
+        }
+
+        template<typename TPrim>
+        void set_prim_color_3(TPrim* prim, const Vec3<uint8>& color) {
+            prim->r0 = color.x;
+            prim->g0 = color.y;
+            prim->b0 = color.z;
+
+            prim->r1 = color.x;
+            prim->g1 = color.y;
+            prim->b1 = color.z;
+
+            prim->r2 = color.x;
+            prim->g2 = color.y;
+            prim->b2 = color.z;
+        }
+
+        template<typename TPrim>
+        void set_prim_3_vertices(TPrim* prim, const DVECTOR& v0, const DVECTOR& v1, const DVECTOR v2) {
+            *(DVECTOR*)(&prim->x0) = v0;
+            *(DVECTOR*)(&prim->x1) = v1;
+            *(DVECTOR*)(&prim->x2) = v2;
+        }
+
+        void compute_lit_color(uint8_t& outpout_color, const ::Vec3<td::int16>& normal) {
+            gte_ldrgb( &outpout_color );
+
+            SVECTOR* raw_normal = vec3_int16_as_svector(normal);
+            gte_ldv0( raw_normal );
+            
+            // Compute color
+            gte_nccs();
+
+            // Retrieve color
+            gte_strgb( &outpout_color );    
+        };
+
+        template<typename TPrim>
+        inline void set_texture_3(TPrim* prim, const TextureAsset* texture, const td::Vec2<uint8>& uv0, const td::Vec2<uint8>& uv1, const td::Vec2<uint8>& uv2) {
+            prim->tpage = texture->load_info->texture_page_id;
+            prim->clut = texture->load_info->clut_id;
+
+            prim->u0 = uv0.x;
+            prim->v0 = uv0.y;
+
+            prim->u1 = uv1.x;
+            prim->v1 = uv1.y;
+
+            prim->u2 = uv2.x;
+            prim->v2 = uv2.y;
+        }
+
+        template<typename TPrim>
+        inline void initialize_prim(TPrim& prim);
+
+        template<> void initialize_prim<POLY_F3>(POLY_F3& prim) { setPolyF3(&prim); }
+        template<> void initialize_prim<POLY_FT3>(POLY_FT3& prim) { setPolyFT3(&prim); }
+        template<> void initialize_prim<POLY_G3>(POLY_G3& prim) { setPolyG3(&prim); }
+        template<> void initialize_prim<POLY_GT3>(POLY_GT3& prim) { setPolyGT3(&prim); }
+
+        template<typename TPrim>
+        TPrim* allocate_prim(PrimitiveBuffer& primitive_buffer, OrderingTableLayer& ordering_table_layer, uint16 ordering_table_index) {
+            TPrim* prim = (TPrim*)primitive_buffer.allocate(sizeof(TPrim));
+            if( prim == nullptr ) {
+                TD_DEBUG_LOG("Primitive is out of memory when allocating prim");
+                return nullptr;
+            }
+            initialize_prim<TPrim>(*prim);
+            ordering_table_layer.add_node((OrderingTableNode*)prim, ordering_table_index);
+            return prim;
+        }
+
     }
 
     RenderSystem::RenderSystem(
@@ -346,85 +431,86 @@ namespace td {
                     //TD_DEBUG_LOG("Not in screen");
                     continue;
                 }        
+                
+                if( model_part->texture_index == 0 ) {
+                    if( !model_part->is_smooth_shaded ) {
 
-                if( !model_part->is_smooth_shaded ) {
+                        POLY_F3* prim = internal::allocate_prim<POLY_F3>(
+                            primitive_buffers[(uint8)active_buffer],
+                            ordering_table_layer,
+                            ordering_table_index_16);
 
-                    POLY_F3* triangle_prim = (POLY_F3*)primitive_buffers[(uint8)active_buffer].allocate(sizeof(POLY_F3));
-                    if( triangle_prim == nullptr ) {
-                        TD_DEBUG_LOG("Not enough space for flat-shaded triangle");
-                        // Not enough space for triangle
-                        return;
+                        if( prim == nullptr) return;
+
+                        internal::set_prim_3_vertices(prim, v0, v1, v2);
+                        internal::set_prim_color(prim, model->color);
+
+                        internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
                     }
+                    else
+                    {
+                        POLY_G3* prim = internal::allocate_prim<POLY_G3>(
+                            primitive_buffers[(uint8)active_buffer],
+                            ordering_table_layer,
+                            ordering_table_index_16);
 
-                    setPolyF3(triangle_prim);
-                    ordering_table_layer.add_node((OrderingTableNode*)triangle_prim, ordering_table_index_16);
+                        if( prim == nullptr) return;
 
-                    triangle_prim->r0 = model->color.x;
-                    triangle_prim->g0 = model->color.y;
-                    triangle_prim->b0 = model->color.z;
+                        internal::set_prim_3_vertices(prim, v0, v1, v2);
+                        internal::set_prim_color_3(prim, model->color);
 
-                    *(DVECTOR*)(&triangle_prim->x0) = v0;
-                    *(DVECTOR*)(&triangle_prim->x1) = v1;
-                    *(DVECTOR*)(&triangle_prim->x2) = v2;
-
-                    gte_ldrgb( &triangle_prim->r0 );
-                    
-                    // TODO: Use the single normal instead of the first, when we only have 1 normal per face
-                    SVECTOR* raw_normal = vec3_int16_as_svector(model->asset.normals[model_part->normal_indices[i].x - 1]);
-                    gte_ldv0( raw_normal );
-                    
-                    /* Normal Color Single */
-                    gte_nccs();
-
-                    gte_strgb( &triangle_prim->r0 );
-                }
-                else
-                {
-                    POLY_G3* triangle_prim = (POLY_G3*)primitive_buffers[(uint8)active_buffer].allocate(sizeof(POLY_G3));
-                    if( triangle_prim == nullptr ) {
-                        TD_DEBUG_LOG("Not enough space");
-                        // Not enough space for triangle
-                        return;
+                        internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
+                        internal::compute_lit_color(prim->r1, model->asset.normals[model_part->normal_indices[i].y - 1]);
+                        internal::compute_lit_color(prim->r2, model->asset.normals[model_part->normal_indices[i].z - 1]);
                     }
-                    setPolyG3(triangle_prim);
-                    ordering_table_layer.add_node((OrderingTableNode*)triangle_prim, ordering_table_index_16);
-
-                    triangle_prim->r0 = model->color.x;
-                    triangle_prim->g0 = model->color.y;
-                    triangle_prim->b0 = model->color.z;
-
-                    triangle_prim->r1 = model->color.x;
-                    triangle_prim->g1 = model->color.y;
-                    triangle_prim->b1 = model->color.z;
-
-                    triangle_prim->r2 = model->color.x;
-                    triangle_prim->g2 = model->color.y;
-                    triangle_prim->b2 = model->color.z;
-
-                    // Note: doing this cast seem necessary, because the raw coordinates (x0, y0 etc)
-                    // are unsigned, but according to nocash specs, screen coordinates are signed.
-                    *(DVECTOR*)(&triangle_prim->x0) = v0;
-                    *(DVECTOR*)(&triangle_prim->x1) = v1;
-                    *(DVECTOR*)(&triangle_prim->x2) = v2;
-
-                    auto compute_color = [&vec3_int16_as_svector](uint8_t& color, const ::Vec3<td::int16>& normal) {
-                        gte_ldrgb( &color );
-
-                        SVECTOR* raw_normal = vec3_int16_as_svector(normal);
-
-                        // Load vertex normal            
-                        gte_ldv0( raw_normal );
-                        
-                        gte_nccs();
-
-                        // Retrieve color
-                        gte_strgb( &color );    
-                    };
-
-                    compute_color(triangle_prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
-                    compute_color(triangle_prim->r1, model->asset.normals[model_part->normal_indices[i].y - 1]);
-                    compute_color(triangle_prim->r2, model->asset.normals[model_part->normal_indices[i].z - 1]);
                 }
+                else {
+                    if( !model_part->is_smooth_shaded ) {
+
+                        POLY_FT3* prim = internal::allocate_prim<POLY_FT3>(
+                            primitive_buffers[(uint8)active_buffer],
+                            ordering_table_layer,
+                            ordering_table_index_16);
+
+                        if( prim == nullptr) return;
+
+                        internal::set_texture_3(
+                            prim, model->asset.texture, 
+                            model->asset.mapped_uvs[model_part->uv_indices[i].x - 1],
+                            model->asset.mapped_uvs[model_part->uv_indices[i].y - 1],
+                            model->asset.mapped_uvs[model_part->uv_indices[i].z - 1]
+                        );
+
+                        internal::set_prim_3_vertices(prim, v0, v1, v2);
+                        internal::set_prim_color(prim, model->color);
+
+                        internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
+                    }
+                    else
+                    {
+                        POLY_GT3* prim = internal::allocate_prim<POLY_GT3>(
+                            primitive_buffers[(uint8)active_buffer],
+                            ordering_table_layer,
+                            ordering_table_index_16);
+
+                        if( prim == nullptr) return;
+
+                        internal::set_texture_3(
+                            prim, model->asset.texture, 
+                            model->asset.mapped_uvs[model_part->uv_indices[i].x - 1],
+                            model->asset.mapped_uvs[model_part->uv_indices[i].y - 1],
+                            model->asset.mapped_uvs[model_part->uv_indices[i].z - 1]
+                        );
+
+                        internal::set_prim_3_vertices(prim, v0, v1, v2);
+                        internal::set_prim_color_3(prim, model->color);
+
+                        internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
+                        internal::compute_lit_color(prim->r1, model->asset.normals[model_part->normal_indices[i].y - 1]);
+                        internal::compute_lit_color(prim->r2, model->asset.normals[model_part->normal_indices[i].z - 1]);
+                    }
+                }
+                
             }
         }
     }

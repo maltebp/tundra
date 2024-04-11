@@ -28,7 +28,6 @@ set( TD_BASE_SOURCES
     ${TD_BASE_DIR_SRC}/tundra/core/string-util.cpp
     ${TD_BASE_DIR_SRC}/tundra/core/grid-allocator.cpp
 
-    ${TD_BASE_DIR_SRC}/tundra/assets/model/model-asset.cpp
     ${TD_BASE_DIR_SRC}/tundra/assets/model/model-deserializer.cpp
 
     ${TD_BASE_DIR_SRC}/tundra/engine/entity-system/component-meta-data.cpp

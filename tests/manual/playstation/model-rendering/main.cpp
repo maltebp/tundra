@@ -119,7 +119,7 @@ int main() {
     td::ModelAsset* car_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_car);
     TD_DEBUG_LOG("  Car triangles: %d", car_model->get_total_num_triangles());
     const td::TextureAsset* car_texture_1 = td::texture_loader::load_texture(vram_allocator, (td::byte*)assets::tex_mdl_car_1);
-    car_model->set_texture(car_texture_1);
+        car_model->map_to_texture(car_texture_1);
 
     const td::TextureAsset* ball_texture = td::texture_loader::load_texture(vram_allocator, (td::byte*)assets::tex_ball);
     const td::TextureAsset* dumbass_texture = td::texture_loader::load_texture(vram_allocator, (td::byte*)assets::tex_dumbass);

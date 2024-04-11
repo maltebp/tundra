@@ -118,8 +118,9 @@ namespace td {
     {
         using StoreType = TFixed::Type;
         constexpr StoreType FRAC = StoreType(1) << TFixed::NUM_FRACTION_BITS;
-        StoreType value = x.get_raw_value() / (FRAC / 2);
-        return TFixed::from_raw_fixed_value(((value / 2) + (value % 2)) * FRAC);
+        StoreType rounded_raw_value = x.get_raw_value() / (FRAC / 2);
+        rounded_raw_value = (StoreType)(((rounded_raw_value / 2) + (rounded_raw_value % 2)) * FRAC);
+        return TFixed::from_raw_fixed_value(rounded_raw_value);
     }
 
     // Returns radians from number of revolutions (1 is 2 PI)
