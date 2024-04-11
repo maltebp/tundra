@@ -151,5 +151,11 @@ namespace td {
             to_string(v.z).get_c_string()
         );
     }
+
+    template<>
+    String to_string<char>(const Vec3<char>& v);
+
+    template<>
+    String to_string<unsigned char>(const Vec3<unsigned char>& v);
     
 }

@@ -46,6 +46,7 @@ namespace td::ac {
 	};
 
 	std::tuple<byte*, uint32> ModelSerializer::serialize(const ModelAsset* model) {
+		TD_ASSERT(model->num_textures != 0 || model->num_uvs == 0, "Model has UVs but no texture");
 
 		ModelFileHeader file_header{};
 		file_header.type_name[0] = 't';
@@ -65,18 +66,18 @@ namespace td::ac {
 
 		uint32 size = 0;
 		size += sizeof(file_header);
-		size += model->num_vertices * sizeof(Vec3<int16>);
-		size += model->num_normals * sizeof(Vec3<int16>);
-		size += model->num_uvs * sizeof(Vec2<int16>);
+		size += model->num_vertices * sizeof(::Vec3<int16>);
+		size += model->num_normals * sizeof(::Vec3<int16>);
+		size += model->num_uvs * sizeof(::Vec2<int16>);
 
 		for( int i = 0; i < model->num_parts; i++ ) {
 			const ModelPart* part = model->model_parts[i];
 			size += sizeof(ModelFilePartHeader);
-			size += part->num_triangles * sizeof(Vec3<uint16>);
-			size += part->num_triangles * sizeof(Vec3<uint16>);
+			size += part->num_triangles * sizeof(::Vec3<uint16>);
+			size += part->num_triangles * sizeof(::Vec3<uint16>);
 
 			if( part->texture_index != 0 ) {
-				size += part->num_triangles * sizeof(Vec3<uint16>);
+				size += part->num_triangles * sizeof(::Vec3<uint16>);
 			}
 		}
 

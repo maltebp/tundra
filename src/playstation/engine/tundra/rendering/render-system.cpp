@@ -1,5 +1,6 @@
 #include "tundra/assets/texture/texture-asset.hpp"
 #include "tundra/core/math.hpp"
+#include "tundra/core/vec/vec3.dec.hpp"
 #include "tundra/rendering/ordering-table-layer.hpp"
 #include "tundra/rendering/primitive-buffer.hpp"
 #include "tundra/rendering/vram-allocator.hpp"
@@ -364,6 +365,26 @@ namespace td {
         for( int part_index = 0; part_index < model->asset.num_parts; part_index++ ) {
 
             td::ModelPart* model_part = model->asset.model_parts[part_index];
+
+            Vec3<uint8> part_real_color = td::Vec3<uint8>{model_part->color.x, model_part->color.y, model_part->color.z};
+            if( model->color != Vec3<uint8>{255} ) {
+                //ZTD_DEBUG_LOG("Start color %s", part_real_color);
+
+                Vec3<UFixed32<12>> color_multiplier {
+                    UFixed32<12>::from_raw_fixed_value((uint16)(UFixed32<12>{model->color.x}.get_raw_value() >> 8)),
+                    UFixed32<12>::from_raw_fixed_value((uint16)(UFixed32<12>{model->color.y}.get_raw_value() >> 8)),
+                    UFixed32<12>::from_raw_fixed_value((uint16)(UFixed32<12>{model->color.z}.get_raw_value() >> 8))
+                };
+
+                part_real_color = {
+                    (uint8)((color_multiplier.x * part_real_color.x).get_raw_integer()),
+                    (uint8)((color_multiplier.y * part_real_color.y).get_raw_integer()),
+                    (uint8)((color_multiplier.z * part_real_color.z).get_raw_integer())
+                };
+
+                // TD_DEBUG_LOG("Real color %s", part_real_color);
+            }
+
             for( int i = 0; i < model_part->num_triangles; i++ ) {
 
                 auto vec3_int16_as_svector = [](const ::Vec3<td::int16>& vec3) {
@@ -443,7 +464,7 @@ namespace td {
                         if( prim == nullptr) return;
 
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
-                        internal::set_prim_color(prim, model->color);
+                        internal::set_prim_color(prim, part_real_color);
 
                         internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
                     }
@@ -457,7 +478,7 @@ namespace td {
                         if( prim == nullptr) return;
 
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
-                        internal::set_prim_color_3(prim, model->color);
+                        internal::set_prim_color_3(prim, part_real_color);
 
                         internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
                         internal::compute_lit_color(prim->r1, model->asset.normals[model_part->normal_indices[i].y - 1]);
@@ -482,7 +503,7 @@ namespace td {
                         );
 
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
-                        internal::set_prim_color(prim, model->color);
+                        internal::set_prim_color(prim, part_real_color);
 
                         internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
                     }
@@ -503,7 +524,7 @@ namespace td {
                         );
 
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
-                        internal::set_prim_color_3(prim, model->color);
+                        internal::set_prim_color_3(prim, part_real_color);
 
                         internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
                         internal::compute_lit_color(prim->r1, model->asset.normals[model_part->normal_indices[i].y - 1]);

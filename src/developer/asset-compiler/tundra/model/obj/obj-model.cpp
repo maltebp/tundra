@@ -14,7 +14,7 @@ namespace td::ac {
 
 		ObjFace triangulated_face;
 
-		const Int3 first_indices = face.indices[0];
+			const Int3 first_indices = face.indices[0];
 		Int3 previous_indices = face.indices[1];
 		for( int i = 2; i < face.indices.size(); i++ ) {
 			triangulated_face.indices.push_back(first_indices);
@@ -72,10 +72,18 @@ namespace td::ac {
 			};
 		}
 
+		std::set<std::string> unique_textures;
+		for( auto& [material, smoothing_groups] : triangles_grouped_by_material ) {
+			if( material != nullptr && !material->diffuse_texture_path.empty() ) {
+				unique_textures.insert(material->diffuse_texture_path.string());
+			}
+		}
+
+		model_asset->num_textures = (uint8)unique_textures.size();
+
 		std::vector<ModelPart*> model_parts;
 
 		uint8 num_non_nullptr_materials = 0;
-		uint8 material_index = 1;
 		for( auto& [material, smoothing_groups] : triangles_grouped_by_material ) {
 			for( auto& [is_smooth_shaded, triangles] : smoothing_groups ) {
 				if( triangles.size() == 0 ) continue;
@@ -83,8 +91,20 @@ namespace td::ac {
 				ModelPart* model_part = new ModelPart();
 				
 				model_part->is_smooth_shaded = is_smooth_shaded;
+				if( material != nullptr ) {
+					model_part->color = {
+						(uint8)(material->diffuse_color.x * 255),
+						(uint8)(material->diffuse_color.y * 255),
+						(uint8)(material->diffuse_color.z * 255)
+					};
 
-				if( material != nullptr ) model_part->texture_index = material_index;
+					if( !material->diffuse_texture_path.empty() ) {
+						auto it = unique_textures.find(material->diffuse_texture_path.string());
+						TD_ASSERT(it != unique_textures.end(), "Part's texture %s does not exist in model", material->diffuse_texture_path.string().c_str());
+						size_t texture_index = std::distance(unique_textures.begin(), it);
+						model_part->texture_index = (uint8)(texture_index + 1);
+					}
+				}
 
 				model_part->num_triangles = (uint16)triangles.size();
 				model_part->vertex_indices = new ::Vec3<uint16>[model_part->num_triangles];
@@ -118,11 +138,8 @@ namespace td::ac {
 
 			if( material != nullptr ) {
 				num_non_nullptr_materials++;
-				material_index++;
 			}
 		}
-
-		model_asset->num_textures = num_non_nullptr_materials;
 
 		model_asset->num_parts = (uint16)model_parts.size();
 		model_asset->model_parts = new ModelPart*[model_asset->num_parts];

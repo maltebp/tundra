@@ -107,14 +107,14 @@ int main() {
 
     TD_DEBUG_LOG("Loading models..");
     
-    // td::ModelAsset* fish_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_fish);
-    // TD_DEBUG_LOG("  Fish triangles: %d", fish_model->get_total_num_triangles());
+    td::ModelAsset* fish_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_fish);
+    TD_DEBUG_LOG("  Fish triangles: %d", fish_model->get_total_num_triangles());
 
-    // td::ModelAsset* sphere_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere);
-    // TD_DEBUG_LOG("  Sphere triangles: %d", sphere_model->get_total_num_triangles());
+    td::ModelAsset* sphere_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere);
+    TD_DEBUG_LOG("  Sphere triangles: %d", sphere_model->get_total_num_triangles());
 
-    // td::ModelAsset* sphere_box_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere_box);
-    // TD_DEBUG_LOG("  Sphere-Box triangles: %d", sphere_model->get_total_num_triangles());
+    td::ModelAsset* sphere_box_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere_box);
+    TD_DEBUG_LOG("  Sphere-Box triangles: %d", sphere_model->get_total_num_triangles());
 
     td::ModelAsset* car_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_car);
     TD_DEBUG_LOG("  Car triangles: %d", car_model->get_total_num_triangles());
@@ -175,44 +175,44 @@ int main() {
                 model_rotation += td::to_fixed(0.15);
             }
             else if( model_x == 1 && model_z == 1 ) {
-                // td::Entity* sphere_box = td::Entity::create();
-                // td::StaticTransform* transform = sphere_box->add_component<td::StaticTransform>(
-                //     td::gte::compute_world_matrix(
-                //         td::Vec3<td::Fixed32<12>>{ td::Fixed32<12>{td::to_fixed(0.2)} },
-                //         td::Vec3<td::Fixed16<12>>{ 0, 0,  0},
-                //         td::Vec3<td::Fixed32<12>>{ model_distance * model_x, 0, model_distance * model_z }
-                //     )
-                // );
+                td::Entity* sphere_box = td::Entity::create();
+                td::StaticTransform* transform = sphere_box->add_component<td::StaticTransform>(
+                    td::gte::compute_world_matrix(
+                        td::Vec3<td::Fixed32<12>>{ td::Fixed32<12>{td::to_fixed(0.2)} },
+                        td::Vec3<td::Fixed16<12>>{ 0, 0,  0},
+                        td::Vec3<td::Fixed32<12>>{ model_distance * model_x, 0, model_distance * model_z }
+                    )
+                );
 
-                // sphere_box->add_component<td::Model>(*sphere_box_model, LAYER_MIDDLE, transform);
-                // model_rotation += td::to_fixed(0.15);
+                sphere_box->add_component<td::Model>(*sphere_box_model, LAYER_MIDDLE, transform);
+                model_rotation += td::to_fixed(0.15);
             }
             else if( (model_x == -1 || model_x == 1) && (model_z == -1 || model_z == 1) ) {
-                // td::Entity* sphere = td::Entity::create();
-                // td::StaticTransform* transform = sphere->add_component<td::StaticTransform>(
-                //     td::gte::compute_world_matrix(
-                //         td::Vec3<td::Fixed32<12>>{ td::Fixed32<12>{td::to_fixed(0.5)} },
-                //         td::Vec3<td::Fixed16<12>>{ 0, model_rotation,  0},
-                //         td::Vec3<td::Fixed32<12>>{ model_distance * model_x, 0, model_distance * model_z }
-                //     )
-                // );
+                td::Entity* sphere = td::Entity::create();
+                td::StaticTransform* transform = sphere->add_component<td::StaticTransform>(
+                    td::gte::compute_world_matrix(
+                        td::Vec3<td::Fixed32<12>>{ td::Fixed32<12>{td::to_fixed(0.5)} },
+                        td::Vec3<td::Fixed16<12>>{ 0, model_rotation,  0},
+                        td::Vec3<td::Fixed32<12>>{ model_distance * model_x, 0, model_distance * model_z }
+                    )
+                );
 
-                // sphere->add_component<td::Model>(*sphere_model, LAYER_MIDDLE, transform);
-                // model_rotation += td::to_fixed(0.15);
+                sphere->add_component<td::Model>(*sphere_model, LAYER_MIDDLE, transform);
+                model_rotation += td::to_fixed(0.15);
             }
             else {
-                // td::Entity* fish = td::Entity::create();
-                // td::StaticTransform* transform = fish->add_component<td::StaticTransform>(
-                //     td::gte::compute_world_matrix(
-                //         td::Vec3<td::Fixed32<12>>{ td::to_fixed(0.1) },
-                //         td::Vec3<td::Fixed16<12>>{ 0, model_rotation,  0},
-                //         td::Vec3<td::Fixed32<12>>{ model_distance * model_x, 0, model_distance * model_z }
-                //     )
-                // );
+                td::Entity* fish = td::Entity::create();
+                td::StaticTransform* transform = fish->add_component<td::StaticTransform>(
+                    td::gte::compute_world_matrix(
+                        td::Vec3<td::Fixed32<12>>{ td::to_fixed(0.1) },
+                        td::Vec3<td::Fixed16<12>>{ 0, model_rotation,  0},
+                        td::Vec3<td::Fixed32<12>>{ model_distance * model_x, 0, model_distance * model_z }
+                    )
+                );
 
-                // td::Model* model = fish->add_component<td::Model>(*fish_model, LAYER_MIDDLE, transform);
-                // model->color = { 100, 100, 255 };
-                // model_rotation += td::to_fixed(0.15);
+                td::Model* model = fish->add_component<td::Model>(*fish_model, LAYER_MIDDLE, transform);
+                model->color = { 100, 100, 255 };
+                model_rotation += td::to_fixed(0.15);
             }
         }   
     }
