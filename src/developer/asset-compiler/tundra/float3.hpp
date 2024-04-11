@@ -11,6 +11,10 @@ namespace td {
 
         constexpr Float3(float x, float y, float z) : x(x), y(y), z(z) { }
 
+        constexpr bool operator==(const Float3& other) const {
+            return x == other.x && y == other.y && z == other.z;
+        }
+
         float x = 0;
         float y = 0;
         float z = 0;

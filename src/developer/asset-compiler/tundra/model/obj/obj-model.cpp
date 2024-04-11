@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 
+#include <tundra/core/assert.hpp>
 #include <tundra/assets/model/model-asset.hpp>
 #include <tundra/assets/model/model-part.hpp>
 
@@ -42,7 +43,7 @@ namespace td::ac {
 		ModelAsset* model_asset = new ModelAsset();
 
 		model_asset->num_vertices = (uint16)this->vertices.size();
-		model_asset->vertices = new Vec3<int16>[model_asset->num_vertices];
+		model_asset->vertices = new ::Vec3<int16>[model_asset->num_vertices];
 		for( int i = 0; i < model_asset->num_vertices; i++ ) {
 			model_asset->vertices[i] = {
 				(int16)(FIXED_4_12_ONE * (this->vertices[i].x)),
@@ -52,7 +53,7 @@ namespace td::ac {
 		}
 
 		model_asset->num_normals = (uint16)this->normals.size();
-		model_asset->normals = new Vec3<int16>[model_asset->num_normals];
+		model_asset->normals = new ::Vec3<int16>[model_asset->num_normals];
 		for( int i = 0; i < model_asset->num_normals; i++ ) {
 			model_asset->normals[i] = {
 				(int16)(FIXED_4_12_ONE * (this->normals[i].x)),
@@ -60,24 +61,35 @@ namespace td::ac {
 				(int16)(FIXED_4_12_ONE * (this->normals[i].z))
 			};
 		}
+		
 
-		model_asset->num_materials = triangles_grouped_by_material.size();
+		model_asset->num_uvs = (uint16)this->uvs.size();
+		model_asset->uvs = new ::Vec2<int16>[model_asset->num_normals];
+		for( int i = 0; i < model_asset->num_uvs; i++ ) {
+			model_asset->uvs[i] = {
+				(int16)(FIXED_4_12_ONE * (this->uvs[i].x)),
+				(int16)(FIXED_4_12_ONE * (this->uvs[i].y))
+			};
+		}
 
 		std::vector<ModelPart*> model_parts;
 
+		uint8 num_non_nullptr_materials = 0;
+		uint8 material_index = 1;
 		for( auto& [material, smoothing_groups] : triangles_grouped_by_material ) {
-			int material_index = 1;
 			for( auto& [is_smooth_shaded, triangles] : smoothing_groups ) {
 				if( triangles.size() == 0 ) continue;
 
 				ModelPart* model_part = new ModelPart();
 				
 				model_part->is_smooth_shaded = is_smooth_shaded;
-				model_part->material_index = material_index;
+
+				if( material != nullptr ) model_part->texture_index = material_index;
 
 				model_part->num_triangles = (uint16)triangles.size();
-				model_part->vertex_indices = new Vec3<uint16>[model_part->num_triangles];
-				model_part->normal_indices = new Vec3<uint16>[model_part->num_triangles];
+				model_part->vertex_indices = new ::Vec3<uint16>[model_part->num_triangles];
+				model_part->normal_indices = new ::Vec3<uint16>[model_part->num_triangles];
+				model_part->uv_indices = model_part->texture_index != 0 ? new ::Vec3<uint16>[model_part->num_triangles] : nullptr;
 
 				for( int i = 0; i < model_part->num_triangles; i++ ) {
 					model_part->vertex_indices[i] = {
@@ -91,13 +103,26 @@ namespace td::ac {
 						(uint16)(triangles[i].indices[1].z),
 						(uint16)(triangles[i].indices[2].z)
 					};
+
+					if( model_part->texture_index != 0 ) {
+						model_part->uv_indices[i] = {
+							(uint16)(triangles[i].indices[0].y),
+							(uint16)(triangles[i].indices[1].y),
+							(uint16)(triangles[i].indices[2].y)
+						};
+					}
 				}
 
 				model_parts.push_back(model_part);
 			}
 
-			material_index++;
+			if( material != nullptr ) {
+				num_non_nullptr_materials++;
+				material_index++;
+			}
 		}
+
+		model_asset->num_textures = num_non_nullptr_materials;
 
 		model_asset->num_parts = (uint16)model_parts.size();
 		model_asset->model_parts = new ModelPart*[model_asset->num_parts];

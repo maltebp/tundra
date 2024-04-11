@@ -24,7 +24,9 @@ namespace td {
 		// uint32 size;
 		uint16 num_vertices;
 		uint16 num_normals;
-		uint16 num_parts;
+		uint16 num_uvs;
+		uint8 num_textures;
+		uint8 num_parts;
 	};
 
 }

@@ -66,17 +66,28 @@ namespace {
     }
 }
 
+
+template<typename T>
+static inline std::ostream& operator<<(std::ostream& stream, const ::Vec3<T> f3) {
+    return stream << "(" << f3.x << ", " << f3.y << ", " << f3.z << ")";
+}
+
+template<>
+static inline std::ostream& operator<< <td::uint8>(std::ostream& stream, const ::Vec3<td::uint8> f3) {
+    return stream << "(" << (td::uint32)f3.x << ", " << (td::uint32)f3.y << ", " << (td::uint32)f3.z << ")";
+}
+
+
 int main(int argc, const char* argv[]) try {
 
     Arguments parsed_args = parse_args(argc, argv);
 
-    std::cout << "Compiling asset: '" << parsed_args.input_file_path << "'" << std::endl;
+    std::cout << "Compiling asset: " << parsed_args.input_file_path << std::endl;
 
     td::ac::ObjParser obj_parser;
     td::ac::ObjModel* obj_model = obj_parser.parse(parsed_args.input_file_path);
 
-    std::cout << "Content: " << std::endl;
-
+    /*std::cout << "Content: " << std::endl;
     std::cout << std::endl << "Vertices:" << std::endl;
     for( const td::Float3 vertex : obj_model->vertices ) {
         std::cout << '\t' << vertex << std::endl;
@@ -85,34 +96,45 @@ int main(int argc, const char* argv[]) try {
     std::cout << std::endl << "Normals:" << std::endl;
     for( const td::Float3 normal : obj_model->normals ) {
         std::cout << '\t' << normal << std::endl;
-    }
-
-    std::cout << "Finished parsing model (vertices: " 
-        << obj_model->vertices.size() 
-        << ", normals: " << obj_model->normals.size() 
-        << ", objects: " << obj_model->obj_objects.size() 
+    }*/
+    
+    std::cout << "Finished parsing model (vertices: "
+        << obj_model->vertices.size()
+        << ", normals: " << obj_model->normals.size()
+        << ", uvs: " << obj_model->uvs.size()
+        << ", objects: " << obj_model->obj_objects.size()
+        << ", materials: " << obj_model->materials.size()
         << ")" << std::endl;
 
+    std::cout << "  Materials:" << std::endl;
+    for( td::ac::ObjMaterial* material: obj_model->materials ) {
+        std::cout << "    " << material->name << ": color = " << material->diffuse_color << ", texture = " << material->diffuse_texture_path << std::endl;
+    }
+
+    std::cout << "  Objects:" << std::endl;
     for( td::ac::ObjObject* object : obj_model->obj_objects ) {
-        std::cout << "\tObject: " << object->name << " (parts: " << object->parts.size() << ", total faces: " << object->num_total_faces() << ")" << std::endl;
+        std::cout << "    " << object->name << " (parts: " << object->parts.size() << ", total faces: " << object->num_total_faces() << ")" << std::endl;
         for( td::ac::ObjObjectPart* part : object->parts ) {
-            std::cout << "\t\tPart: material = " << part->material_name << ", faces = " << part->faces.size() << ", smooth = " << (part->is_smooth_shaded ? "true" : "false") << std::endl;
+            std::cout << "      Part: material = " << (part->material == nullptr ? "none" : part->material->name) << ", faces = " << part->faces.size() << ", smooth = " << (part->is_smooth_shaded ? "true" : "false") << std::endl;
         }
     }
 
-    std::cout << "Converting to Model Asser..." << std::endl;
+    std::cout << std::endl;
+    std::cout << "Converting to Model Asset..." << std::endl;
     td::ModelAsset* model_asset = obj_model->to_model_asset();
-
     std::cout << "Finished parsing Model Asset" << std::endl;
     std::cout << "  Vertices: " << model_asset->num_vertices << std::endl;
     std::cout << "  Normals: " << model_asset->num_normals << std::endl;
+    std::cout << "  UVs: " << model_asset->num_uvs << std::endl;
+    std::cout << "  Textures: " << (td::uint32)model_asset->num_textures << std::endl;
     std::cout << "  Parts: " << model_asset->num_parts << std::endl;
+
     for( int i = 0; i < model_asset->num_parts; i++ ) {
         td::ModelPart* part = model_asset->model_parts[i];
-        std::cout << "    Triangles: " << part->num_triangles << ", Smooth = " << part->is_smooth_shaded << std::endl;
+        std::cout << "    Triangles: " << part->num_triangles << ", Color = " << part->color << ", Texture = " << (td::uint32)part->texture_index << ", Smooth = " << part->is_smooth_shaded << std::endl;
     }
 
-    std::cout << "Vertices: " << std::endl;
+    /*std::cout << "Vertices: " << std::endl;
     for( int i = 0; i < model_asset->num_vertices; i++ ) {
         Vec3<td::int16> vertex = model_asset->vertices[i];
         td::Vec3<td::Fixed16<12>> v{ td::Fixed16<12>::from_raw_fixed_value(vertex.x), td::Fixed16<12>::from_raw_fixed_value(vertex.y), td::Fixed16<12>::from_raw_fixed_value(vertex.z) };
@@ -125,9 +147,10 @@ int main(int argc, const char* argv[]) try {
             Vec3<td::uint16> vertex_indices = model_asset->model_parts[i]->vertex_indices[j];
             std::cout << "  " << vertex_indices.x << ", " << vertex_indices.y << ", " << vertex_indices.z << std::endl;
         }
-    }
-
-    std::cout << "Testing equality operator...";
+    }*/
+       
+    std::cout << std::endl;
+    std::cout << "Validating...";
     TD_ASSERT((*model_asset) == (*model_asset), "ModelAsset operator== failed (object is not equal to itself)");
     std::cout << "Done";
 

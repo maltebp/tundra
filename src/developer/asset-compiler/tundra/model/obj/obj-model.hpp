@@ -19,7 +19,11 @@ namespace td::ac {
 
         std::vector<Float3> normals;
 
+        std::vector<Float2> uvs;
+
         std::vector<ObjObject*> obj_objects;
+
+        std::set<ObjMaterial*> materials;
 
         ModelAsset* to_model_asset() const;
 

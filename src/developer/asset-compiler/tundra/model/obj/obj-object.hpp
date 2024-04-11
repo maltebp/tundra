@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <set>
 
 #include "tundra/model/obj/obj-object-part.hpp"
 

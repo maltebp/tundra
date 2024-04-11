@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "tundra/model/obj/obj-face.hpp"
+#include "tundra/model/obj/obj-material.hpp"
 
 
 namespace td :: ac {

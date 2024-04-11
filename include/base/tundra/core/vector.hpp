@@ -5,6 +5,10 @@ class Vec2 {
 public:
 	T x;
 	T y;
+
+	bool operator==(const Vec2<T>& other) const {
+		return x == other.x && y == other.y;
+	}
 };
 
 #ifdef _MSC_VER

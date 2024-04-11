@@ -29,18 +29,25 @@ namespace td {
 		
 		model_asset->num_vertices = file_header.num_vertices;
 		model_asset->num_normals = file_header.num_normals;
+		model_asset->num_uvs = file_header.num_uvs;
+		model_asset->num_textures = file_header.num_textures;
 		model_asset->num_parts = file_header.num_parts;
 
-		model_asset->vertices = new Vec3<int16>[model_asset->num_vertices];
-		model_asset->normals = new Vec3<int16>[model_asset->num_normals];
+		model_asset->vertices = new ::Vec3<int16>[model_asset->num_vertices];
+		model_asset->normals = new ::Vec3<int16>[model_asset->num_normals];
+		model_asset->uvs = model_asset->num_uvs > 0 ? new ::Vec2<int16>[model_asset->num_uvs] : nullptr;
 		model_asset->model_parts = new ModelPart*[model_asset->num_parts];
 
 		for( int i = 0; i < model_asset->num_vertices; i++ ) {
-			read_bytes<Vec3<int16>>(next_data, &model_asset->vertices[i]);
+			read_bytes<::Vec3<int16>>(next_data, &model_asset->vertices[i]);
 		}
 
 		for( int i = 0; i < model_asset->num_normals; i++ ) {
-			read_bytes<Vec3<int16>>(next_data, &model_asset->normals[i]);
+			read_bytes<::Vec3<int16>>(next_data, &model_asset->normals[i]);
+		}
+
+		for( int i = 0; i < model_asset->num_uvs; i++ ) {
+			read_bytes<::Vec2<int16>>(next_data, &model_asset->uvs[i]);
 		}
 
 		for( int i = 0; i < model_asset->num_parts; i++ ) {
@@ -51,11 +58,12 @@ namespace td {
 			read_bytes(next_data, &part_header);
 			
 			model_part->is_smooth_shaded = part_header.is_smooth_shaded;
-			model_part->is_smooth_shaded = part_header.is_smooth_shaded;
+			model_part->texture_index = part_header.texture_index;
+			model_part->color = part_header.color;
 
 			model_part->num_triangles = part_header.num_triangles;
-			model_part->vertex_indices = new Vec3<uint16>[model_part->num_triangles];
-			model_part->normal_indices = new Vec3<uint16>[model_part->num_triangles];
+			model_part->vertex_indices = new ::Vec3<uint16>[model_part->num_triangles];
+			model_part->normal_indices = new ::Vec3<uint16>[model_part->num_triangles];
 
 			for( int j = 0; j < part_header.num_triangles; j++ ) {
 				read_bytes(next_data, &model_part->vertex_indices[j]); 
@@ -63,6 +71,13 @@ namespace td {
 
 			for( int j = 0; j < part_header.num_triangles; j++ ) {
 				read_bytes(next_data, &model_part->normal_indices[j]);
+			}
+
+			if( part_header.texture_index != 0 ) {
+				model_part->uv_indices = new ::Vec3<uint16>[model_part->num_triangles];
+				for( int j = 0; j < part_header.num_triangles; j++ ) {
+					read_bytes(next_data, &model_part->uv_indices[j]);
+				}
 			}
 
 			model_asset->model_parts[i] = model_part;

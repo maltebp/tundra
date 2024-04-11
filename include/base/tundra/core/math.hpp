@@ -113,6 +113,15 @@ namespace td {
         }
     }
 
+    template<typename TFixed>
+    [[nodiscard]] constexpr inline TFixed round(TFixed x) noexcept
+    {
+        using StoreType = TFixed::Type;
+        constexpr StoreType FRAC = StoreType(1) << TFixed::NUM_FRACTION_BITS;
+        StoreType value = x.get_raw_value() / (FRAC / 2);
+        return TFixed::from_raw_fixed_value(((value / 2) + (value % 2)) * FRAC);
+    }
+
     // Returns radians from number of revolutions (1 is 2 PI)
     template<typename TFixed>
     [[nodiscard]] constexpr TFixed revolutions_to_radians(TFixed num_revolutions) 
