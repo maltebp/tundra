@@ -172,13 +172,21 @@ namespace td {
 
         Vec2<uint16> draw_vram_position = frame_buffer_positions[(uint8)active_buffer];
         DRAWENV draw_env;
-        SetDefDrawEnv(&draw_env, display_vram_position.x, display_vram_position.y, internal::SCREEN_WIDTH, internal::SCREEN_HEIGHT);
+        SetDefDrawEnv(&draw_env, draw_vram_position.x, display_vram_position.y, internal::SCREEN_WIDTH, internal::SCREEN_HEIGHT);
         draw_env.isbg = 1;
         draw_env.dtd = 0;
         draw_env.r0 = clear_color.x;
         draw_env.g0 = clear_color.y;
         draw_env.b0 = clear_color.z;
         PutDrawEnv( &draw_env );
+
+        for(td::Camera* camera : Camera::get_all()) {
+            
+            // TODO: Queue the drawing of the camera (now drawing a second will block while waiting)
+            const td::OrderingTableNode* first_ordering_table_node_to_draw =
+                camera->ordering_tables[(uint8)active_buffer].get_first_node_to_draw();
+            DrawOTag((const td::uint32*)first_ordering_table_node_to_draw);
+        }
 
         // We now submit to the ordering table of the buffer being displayed,
         // while the other one is being drawn to and not displayed
@@ -226,11 +234,6 @@ namespace td {
             
             render_sprite(sprite, layer);
         }
-
-        // TODO: Queue the drawing of the camera (now drawing a second will block while waiting)
-        const td::OrderingTableNode* first_ordering_table_node_to_draw =
-            camera->ordering_tables[(uint8)active_buffer].get_first_node_to_draw();
-        DrawOTag((const td::uint32*)first_ordering_table_node_to_draw);
     }
 
     void RenderSystem::render_sprite(const Sprite* sprite, OrderingTableLayer& ordering_table_layer) {
