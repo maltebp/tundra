@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include <tundra/core/vec/vec3.fwd.hpp>
 
 namespace td {
@@ -22,7 +24,11 @@ namespace td {
 
         // TODO: Only enable this if an implicit conversion exists
         template<typename TOther>
-        constexpr Vec2(const Vec2<TOther>& other);
+        constexpr Vec2(const Vec2<TOther>& other) 
+            requires( 
+                std::is_convertible<TOther, T>::value 
+            && (std::is_unsigned<T>::value == std::is_unsigned<TOther>::value 
+                    || sizeof(T) > sizeof(TOther)));
 
         constexpr Vec2& operator=(const Vec2& other);
 

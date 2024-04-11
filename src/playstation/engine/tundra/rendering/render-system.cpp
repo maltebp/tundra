@@ -1,9 +1,5 @@
-#include "tundra/core/log.hpp"
-#include "tundra/core/mat/mat3x3.dec.hpp"
-#include "tundra/core/types.hpp"
-#include "tundra/gte/operations.hpp"
-#include "tundra/rendering/double-buffer-id.hpp"
-#include "tundra/rendering/ordering-table-node.hpp"
+#include "tundra/core/math.hpp"
+#include "tundra/rendering/vram-allocator.hpp"
 #include <tundra/rendering/render-system.hpp>
 
 #include <psxgpu.h>
@@ -11,14 +7,28 @@
 #include <inline_c.h>
 
 #include <tundra/core/assert.hpp>
+#include <tundra/core/vec/vec2.hpp>
 #include <tundra/core/mat/mat3x3.hpp>
 #include <tundra/core/fixed.hpp>
+#include <tundra/core/grid-allocator.hpp>
+#include <tundra/core/log.hpp>
+#include <tundra/core/mat/mat3x3.dec.hpp>
+#include <tundra/core/types.hpp>
+
+#include <tundra/assets/texture/texture-asset-load-info.hpp>
 
 #include <tundra/engine/transform-matrix.hpp>
+
 #include <tundra/rendering/camera.hpp>
 #include <tundra/rendering/model.hpp>
+#include <tundra/rendering/sprite.hpp>
+#include <tundra/rendering/double-buffer-id.hpp>
+#include <tundra/rendering/ordering-table-node.hpp>
+
 #include <tundra/gte/cast.hpp>
 #include <tundra/gte/compute-transform.hpp>
+#include <tundra/gte/operations.hpp>
+
 
 namespace td {
 
@@ -27,48 +37,19 @@ namespace td {
         const uint16 SCREEN_WIDTH = 320;
         const uint16 SCREEN_HEIGHT = 240;
 
-        DRAWENV create_draw_env(int32 x, int32 y) {
-            DRAWENV draw_env;
-            SetDefDrawEnv( &draw_env, x, y, SCREEN_WIDTH, SCREEN_HEIGHT);
-            
-	        draw_env.isbg = 1;
-	        // draw_env.dtd = 1; // TODO: Disable dithering
-            draw_env.dtd = 0;
-
-            draw_env.r0 = 155;
-            draw_env.g0 = 155;
-            draw_env.b0 = 155;
-
-            return draw_env;
-        }
-
-        DISPENV create_display_env(int32 x, int32 y) {
-            DISPENV display_env;
-            SetDefDispEnv( &display_env, x, y, SCREEN_WIDTH, SCREEN_HEIGHT);
-            return display_env;
-        }
-
-        // TODO: This should probably be re-designed
-        DRAWENV draw_settings[2] {
-            create_draw_env(0, 0),
-            create_draw_env(SCREEN_WIDTH, 0)
-        };
-
-        DISPENV display_settings[2] {
-            create_display_env(0, 0),
-            create_display_env(SCREEN_WIDTH, 0)
-        };
-
-        bool screen_triangle_is_in_screen(
-            const DVECTOR* v0, const DVECTOR* v1, const DVECTOR* v2
-        );
+        bool screen_triangle_is_in_screen(const DVECTOR* v0, const DVECTOR* v1, const DVECTOR* v2);
     }
 
     RenderSystem::RenderSystem(
-            uint32 primitive_buffer_size,
-            Vec3<uint8> clear_color
+        VramAllocator& vram_allocator,
+        uint32 primitive_buffer_size,
+        Vec3<uint8> clear_color
     )
-        :   primitive_buffers{primitive_buffer_size, primitive_buffer_size},
+        :   frame_buffer_positions{
+                vram_allocator.frame_buffer_1_position, 
+                vram_allocator.frame_buffer_2_position
+            },
+            primitive_buffers{primitive_buffer_size, primitive_buffer_size},
             clear_color(clear_color),
             light_directions(0), // All lights disabled by default
             light_colors(128) // Default all values to some gray
@@ -98,13 +79,20 @@ namespace td {
 
         DoubleBufferId inactive_buffer = active_buffer == DoubleBufferId::First ? DoubleBufferId::Second : DoubleBufferId::First;
 
-        PutDispEnv( &internal::display_settings[(uint8)inactive_buffer] );
+        Vec2<uint16> display_vram_position = frame_buffer_positions[(uint8)inactive_buffer];
+        DISPENV display_env;
+        SetDefDispEnv( &display_env, display_vram_position.x, display_vram_position.y, internal::SCREEN_WIDTH, internal::SCREEN_HEIGHT);
+        PutDispEnv( &display_env );        
 
-        DRAWENV& draw_env_to_activate = internal::draw_settings[(uint8)active_buffer];
-        draw_env_to_activate.r0 = clear_color.x;
-        draw_env_to_activate.g0 = clear_color.y;
-        draw_env_to_activate.b0 = clear_color.z;
-        PutDrawEnv( &draw_env_to_activate );
+        Vec2<uint16> draw_vram_position = frame_buffer_positions[(uint8)active_buffer];
+        DRAWENV draw_env;
+        SetDefDrawEnv(&draw_env, display_vram_position.x, display_vram_position.y, internal::SCREEN_WIDTH, internal::SCREEN_HEIGHT);
+        draw_env.isbg = 1;
+        draw_env.dtd = 0;
+        draw_env.r0 = clear_color.x;
+        draw_env.g0 = clear_color.y;
+        draw_env.b0 = clear_color.z;
+        PutDrawEnv( &draw_env );
 
         // We now submit to the ordering table of the buffer being displayed,
         // while the other one is being drawn to and not displayed
@@ -144,10 +132,126 @@ namespace td {
             render_model(camera_matrix, model, layer);
         }
 
+        for( Sprite* sprite : Sprite::get_all() ) {
+
+            if( !camera->layers_to_render.contains(sprite->layer_index) ) continue;
+
+            OrderingTableLayer& layer = camera->get_ordering_table_layer(active_buffer, sprite->layer_index);
+            
+            render_sprite(sprite, layer);
+        }
+
         // TODO: Queue the drawing of the camera (now drawing a second will block while waiting)
         const td::OrderingTableNode* first_ordering_table_node_to_draw =
             camera->ordering_tables[(uint8)active_buffer].get_first_node_to_draw();
         DrawOTag((const td::uint32*)first_ordering_table_node_to_draw);
+    }
+
+    void RenderSystem::render_sprite(const Sprite* sprite, OrderingTableLayer& ordering_table_layer) {
+
+        if( !sprite->enabled ) return;
+        if( sprite->texture == nullptr ) return
+        
+        TD_ASSERT(sprite->size.x > 0 && sprite->size.y > 0, "Sprite size must be larger than 0");
+
+        // OPTIMIZATION: Sprite rendering is not optimized at all (there is no specialized transform, nor transform computation for it)
+
+        Vec2<Fixed32<12>> half_size {
+            Fixed32<12>::from_raw_fixed_value(sprite->size.x.get_raw_value() >> 1),
+            Fixed32<12>::from_raw_fixed_value(sprite->size.y.get_raw_value() >> 1)
+        };
+
+        Vec2<Fixed32<12>> v0;
+        Vec2<Fixed32<12>> v1;
+        Vec2<Fixed32<12>> v2;
+        Vec2<Fixed32<12>> v3;
+
+        if( sprite->rotation == 0 ) {
+            v0 = { -half_size.x, half_size .y }; // Top left
+            v1 = { half_size.x, half_size .y }; // Top right
+            v2 = { -half_size.x, -half_size .y }; // Bottom left
+            v3 = { half_size.x,  -half_size.y }; // Bottom right
+        } 
+        else {
+            // OPTIMIZATION: I am sure we can make this calculation faster
+            td::Fixed32<12> c = cos(sprite->rotation);
+            td::Fixed32<12> s = sin(sprite->rotation);
+
+            // We only have to calculate one point, and then we can rotate that by 90 degrees
+            
+            // Rotating top-left by 
+            v0 = {
+                c * -half_size.x - s * half_size.y,
+                s * -half_size.x + c * half_size.y
+            };
+
+            v1 = { v0.y, -v0.x }; // Top Right
+            v3 = { v1.y, -v1.x }; // Bottom right
+            v2 = { v3.y, -v3.x }; // Bottom left
+        }
+
+        // Flip so we point y-axis downwards (i.e. screen space)
+        v0.y = -v0.y;
+        v1.y = -v1.y;
+        v2.y = -v2.y;
+        v3.y = -v3.y;
+        
+        // OPTIMIZATION: If rotation is 0 we should draw it as a PS Sprite instead (axis-aligned)
+        
+        v0 += { sprite->position.x, sprite->position.y };
+        v1 += { sprite->position.x, sprite->position.y };
+        v2 += { sprite->position.x, sprite->position.y };
+        v3 += { sprite->position.x, sprite->position.y };
+
+        POLY_FT4* primitive = (POLY_FT4*)primitive_buffers[(uint8)active_buffer].allocate(sizeof(POLY_FT4));
+        if( primitive == nullptr ) {
+            TD_DEBUG_LOG("Not enough space for Sprite primitive");
+            return;
+        }
+
+        setPolyFT4(primitive);
+
+        // TODO: Should there be z-depth to sprites?
+        ordering_table_layer.add_to_front((OrderingTableNode*)primitive);
+        
+        // We use static cast to preserve the bit pattern (I believe the primitive members are
+        // wrongly unsigned values - they should be signed, but this is only the case for x0, y0)
+        primitive->x0 = static_cast<uint16>(v0.x.get_raw_integer());
+        primitive->y0 = static_cast<uint16>(v0.y.get_raw_integer());
+
+        primitive->x1 = (int16)v1.x.get_raw_integer();
+        primitive->y1 = (int16)v1.y.get_raw_integer();
+
+        primitive->x2 = (int16)v2.x.get_raw_integer();
+        primitive->y2 = (int16)v2.y.get_raw_integer();
+
+        primitive->x3 = (int16)v3.x.get_raw_integer();
+        primitive->y3 = (int16)v3.y.get_raw_integer();
+        
+        primitive->tpage = sprite->texture->load_info->texture_page_id;
+        primitive->clut = sprite->texture->load_info->clut_id;
+       
+        uint8 uv_u0 = sprite->texture->load_info->texture_page_offset.x;
+        uint8 uv_v0 = sprite->texture->load_info->texture_page_offset.y;
+
+        uint8 uv_u1 = sprite->texture->load_info->texture_page_offset.x + sprite->texture->pixels_width;
+        uint8 uv_v1 = sprite->texture->load_info->texture_page_offset.y + sprite->texture->pixels_height;
+
+        primitive->u0 = uv_u0;
+        primitive->v0 = uv_v0;
+
+        primitive->u1 = uv_u1;
+        primitive->v1 = uv_v0;
+
+        primitive->u2 = uv_u0;
+        primitive->v2 = uv_v1;
+
+        primitive->u3 = uv_u1;
+        primitive->v3 = uv_v1;
+
+        primitive->r0 = sprite->color.x;
+        primitive->g0 = sprite->color.y;
+        primitive->b0 = sprite->color.z;
     }
 
     void RenderSystem::render_model(const TransformMatrix& camera_matrix, const Model* model, OrderingTableLayer& ordering_table_layer) {
@@ -297,6 +401,8 @@ namespace td {
                     triangle_prim->g2 = model->color.y;
                     triangle_prim->b2 = model->color.z;
 
+                    // Note: doing this cast seem necessary, because the raw coordinates (x0, y0 etc)
+                    // are unsigned, but according to nocash specs, screen coordinates are signed.
                     *(DVECTOR*)(&triangle_prim->x0) = v0;
                     *(DVECTOR*)(&triangle_prim->x1) = v1;
                     *(DVECTOR*)(&triangle_prim->x2) = v2;

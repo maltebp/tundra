@@ -1,3 +1,4 @@
+#include "inline_c.h"
 #include "tundra/core/assert.hpp"
 #include "tundra/core/fixed.hpp"
 #include "tundra/core/vec/vec3.dec.hpp"
@@ -111,16 +112,24 @@ namespace td::gte {
         return camera_matrix;
     }
 
-    Vec3<Fixed32<12>> apply_transform_matrix(const TransformMatrix& m, const Vec3<Fixed32<12>>& v) {
+    Vec3<Fixed32<12>> apply_transform_matrix(const TransformMatrix& m, const Vec3<Fixed16<12>>& v) {
         TD_ASSERT(gte::is_initialized(), "GTE is not initialized");
 
         MATRIX* raw_matrix = const_cast<MATRIX*>(reinterpret_cast<const MATRIX*>(&m));
-        VECTOR* raw_vector = const_cast<VECTOR*>(reinterpret_cast<const VECTOR*>(&v));
+
+        // We cannot simply reinterpret, because we go from 16-bit to 32-bit
+        // OPTIMIZATION: The assembly implementation could simply read a 16-bit vector instead
+        VECTOR raw_vector { v.x.get_raw_value(), v.y.get_raw_value(), v.z.get_raw_value() };
         
         Vec3<Fixed32<12>> result;
         VECTOR* raw_result = const_cast<VECTOR*>(reinterpret_cast<const VECTOR*>(&result));
-        
-        ApplyMatrixLV(raw_matrix, raw_vector, raw_result);
+
+        // This function is misleading, because its "return value" is 32-bit,
+        // but the registers the return  value is stored in is only 16-bit.
+        // But it stored in MAC1-3 first, which we can just read from instead.
+        VECTOR result_16_bit;
+        ApplyMatrixLV(raw_matrix, &raw_vector, &result_16_bit);
+        gte_stlvnl(raw_result);
 
         result += m.translation;
         

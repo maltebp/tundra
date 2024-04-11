@@ -9,6 +9,8 @@
 #include <core/mat3x3.tests.hpp>
 #include <core/math.tests.hpp>
 
+#include <core/grid-allocator.tests.hpp>
+
 #include <engine/entity-system/registry-block.tests.hpp>
 #include <engine/entity-system/registry.tests.hpp>
 #include <engine/entity-system/entity.tests.hpp>

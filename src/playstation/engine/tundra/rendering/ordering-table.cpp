@@ -36,7 +36,7 @@ namespace td {
 
             // Insert layer's ordering table as a node into slot i of the root ordering table
             layer_front.next_node_ptr = root_ordering_table[i].next_node_ptr;
-            root_ordering_table[i].next_node_ptr = layer_back.next_node_ptr;
+            root_ordering_table[i].set_next_node(&layer_back);
             // Using this instead of psn00bsdk's addPrims, because it was throwing warnings
 
             layers[i].front_node = &layer_front; 

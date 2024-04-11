@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tundra/core/fixed.hpp"
+#include "tundra/core/limits.hpp"
 #include "tundra/core/vec/vec3.dec.hpp"
 #include "tundra/engine/static-transform.hpp"
 #include <tundra/test-framework/test.hpp>
@@ -27,7 +28,7 @@ namespace td::compute_transform_tests {
         Vec3<Fixed32<12>> expected_translation{ 0 };
         TD_TEST_ASSERT_EQUAL(world_matrix.translation, expected_translation);
 
-        Vec3<Fixed32<12>> v { 1, 2, 3 };
+        Vec3<Fixed16<12>> v { 1, 2, 3 };
         
         Vec3<Fixed32<12>> result = gte::apply_transform_matrix(world_matrix, v);
         TD_TEST_ASSERT_EQUAL(result, v);
@@ -44,7 +45,7 @@ namespace td::compute_transform_tests {
 
         TransformMatrix world_matrix = gte::compute_world_matrix(t);     
 
-        Vec3<Fixed32<12>> v { 1, 2, 3 };
+        Vec3<Fixed16<12>> v { 1, 2, 3 };
         Vec3<Fixed32<12>> expected { -2, 3, -1 };        
         
         Vec3<Fixed32<12>> result = gte::apply_transform_matrix(world_matrix, v);
@@ -62,7 +63,7 @@ namespace td::compute_transform_tests {
 
         TransformMatrix world_matrix = gte::compute_world_matrix(t);     
 
-        Vec3<Fixed32<12>> v { 1, 2, 3 };
+        Vec3<Fixed16<12>> v { 1, 2, 3 };
         Vec3<Fixed32<12>> expected { 3, 4, td::to_fixed(1.5) };
         
         Vec3<Fixed32<12>> result = gte::apply_transform_matrix(world_matrix, v);
@@ -80,7 +81,7 @@ namespace td::compute_transform_tests {
 
         TransformMatrix world_matrix = gte::compute_world_matrix(t);     
 
-        Vec3<Fixed32<12>> v { 1, 2, 3 };
+        Vec3<Fixed16<12>> v { 1, 2, 3 };
         Vec3<Fixed32<12>> expected { -1, 3, 6 };
         
         Vec3<Fixed32<12>> result = gte::apply_transform_matrix(world_matrix, v);
@@ -100,12 +101,32 @@ namespace td::compute_transform_tests {
 
         TransformMatrix world_matrix = gte::compute_world_matrix(t);     
 
-        Vec3<Fixed32<12>> v { 1, 2, 3 };
+        Vec3<Fixed16<12>> v { 1, 2, 3 };
         
         // Scale: 3, 4, 1.5
         // Rotate: -4, 1.5, -3
         // Translation: -6, 2.5, 0
         Vec3<Fixed32<12>> expected { -6, td::to_fixed(2.5), td::to_fixed(0) };
+        
+        Vec3<Fixed32<12>> result = gte::apply_transform_matrix(world_matrix, v);
+        TD_TEST_ASSERT_EQUAL(result, expected);  
+
+        e->destroy(); 
+    }
+    
+    TD_TEST("gte/compute-transform/apply-transform/32-bit-output") {
+        // I just want to be sure that I'm correctly reading the 32-bit output
+
+        Entity* e = Entity::create();
+        DynamicTransform* t = e->add_component<DynamicTransform>();
+
+        t->set_translation(Vec3<Fixed32<12>>{td::limits::numeric_limits<Fixed32<12>>::max});
+
+        TransformMatrix world_matrix = gte::compute_world_matrix(t);     
+
+        Vec3<Fixed16<12>> v { 0, 0, 0 };
+
+        Vec3<Fixed32<12>> expected { td::limits::numeric_limits<Fixed32<12>>::max };
         
         Vec3<Fixed32<12>> result = gte::apply_transform_matrix(world_matrix, v);
         TD_TEST_ASSERT_EQUAL(result, expected);  
@@ -123,7 +144,7 @@ namespace td::compute_transform_tests {
 
         TransformMatrix world_matrix = gte::compute_world_matrix(child);     
 
-        Vec3<Fixed32<12>> v { 1, 2, 3 };
+        Vec3<Fixed16<12>> v { 1, 2, 3 };
         
         Vec3<Fixed32<12>> result = gte::apply_transform_matrix(world_matrix, v);
         TD_TEST_ASSERT_EQUAL(result, v); 
@@ -145,7 +166,7 @@ namespace td::compute_transform_tests {
 
         TransformMatrix world_matrix = gte::compute_world_matrix(child);     
 
-        Vec3<Fixed32<12>> v { 1, 2, 3 };
+        Vec3<Fixed16<12>> v { 1, 2, 3 };
         Vec3<Fixed32<12>> expected { -6, td::to_fixed(2.5), td::to_fixed(0) };
 
         Vec3<Fixed32<12>> result = gte::apply_transform_matrix(world_matrix, v);
@@ -168,7 +189,7 @@ namespace td::compute_transform_tests {
 
         TransformMatrix world_matrix = gte::compute_world_matrix(child);     
 
-        Vec3<Fixed32<12>> v { 1, 2, 3 };
+        Vec3<Fixed16<12>> v { 1, 2, 3 };
         Vec3<Fixed32<12>> expected { -6, td::to_fixed(2.5), td::to_fixed(0) };
 
         Vec3<Fixed32<12>> result = gte::apply_transform_matrix(world_matrix, v);
@@ -193,7 +214,7 @@ namespace td::compute_transform_tests {
 
         parent->add_child(child);
 
-        Vec3<Fixed32<12>> v { 1, 2, 3 };
+        Vec3<Fixed16<12>> v { 1, 2, 3 };
 
         // Child's transformation: 
         //  Scale: 0.5, 3, 3
@@ -221,7 +242,7 @@ namespace td::compute_transform_tests {
         DynamicTransform* child = e->add_component<DynamicTransform>();
         parent->add_child(child);
 
-        Vec3<Fixed32<12>> v { 1, 1, 1 };
+        Vec3<Fixed16<12>> v { 1, 1, 1 };
         Vec3<Fixed32<12>> result;
         Vec3<Fixed32<12>> expected;
         TransformMatrix world_matrix = gte::compute_world_matrix(child);     
@@ -284,7 +305,7 @@ namespace td::compute_transform_tests {
 
         TransformMatrix world_matrix = gte::compute_world_matrix(transform);     
 
-        Vec3<Fixed32<12>> v { 1, 2, 3 };
+        Vec3<Fixed16<12>> v { 1, 2, 3 };
         
         Vec3<Fixed32<12>> expected { -6, td::to_fixed(2.5), td::to_fixed(0) };
         
@@ -310,7 +331,7 @@ namespace td::compute_transform_tests {
             parent
         ));
 
-        Vec3<Fixed32<12>> v { 1, 2, 3 };
+        Vec3<Fixed16<12>> v { 1, 2, 3 };
 
         // Child's transformation: 
         //  Scale: 0.5, 3, 3
@@ -343,43 +364,44 @@ namespace td::compute_transform_tests {
      
         Camera* camera = create_test_camera(); 
 
-        Vec3<td::Fixed32<12>> some_position { 1, 1, 1 };
+        Vec3<Fixed16<12>> some_position { 1, 1, 1 };
 
         const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
         Vec3<td::Fixed32<12>> transformed_position = gte::apply_transform_matrix(camera_matrix, some_position);
-        TD_TEST_ASSERT_EQUAL(transformed_position, some_position);
+        Vec3<td::Fixed32<12>> expected { some_position.x, -some_position.y, some_position.z }; 
+        TD_TEST_ASSERT_EQUAL(transformed_position, expected);
     }
 
     TD_TEST("gte/compute_transform/compute_camera_matrix/translation") {
      
         Camera* camera = create_test_camera();
-        Vec3<td::Fixed32<12>> some_position { 1, 1, 1 };
+        Vec3<Fixed16<12>> some_position { 1, 1, 1 };
 
         camera->transform->set_translation(Vec3<Fixed32<12>>{2, -1, -2}); 
 
         const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
         Vec3<td::Fixed32<12>> transformed_position = gte::apply_transform_matrix(camera_matrix, some_position);
-        Vec3<td::Fixed32<12>> expected { -1, 2, 3 };
+        Vec3<td::Fixed32<12>> expected { -1, -2, 3 };
         TD_TEST_ASSERT_EQUAL(transformed_position, expected);
     }
 
     TD_TEST("gte/compute_transform/compute_camera_matrix/rotation") {
      
         Camera* camera = create_test_camera();
-        Vec3<td::Fixed32<12>> some_position { 1, 1, 1 };
+        Vec3<Fixed16<12>> some_position { 1, 1, 1 };
 
         camera->transform->set_rotation(Vec3<Fixed16<12>>{0, td::to_fixed(0.5), 0}); 
 
         const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
         Vec3<td::Fixed32<12>> transformed_position = gte::apply_transform_matrix(camera_matrix, some_position);
-        Vec3<td::Fixed32<12>> expected { -1, 1, -1 };
+        Vec3<td::Fixed32<12>> expected { -1, -1, -1 };
         TD_TEST_ASSERT_EQUAL(transformed_position, expected);
     }
 
     TD_TEST("gte/compute_transform/compute_camera_matrix/rotation_and_translation") {
      
         Camera* camera = create_test_camera();
-        Vec3<td::Fixed32<12>> some_position { 1, 1, 1 };
+        Vec3<Fixed16<12>> some_position { 1, 1, 1 };
 
         camera->transform->set_translation(Vec3<Fixed32<12>>{0, 1, 2});
         camera->transform->set_rotation(Vec3<Fixed16<12>>{0, to_fixed(0.5), 0 }); 
