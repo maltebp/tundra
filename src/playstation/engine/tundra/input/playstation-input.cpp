@@ -52,6 +52,7 @@ namespace td {
 
     void playstation_input::initialize() {
         TD_ASSERT(!internal::is_initialized, "PlayStation input is already initialized");
+        internal::is_initialized = true;
     
         InitPAD(internal::pad_buffer_1, internal::BUFFER_LENGTH, internal::pad_buffer_2, internal::BUFFER_LENGTH);
         StartPAD();
@@ -65,6 +66,7 @@ namespace td {
     }
 
     void playstation_input::update_controllers(td::PlayStationController& controller_1, PlayStationController& controller_2) {
+        TD_ASSERT(internal::is_initialized, "PlayStation input is not initialized");
         internal::update_controller(internal::pad_buffer_1, controller_1);
         internal::update_controller(internal::pad_buffer_2, controller_2);
     }

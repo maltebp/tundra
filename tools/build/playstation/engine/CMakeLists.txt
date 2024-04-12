@@ -23,6 +23,8 @@ set( TD_ENGINE_DIR_SRC ${TD_DIR_SRC}/playstation/engine )
 set( TD_ENGINE_SOURCES
 
     ${TD_ENGINE_DIR_SRC}/tundra/input/playstation-input.cpp
+
+    ${TD_ENGINE_DIR_SRC}/tundra/sound/playstation-sound.cpp
     
     ${TD_ENGINE_DIR_SRC}/tundra/assets/texture/texture-loader.cpp
     ${TD_ENGINE_DIR_SRC}/tundra/assets/model/model-asset.cpp

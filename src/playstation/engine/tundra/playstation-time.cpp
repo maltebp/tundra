@@ -1,4 +1,3 @@
-#include "tundra/core/log.hpp"
 #include <tundra/playstation-time.hpp>
 
 #include <hwregs_c.h>

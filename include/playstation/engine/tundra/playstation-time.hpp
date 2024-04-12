@@ -5,7 +5,7 @@
 
 namespace td {
 
-    class PlayStationTime : ITime {
+    class PlayStationTime : public ITime {
     public:
 
         // Constructing this will initialize the hardware time system
