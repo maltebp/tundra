@@ -4,11 +4,18 @@ set( TD_ENGINE_DIR_INCLUDE ${TD_DIR_INCLUDE}/playstation/engine )
 
 set( TD_ENGINE_HEADERS 
     ${TD_ENGINE_DIR_INCLUDE}/tundra/assets/texture/texture-loader.hpp
-
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/assets/asset-loader.hpp
+    
     ${TD_ENGINE_DIR_INCLUDE}/tundra/gte/initialize.hpp
     ${TD_ENGINE_DIR_INCLUDE}/tundra/gte/operations.hpp
     ${TD_ENGINE_DIR_INCLUDE}/tundra/gte/compute-transform.hpp
     ${TD_ENGINE_DIR_INCLUDE}/tundra/playstation-time.hpp
+    
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/engine-systems.hpp
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/engine-settings.hpp
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/engine.hpp
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/startup.hpp
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/assets/asset-loader.hpp
 
     ${TD_ENGINE_DIR_INCLUDE}/tundra/rendering/primitive-buffer.hpp
     ${TD_ENGINE_DIR_INCLUDE}/tundra/rendering/camera.hpp
@@ -16,6 +23,7 @@ set( TD_ENGINE_HEADERS
     ${TD_ENGINE_DIR_INCLUDE}/tundra/rendering/ordering-table-layer.hpp
     ${TD_ENGINE_DIR_INCLUDE}/tundra/rendering/ordering-table.hpp
     ${TD_ENGINE_DIR_INCLUDE}/tundra/rendering/render-system.hpp
+    ${TD_ENGINE_DIR_INCLUDE}/tundra/rendering/vram-allocator.hpp
 )
 
 set( TD_ENGINE_DIR_SRC ${TD_DIR_SRC}/playstation/engine )
@@ -34,12 +42,15 @@ set( TD_ENGINE_SOURCES
     ${TD_ENGINE_DIR_SRC}/tundra/gte/compute-transform.cpp
     
     ${TD_ENGINE_DIR_SRC}/tundra/playstation-time.cpp
+    ${TD_ENGINE_DIR_SRC}/tundra/engine.cpp
+    ${TD_ENGINE_DIR_SRC}/tundra/assets/asset-loader.cpp
 
     ${TD_ENGINE_DIR_SRC}/tundra/rendering/camera.cpp
     ${TD_ENGINE_DIR_SRC}/tundra/rendering/primitive-buffer.cpp
     ${TD_ENGINE_DIR_SRC}/tundra/rendering/ordering-table-layer.cpp
     ${TD_ENGINE_DIR_SRC}/tundra/rendering/ordering-table.cpp
     ${TD_ENGINE_DIR_SRC}/tundra/rendering/render-system.cpp 
+    ${TD_ENGINE_DIR_SRC}/tundra/rendering/vram-allocator.cpp 
 )
 
 psn00bsdk_add_library(td.playstation.engine STATIC ${TD_ENGINE_SOURCES} ${TD_ENGINE_HEADERS})

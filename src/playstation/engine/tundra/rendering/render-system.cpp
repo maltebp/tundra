@@ -129,15 +129,14 @@ namespace td {
 
     RenderSystem::RenderSystem(
         VramAllocator& vram_allocator,
-        uint32 primitive_buffer_size,
-        Vec3<uint8> clear_color
+        uint32 primitive_buffer_size
     )
         :   frame_buffer_positions{
                 vram_allocator.frame_buffer_1_position, 
                 vram_allocator.frame_buffer_2_position
             },
             primitive_buffers{primitive_buffer_size, primitive_buffer_size},
-            clear_color(clear_color),
+            clear_color(128),
             light_directions(0), // All lights disabled by default
             light_colors(128) // Default all values to some gray
     { 
@@ -201,6 +200,10 @@ namespace td {
         // We now submit to the ordering table of the buffer being displayed,
         // while the other one is being drawn to and not displayed
         active_buffer = inactive_buffer;
+    }
+
+    void RenderSystem::set_clear_color(Vec3<uint8> color) {
+        this->clear_color = color;
     }
 
     void RenderSystem::set_ambient_light(Vec3<uint8> color) {

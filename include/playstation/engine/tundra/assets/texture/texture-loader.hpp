@@ -1,7 +1,7 @@
 #pragma once
 
 #include <tundra/core/types.hpp>
-#include <tundra/core/grid-allocator.fwd.hpp>
+#include <tundra/rendering/vram-allocator.hpp>
 
 #include <tundra/assets/texture/texture-asset.hpp>
 

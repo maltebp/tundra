@@ -26,11 +26,12 @@ namespace td {
 
         RenderSystem(
             VramAllocator& vram_allocator,
-            uint32 primitive_buffer_size,
-            Vec3<uint8> clear_color
+            uint32 primitive_buffer_size
         );
 
         void render();
+
+        void set_clear_color(Vec3<uint8> color);
 
         // The color is both the intensity of the light and the hue/saturation
         void set_ambient_light(Vec3<uint8> color);

@@ -1,21 +1,14 @@
-#include "tundra/rendering/sprite.hpp"
-#include "tundra/rendering/text.hpp"
-#include "tundra/rendering/vram-allocator.hpp"
-#include <psxgpu.h>
-#include <psxgte.h>
-#include <inline_c.h>
+
+#include <tundra/startup.hpp>
 
 #include <tundra/core/fixed.hpp>
 #include <tundra/core/log.hpp>
 #include <tundra/core/list.hpp>
 #include <tundra/core/fixed.hpp>
 #include <tundra/core/math.hpp>
-#include <tundra/core/grid-allocator.hpp>
 
 #include <tundra/assets/texture/texture-asset.hpp>
-#include <tundra/assets/texture/texture-loader.hpp>
 #include <tundra/assets/model/model-asset.hpp>
-#include <tundra/assets/model/model-deserializer.hpp>
 
 #include <tundra/engine/entity-system/entity.hpp>
 #include <tundra/engine/dynamic-transform.hpp>
@@ -24,13 +17,17 @@
 #include <tundra/rendering/camera.hpp>
 #include <tundra/rendering/model.hpp>
 #include <tundra/rendering/render-system.hpp>
+#include <tundra/rendering/sprite.hpp>
+#include <tundra/rendering/text.hpp>
 
-#include <tundra/gte/initialize.hpp>
 #include <tundra/gte/compute-transform.hpp>
 
 
+const td::EngineSettings ENGINE_SETTINGS {
+    30000
+};
+
 constexpr td::uint16 ORDERING_TABLE_SIZE = 2048; // entries
-constexpr td::uint32 PRIMIIVES_BUFFER_SIZE = 30000; // bytes
 
 constexpr td::Vec3<td::uint8> CLEAR_COLOR = { 255, 100, 50 };
 
@@ -70,30 +67,23 @@ namespace assets {
     extern "C" const uint8_t tex_dumbass[];
 }
 
-int main() {
 
+td::Fixed32<12> camera_y_rotation = 1;
+td::Camera* camera;
+
+extern void initialize(td::EngineSystems& engine_systems) {
     TD_DEBUG_LOG("Initializing %d", 1);
-    ResetGraph(0);
-    td::gte::initialize();
 
-    // Set the origin of screen space
-	gte_SetGeomOffset(320 / 2, 240/ 2);
-	
-	// Set screen depth (basically FOV control, W/2 works best)
-	gte_SetGeomScreen(320 / 2);
+    engine_systems.render.set_clear_color(CLEAR_COLOR);
+    engine_systems.render.set_ambient_light(AMBIENT_COLOR);
+    engine_systems.render.set_light_direction(0, DIRECTIONAL_LIGHT_DIRECTIONS[0]);
+    engine_systems.render.set_light_direction(1, DIRECTIONAL_LIGHT_DIRECTIONS[1]);
+    engine_systems.render.set_light_direction(2, DIRECTIONAL_LIGHT_DIRECTIONS[2]);
+    engine_systems.render.set_light_color(0, DIRECTIONAL_LIGHT_COLORS[0]);
+    engine_systems.render.set_light_color(1, DIRECTIONAL_LIGHT_COLORS[1]);
+    engine_systems.render.set_light_color(2, DIRECTIONAL_LIGHT_COLORS[2]);
 
-    td::VramAllocator vram_allocator;
-
-    TD_DEBUG_LOG("Initializing RenderSystem");
-    td::RenderSystem render_system{vram_allocator, PRIMIIVES_BUFFER_SIZE, CLEAR_COLOR};
-    render_system.set_ambient_light(AMBIENT_COLOR);
-    render_system.set_light_direction(0, DIRECTIONAL_LIGHT_DIRECTIONS[0]);
-    render_system.set_light_direction(1, DIRECTIONAL_LIGHT_DIRECTIONS[1]);
-    render_system.set_light_direction(2, DIRECTIONAL_LIGHT_DIRECTIONS[2]);
-    render_system.set_light_color(0, DIRECTIONAL_LIGHT_COLORS[0]);
-    render_system.set_light_color(1, DIRECTIONAL_LIGHT_COLORS[1]);
-    render_system.set_light_color(2, DIRECTIONAL_LIGHT_COLORS[2]);
-
+    
     td::Entity* camera_entity = td::Entity::create();
     td::DynamicTransform* camera_transform = camera_entity->add_component<td::DynamicTransform>();
     camera_transform->set_translation({0, 3, td::to_fixed(-5.25)});
@@ -104,54 +94,26 @@ int main() {
     layer_settings.add({LAYER_MIDDLE, ORDERING_TABLE_SIZE});
     layer_settings.add({LAYER_BACKGROUND, 1});
 
-    td::Camera* camera = camera_entity->add_component<td::Camera>(camera_transform, layer_settings);
+    camera = camera_entity->add_component<td::Camera>(camera_transform, layer_settings);
 
-    TD_DEBUG_LOG("Loading models..");
+     TD_DEBUG_LOG("Loading models..");
     
-    td::ModelAsset* fish_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_fish);
+    const td::ModelAsset* fish_model = engine_systems.asset_load.load_model((td::byte*)assets::mdl_fish);
     TD_DEBUG_LOG("  Fish triangles: %d", fish_model->get_total_num_triangles());
 
-    td::ModelAsset* sphere_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere);
+    const td::ModelAsset* sphere_model = engine_systems.asset_load.load_model((td::byte*)assets::mdl_sphere);
     TD_DEBUG_LOG("  Sphere triangles: %d", sphere_model->get_total_num_triangles());
 
-    td::ModelAsset* sphere_box_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_sphere_box);
+    const td::ModelAsset* sphere_box_model = engine_systems.asset_load.load_model((td::byte*)assets::mdl_sphere_box);
     TD_DEBUG_LOG("  Sphere-Box triangles: %d", sphere_model->get_total_num_triangles());
-
-    td::ModelAsset* car_model = td::ModelDeserializer().deserialize((td::byte*)assets::mdl_car);
-    TD_DEBUG_LOG("  Car triangles: %d", car_model->get_total_num_triangles());
-    const td::TextureAsset* car_texture_1 = td::texture_loader::load_texture(vram_allocator, (td::byte*)assets::tex_mdl_car_1);
-        car_model->map_to_texture(car_texture_1);
-
-    const td::TextureAsset* ball_texture = td::texture_loader::load_texture(vram_allocator, (td::byte*)assets::tex_ball);
-    const td::TextureAsset* dumbass_texture = td::texture_loader::load_texture(vram_allocator, (td::byte*)assets::tex_dumbass);
-
-    // Print VRAM statistics
-    // TODO: This need to be adjusted to the new VRAM class
-    {
-        td::int32 max_area = 0;
-        const td::GridAllocator::Rect* max_rect = nullptr;
-        for( td::uint32 i = 0; i < vram_allocator.get_global_allocator().get_free_rects().get_size(); i++ ) {
-            if( vram_allocator.get_global_allocator().get_free_rects()[i].area > max_area ) {
-                max_area = vram_allocator.get_global_allocator().get_free_rects()[i].area;
-                max_rect = &vram_allocator.get_global_allocator().get_free_rects()[i];
-            }
-        }
-
-        td::UFixed32<10> allocated_percentage = td::UFixed32<10>(vram_allocator.get_global_allocator().get_num_bytes_allocated()) / td::UFixed32<10>(1024U*1024U);
-        allocated_percentage *= 100;
-
-        if( max_rect != nullptr ) {
-            TD_DEBUG_LOG(
-                "VRAM used: %d bytes (%d%%), %d rects remain (biggest is %dx%d)",
-                vram_allocator.get_global_allocator().get_num_bytes_allocated(), allocated_percentage.get_raw_integer(), vram_allocator.get_global_allocator().get_free_rects().get_size(), max_rect->size.x, max_rect->size.y);
-        }
-        else {
-            TD_DEBUG_LOG(
-                "VRAM used: %d bytes (%d%%), 0 rects remain",
-                vram_allocator.get_global_allocator().get_num_bytes_allocated(), allocated_percentage.get_raw_integer());
-        }
-    }
     
+    const td::TextureAsset* car_texture_1 = engine_systems.asset_load.load_texture((td::byte*)assets::tex_mdl_car_1);
+
+    const td::ModelAsset* car_model = engine_systems.asset_load.load_model((td::byte*)assets::mdl_car, car_texture_1);
+    TD_DEBUG_LOG("  Car triangles: %d", car_model->get_total_num_triangles());
+
+    const td::TextureAsset* ball_texture = engine_systems.asset_load.load_texture((td::byte*)assets::tex_ball);
+    const td::TextureAsset* dumbass_texture = engine_systems.asset_load.load_texture((td::byte*)assets::tex_dumbass);    
 
     TD_DEBUG_LOG("Initializing rendering data");
 
@@ -249,36 +211,26 @@ int main() {
     text->position = { 100, 210 };
     text->text = "This is some text";
 
-    td::Fixed32<12> camera_y_rotation = 1;
+}
+
+extern void update(td::EngineSystems& engine_systems, const td::FrameTime& frame_time) {
     
-    SetDispMask(1);
-    // FntLoad(0, 256);
-
-    TD_DEBUG_LOG("Running main loop");
-    while(true) {
-
-        for( td::Sprite* sprite : td::Sprite::get_all() ) {
-            sprite->rotation += td::to_fixed(0.005);
-            if( sprite->rotation > 1 ) {
-                sprite->rotation -= 1;
-            }
+    for( td::Sprite* sprite : td::Sprite::get_all() ) {
+        sprite->rotation += td::to_fixed(0.005);
+        if( sprite->rotation > 1 ) {
+            sprite->rotation -= 1;
         }
-
-        camera_y_rotation -= td::to_fixed(0.005);
-        if( camera_y_rotation < 0 ) {
-            camera_y_rotation += 1;            
-        }
-
-        td::Fixed32<12> camera_x = td::cos(camera_y_rotation) * CAMERA_XZ_DISTANCE;
-        td::Fixed32<12> camera_z = td::sin(camera_y_rotation) * CAMERA_XZ_DISTANCE;
-
-        camera->transform->set_translation({camera_x, CAMERA_HEIGHT, camera_z});
-        camera->look_at(CAMERA_TARGET);
-
-        // TD_DEBUG_LOG("y_rot = %s, T = %s, R = %s", camera_y_rotation, camera->transform->get_translation(), camera->transform->get_rotation());
-
-        render_system.render();
     }
 
-    return 0; 
+    camera_y_rotation -= td::to_fixed(0.005);
+    if( camera_y_rotation < 0 ) {
+        camera_y_rotation += 1;            
+    }
+
+    td::Fixed32<12> camera_x = td::cos(camera_y_rotation) * CAMERA_XZ_DISTANCE;
+    td::Fixed32<12> camera_z = td::sin(camera_y_rotation) * CAMERA_XZ_DISTANCE;
+
+    camera->transform->set_translation({camera_x, CAMERA_HEIGHT, camera_z});
+    camera->look_at(CAMERA_TARGET);
+    
 }
