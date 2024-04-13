@@ -6,6 +6,7 @@
 #include <tundra/engine/entity-system/internal/registry.hpp>
 #include <tundra/engine/entity-system/internal/component-meta-data.hpp>
 #include <tundra/engine/entity-system/internal/registry-block.hpp>
+#include <type_traits>
 
 namespace td {
 
@@ -50,6 +51,10 @@ namespace td {
 
         template<typename TComponent, typename ... TArgs>
         TComponent* add_component(TArgs&& ... args) {
+            static_assert(
+                std::is_base_of<internal::ComponentBase, TComponent>::value,
+                "TComponent must derive from td::Component<TComponent, TOptionalBase>");
+
             TD_ASSERT(is_alive(), "Entity is not alive");
             
             TComponent* component = internal::Registry<TComponent>::create_component(forward<TArgs>(args)...);

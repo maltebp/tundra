@@ -100,7 +100,7 @@ namespace td {
             };
         }
 
-        const GridAllocator& get_global_allocator() const { return global_allocator; }
+        GridAllocator& get_global_allocator() { return global_allocator; }
 
         // TODO: Make these const
         Vec2<uint16> frame_buffer_1_position;

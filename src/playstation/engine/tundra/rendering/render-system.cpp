@@ -26,6 +26,7 @@
 #include <tundra/rendering/camera.hpp>
 #include <tundra/rendering/model.hpp>
 #include <tundra/rendering/sprite.hpp>
+#include <tundra/rendering/text.hpp>
 #include <tundra/rendering/double-buffer-id.hpp>
 #include <tundra/rendering/ordering-table-node.hpp>
 
@@ -139,7 +140,16 @@ namespace td {
             clear_color(clear_color),
             light_directions(0), // All lights disabled by default
             light_colors(128) // Default all values to some gray
-    { }
+    { 
+        GridAllocator::Result font_vram_allocation = vram_allocator
+            .get_global_allocator()
+            .allocate(64, 65, 7, 8);
+        
+        TD_ASSERT(font_vram_allocation.success, "Failed at allocate vram for font");
+        
+        // FntLoad(font_vram_allocation.position.x, font_vram_allocation.position.y); 
+        FntLoad(font_vram_allocation.position.x >> 1, font_vram_allocation.position.y);
+    }
 
     void RenderSystem::render() {
 
@@ -233,6 +243,15 @@ namespace td {
             OrderingTableLayer& layer = camera->get_ordering_table_layer(active_buffer, sprite->layer_index);
             
             render_sprite(sprite, layer);
+        }
+
+        for( Text* text : Text::get_all() ) {
+
+            if( !camera->layers_to_render.contains(text->layer_index) ) continue;
+
+            OrderingTableLayer& layer = camera->get_ordering_table_layer(active_buffer, text->layer_index);
+            
+            render_text(text, layer);
         }
     }
 
@@ -537,6 +556,18 @@ namespace td {
                 
             }
         }
+    }
+
+    void RenderSystem::render_text(const Text* text, OrderingTableLayer& ordering_table_layer) {
+        if( !text->is_enabled ) return;
+        if( text->text.is_empty() ) return;
+        
+        ordering_table_layer.add_font_to_front(
+            primitive_buffers[(uint8)active_buffer],
+            text->position.x.get_raw_integer(),
+            text->position.y.get_raw_integer(),
+            text->text
+        );
     }
 
     bool internal::screen_triangle_is_in_screen(

@@ -1,4 +1,5 @@
 #include "tundra/rendering/sprite.hpp"
+#include "tundra/rendering/text.hpp"
 #include "tundra/rendering/vram-allocator.hpp"
 #include <psxgpu.h>
 #include <psxgte.h>
@@ -241,6 +242,12 @@ int main() {
     };
 
     create_dumbass({ 160, 24 }, {32, 32});
+
+    // Create text
+
+    td::Text* text = td::Entity::create()->add_component<td::Text>(LAYER_FOREGROUND);
+    text->position = { 100, 210 };
+    text->text = "This is some text";
 
     td::Fixed32<12> camera_y_rotation = 1;
     

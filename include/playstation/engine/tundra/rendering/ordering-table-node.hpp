@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include <tundra/core/types.hpp>
 
 namespace td {
@@ -15,4 +17,5 @@ namespace td {
     };
 
     static_assert(sizeof(OrderingTableNode) == 4, "");
+    static_assert(std::is_trivial<OrderingTableNode>::value);
 }

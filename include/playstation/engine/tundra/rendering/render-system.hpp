@@ -19,6 +19,7 @@ namespace td {
 
     class Model;
     class Sprite;
+    class Text;
 
     class RenderSystem {
     public:
@@ -48,6 +49,8 @@ namespace td {
         void render_sprite(const Sprite* model, OrderingTableLayer& ordering_table_layer);
 
         void render_model(const TransformMatrix& camera_matrix, const Model* model, OrderingTableLayer& ordering_table_layer);
+
+        void render_text(const Text* text, OrderingTableLayer& ordering_table_layer);
         
         const Vec2<uint16> frame_buffer_positions[2];
         

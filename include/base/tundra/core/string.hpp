@@ -26,7 +26,7 @@ namespace td {
 
         uint32 get_size() const { return size; }
 
-        bool is_empty() const { return size > 0; }
+        bool is_empty() const { return size == 0; }
     
         bool is_empty_or_whitespace() const;
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tundra/core/types.hpp"
+#include "tundra/rendering/primitive-buffer.hpp"
 #include <tundra/core/fixed.hpp>
 #include <tundra/core/list.dec.hpp>
 
@@ -28,6 +30,10 @@ namespace td {
         void add_node(OrderingTableNode* node, uint16 resolution_index);
 
         void add_to_front(OrderingTableNode* node);
+
+        // This function is a bit misplaced, but it is because of the rather
+        // annoying API of FntSort.
+        void add_font_to_front(PrimitiveBuffer& primitive_buffer, int32 x, int32 y, const td::String& text);
 
         [[nodiscard]] uint16 get_resolution() const;
 
