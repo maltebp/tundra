@@ -12,3 +12,8 @@ get_filename_component(TD_DIR_ROOT ${CMAKE_CURRENT_LIST_DIR}/../.. ABSOLUTE)
 get_filename_component(TD_DIR_SRC ${CMAKE_CURRENT_LIST_DIR}/../../src ABSOLUTE)
 get_filename_component(TD_DIR_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/../../include ABSOLUTE)
 get_filename_component(TD_DIR_TESTS ${CMAKE_CURRENT_LIST_DIR}/../../tests ABSOLUTE) 
+get_filename_component(TD_DIR_EXTERNAL ${CMAKE_CURRENT_LIST_DIR}/../../external ABSOLUTE) 
+
+
+set( CMAKE_TOOLCHAIN_FILE ${TD_DIR_EXTERNAL}/psn00bsdk/lib/libpsn00b/cmake/sdk.cmake  )
+set( PSN00BSDK_TC ${TD_DIR_EXTERNAL}/psn00bsdk/bin  )

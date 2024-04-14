@@ -1,0 +1,8 @@
+{
+	"version":       "0.24",
+	"build_date":    "2023-07-03T06:16:03Z",
+	"git_tag":       "v0.24",
+	"git_commit":    "06e65bea3a778b2dae5af77a7935ae3868ddd4d3",
+	"cmake_version": "3.26.4",
+	"host_system":   "Windows"
+}
