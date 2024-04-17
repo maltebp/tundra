@@ -1,0 +1,2 @@
+14.1
+Downloaded from: https://static.grumpycoder.net/pixel/gdb-multiarch-windows/
