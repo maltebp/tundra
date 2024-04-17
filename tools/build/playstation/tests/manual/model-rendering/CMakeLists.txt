@@ -16,6 +16,18 @@ psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE tex_
 psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE tex_ball ${TD_DIR_TESTS}/data/ball.tim)
 psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE tex_dumbass ${TD_DIR_TESTS}/data/dumbass.tim)
 
+
+td_target_assets(td.playstation.tests.manual.model-rendering ${TD_DIR_TESTS}/data 
+    MODEL mdl_car models/car.obj
+    TEXTURE tex_mdl_car_1 models/car.png
+    MODEL mdl_sphere_box models/sphere-box.obj
+    MODEL mdl_sphere models/sphere.obj
+    MODEL mdl_fish models/fish.obj
+    MODEL mdl_car models/car.obj
+    TEXTURE tex_ball textures/circle.png PALETTE4
+    TEXTURE tex_dog textures/herman.png PALETTE8
+)
+
 target_link_libraries(td.playstation.tests.manual.model-rendering PRIVATE td.base)
 target_link_libraries(td.playstation.tests.manual.model-rendering PRIVATE td.playstation.engine)
 

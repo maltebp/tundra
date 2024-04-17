@@ -1,3 +1,6 @@
+set( CMAKE_TOOLCHAIN_FILE ${TD_DIR_EXTERNAL}/psn00bsdk/lib/libpsn00b/cmake/sdk.cmake  )
+set( PSN00BSDK_TC ${TD_DIR_EXTERNAL}/psn00bsdk/bin  )
+
 # This is by no means a proper setup function - I just wanted to move all the Tundra setup out of the
 # project CMakeLists.txt and this will do for now
 function(td_link_engine target) 

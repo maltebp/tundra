@@ -360,9 +360,9 @@ namespace td {
         primitive->u3 = uv_u1;
         primitive->v3 = uv_v1;
 
-        primitive->r0 = sprite->color.x;
-        primitive->g0 = sprite->color.y;
-        primitive->b0 = sprite->color.z;
+        primitive->r0 = sprite->color.x >> 1;
+        primitive->g0 = sprite->color.y >> 1;
+        primitive->b0 = sprite->color.z >> 1;
     }
 
     void RenderSystem::render_model(const TransformMatrix& camera_matrix, const Model* model, OrderingTableLayer& ordering_table_layer) {

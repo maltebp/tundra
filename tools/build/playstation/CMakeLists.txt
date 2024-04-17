@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.21)
 
 include(../tundra.cmake)
 
+set( CMAKE_TOOLCHAIN_FILE ${TD_DIR_EXTERNAL}/psn00bsdk/lib/libpsn00b/cmake/sdk.cmake  )
+set( PSN00BSDK_TC ${TD_DIR_EXTERNAL}/psn00bsdk/bin  )
+
 project(
 	td.playstation
 	LANGUAGES    C CXX ASM

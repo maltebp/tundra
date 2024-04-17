@@ -8,9 +8,11 @@ set( TD_TESTS_INPUT_SOURCES
 
 psn00bsdk_add_executable(td.playstation.tests.manual.sound GPREL ${TD_TESTS_INPUT_SOURCES})
 
-psn00bsdk_target_incbin(td.playstation.tests.manual.sound PRIVATE snd_jump ${TD_DIR_TESTS}/data/jump.vag)
-psn00bsdk_target_incbin(td.playstation.tests.manual.sound PRIVATE snd_drone_engine ${TD_DIR_TESTS}/data/drone-engine.vag)
-psn00bsdk_target_incbin(td.playstation.tests.manual.sound PRIVATE snd_techno_music ${TD_DIR_TESTS}/data/techno-music.vag)
+td_target_assets(td.playstation.tests.manual.sound ${TD_DIR_TESTS}/data 
+    SOUND snd_jump sounds/jump.wav
+    SOUND snd_drone_engine sounds/drone-engine.wav LOOP
+    SOUND snd_techno_music sounds/techno-music.wav LOOP
+)
 
 target_link_libraries(td.playstation.tests.manual.sound PRIVATE td.base)
 target_link_libraries(td.playstation.tests.manual.sound PRIVATE td.playstation.engine)

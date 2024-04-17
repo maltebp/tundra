@@ -64,7 +64,7 @@ namespace assets {
     extern "C" const uint8_t mdl_car[];
     extern "C" const uint8_t tex_mdl_car_1[];
     extern "C" const uint8_t tex_ball[];
-    extern "C" const uint8_t tex_dumbass[];
+    extern "C" const uint8_t tex_dog[];
 }
 
 
@@ -113,7 +113,7 @@ extern void initialize(td::EngineSystems& engine_systems) {
     TD_DEBUG_LOG("  Car triangles: %d", car_model->get_total_num_triangles());
 
     const td::TextureAsset* ball_texture = engine_systems.asset_load.load_texture((td::byte*)assets::tex_ball);
-    const td::TextureAsset* dumbass_texture = engine_systems.asset_load.load_texture((td::byte*)assets::tex_dumbass);    
+    const td::TextureAsset* dumbass_texture = engine_systems.asset_load.load_texture((td::byte*)assets::tex_dog);    
 
     TD_DEBUG_LOG("Initializing rendering data");
 
@@ -195,7 +195,7 @@ extern void initialize(td::EngineSystems& engine_systems) {
     create_ball({320 - 32, 240 - 32}, {32, 32}, { 255U, 255U, 0});
     create_ball({36, 240 - 36}, {40, 40}, { 120U, 255U, 120U});
 
-    auto create_dumbass = [&](td::Vec2<td::Fixed32<12>> position, td::Vec2<td::Fixed32<12>> size) {
+    auto create_dog = [&](td::Vec2<td::Fixed32<12>> position, td::Vec2<td::Fixed32<12>> size) {
         td::Entity* e = td::Entity::create();
         td::Sprite* sprite = e->add_component<td::Sprite>(LAYER_FOREGROUND);
         sprite->texture = dumbass_texture;
@@ -203,7 +203,7 @@ extern void initialize(td::EngineSystems& engine_systems) {
         sprite->size = size;
     };
 
-    create_dumbass({ 160, 24 }, {32, 32});
+    create_dog({ 160, 24 }, {32, 32});
 
     // Create text
 

@@ -29,9 +29,10 @@ namespace {
 
     Arguments parse_args(int argc, const char* argv[]) {
         int actual_argc = argc - 1;
-        td::ac::input_assert(argc >= 1 && argc <= 2, "Expected %d to %d argumentes (was %d)", 1, 2, actual_argc);
+        td::ac::input_assert(actual_argc >= 1 && actual_argc <= 2, "Expected %d to %d argumentes (was %d)", 1, 2, actual_argc);
 
         std::filesystem::path input_file_path { argv[1] };
+        
         td::ac::input_assert(std::filesystem::exists(input_file_path), "Input path does not exit: '%s'", input_file_path.string().c_str());
 
         std::filesystem::path output_file_path;
@@ -54,6 +55,8 @@ namespace {
             std::cout << "  File already exists - deleting it" << std::endl;
             std::filesystem::remove(path);
         }
+
+        std::filesystem::create_directories(path.parent_path());
 
         std::ofstream output_file{};
         output_file.open(path, std::ios::binary | std::ios::out);
