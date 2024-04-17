@@ -8,15 +8,6 @@ set( TD_TESTS_SOURCES
 
 psn00bsdk_add_executable(td.playstation.tests.manual.model-rendering GPREL ${TD_TESTS_SOURCES})
 
-psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE mdl_sphere ${TD_DIR_TESTS}/data/sphere.td_model)
-psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE mdl_sphere_box ${TD_DIR_TESTS}/data/sphere-box.td_model)
-psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE mdl_fish ${TD_DIR_TESTS}/data/fish.td_model)
-psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE mdl_car ${TD_DIR_TESTS}/data/car.td_model)
-psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE tex_mdl_car_1 ${TD_DIR_TESTS}/data/car_1.tim)
-psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE tex_ball ${TD_DIR_TESTS}/data/ball.tim)
-psn00bsdk_target_incbin(td.playstation.tests.manual.model-rendering PRIVATE tex_dumbass ${TD_DIR_TESTS}/data/dumbass.tim)
-
-
 td_target_assets(td.playstation.tests.manual.model-rendering ${TD_DIR_TESTS}/data 
     MODEL mdl_car models/car.obj
     TEXTURE tex_mdl_car_1 models/car.png

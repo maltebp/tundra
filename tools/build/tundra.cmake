@@ -25,6 +25,10 @@ function(_td_compile_asset_model target asset_name asset_input_path asset_output
     set(model_compiler_path ${TD_DIR_ROOT}/build/developer/bin/Debug/td-asset-compiler.exe)
 
     cmake_path(REPLACE_EXTENSION asset_output_path LAST_ONLY td_model)
+
+    if( NOT EXISTS ${model_compiler_path} )
+        message(FATAL_ERROR "Model compiler does not exist - did you build developer before running this?")
+    endif()
     
     execute_process(COMMAND
         ${model_compiler_path}
