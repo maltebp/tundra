@@ -17,14 +17,15 @@ namespace td::internal {
     // Should not be called by code manually
     template<typename ... TArgs>
     [[noreturn]] static void _handle_assert (const char *format, TArgs... args) {
-        std::printf(format, args...);
 
 #if defined TD_PLATFORM_PLAYSTATION
+        std::printf(format, args...);
         for (;;) {  
             __asm__ volatile("");
         }
 #elif defined TD_PLATFORM_DEVELOPER
-        std::terminate();
+        std::fprintf(stderr, format, args...);
+        throw std::exception("Assert was false");
 #else
 #error "No platform is set"
 #endif
