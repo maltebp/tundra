@@ -43,7 +43,8 @@ namespace td {
 
     OrderingTableLayer& Camera::get_ordering_table_layer(DoubleBufferId ordering_table_id, uint32 layer_id) {
         TD_ASSERT(layers_to_render.contains(layer_id), "Camera does not render layer %d", layer_id);
-        return ordering_tables[(uint8)ordering_table_id].get_layer(layer_id);
+        uint32 ordering_table_layer_index = layers_to_render.index_of(layer_id);
+        return ordering_tables[(uint8)ordering_table_id].get_layer(ordering_table_layer_index);
     }
 
     void Camera::look_at(const Vec3<Fixed32<12>>& target) {
