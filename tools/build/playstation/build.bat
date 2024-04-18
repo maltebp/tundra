@@ -7,7 +7,8 @@ IF NOT "%~1"=="release" IF NOT "%~1"=="debug" (
 
 pushd %~dp0 || exit /b
 
-cmake --build ..\..\..\build\playstation --config %~1 || goto done
+set CMAKE=%~dp0..\..\..\external\cmake\bin\cmake
+%CMAKE% --build ..\..\..\build\playstation --config %~1 || goto done
 
 :done
 popd

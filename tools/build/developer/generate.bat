@@ -2,6 +2,7 @@
 
 pushd %~dp0 || exit /b
 
-cmake --preset developer
+set CMAKE=%~dp0..\..\..\external\cmake\bin\cmake
+%CMAKE% --preset developer
 
 popd
