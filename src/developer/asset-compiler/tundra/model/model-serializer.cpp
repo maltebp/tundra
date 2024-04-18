@@ -46,7 +46,8 @@ namespace td::ac {
 	};
 
 	std::tuple<byte*, uint32> ModelSerializer::serialize(const ModelAsset* model) {
-		TD_ASSERT(model->num_textures != 0 || model->num_uvs == 0, "Model has UVs but no texture");
+		TD_ASSERT(model->num_uvs == 0 || model->num_textures != 0, "Model has UVs but no texture");
+		TD_ASSERT(model->num_textures == 0 || model->num_uvs > 0, "Model has texture but no UVs");
 
 		ModelFileHeader file_header{};
 		file_header.type_name[0] = 't';

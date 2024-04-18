@@ -304,7 +304,7 @@ namespace td::ac {
 		
 
 		while( !material_lib_file.eof() ) {
-			TD_ASSERT(!material_lib_file.fail(), "Filestream failed when reading material lib '%s'", material_lib_path);
+			TD_ASSERT(!material_lib_file.fail(), "Filestream failed when reading material lib '%s'", material_lib_path.c_str());
 			
 			std::vector<std::string> tokens = parse_line(material_lib_file);
 
@@ -342,13 +342,6 @@ namespace td::ac {
 
 				current_material->diffuse_texture_path = tokens[1];
 			}
-		}
-
-		int i = 0;
-		for( ObjMaterial* material : materials ) {
-			bool material_has_no_values = material->diffuse_color == Float3{ 1, 1, 1 } && material->diffuse_texture_path.empty();
-			td::ac::input_assert_warning(!material_has_no_values, "Material %d has no texture nor diffuse color", i);
-			i++;
 		}
 
 		return materials;

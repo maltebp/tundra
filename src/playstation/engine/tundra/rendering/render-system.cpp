@@ -137,6 +137,7 @@ namespace td {
             },
             primitive_buffers{primitive_buffer_size, primitive_buffer_size},
             clear_color(128),
+            ambient_color(128),
             light_directions(0), // All lights disabled by default
             light_colors(128) // Default all values to some gray
     { 

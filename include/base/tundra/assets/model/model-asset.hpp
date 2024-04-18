@@ -81,10 +81,10 @@ namespace td {
 		uint16 num_uvs = 0;
 		::Vec2<int16>* uvs = nullptr;
 
-		uint8 num_textures = 0;
-
 		uint16 num_parts = 0;
 		ModelPart** model_parts = nullptr;
+
+		uint8 num_textures = 0;	
 
 		// Not serialized
 		const TextureAsset* texture = nullptr;

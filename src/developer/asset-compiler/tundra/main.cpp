@@ -76,7 +76,7 @@ static inline std::ostream& operator<<(std::ostream& stream, const ::Vec3<T> f3)
 }
 
 template<>
-static inline std::ostream& operator<< <td::uint8>(std::ostream& stream, const ::Vec3<td::uint8> f3) {
+inline std::ostream& operator<< <td::uint8>(std::ostream& stream, const ::Vec3<td::uint8> f3) {
     return stream << "(" << (td::uint32)f3.x << ", " << (td::uint32)f3.y << ", " << (td::uint32)f3.z << ")";
 }
 
@@ -184,6 +184,7 @@ int main(int argc, const char* argv[]) try {
 catch (td::ac::InputException e) {
     
     std::cerr << "Error: " << e.what() << std::endl;
+    throw e;
 
 } catch(std::exception e) {
     std::cerr << "Internal exception: " << e.what() << std::endl;
