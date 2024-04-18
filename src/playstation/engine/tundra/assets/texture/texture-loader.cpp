@@ -63,8 +63,6 @@ namespace td {
 
         asset->mode = internal::tim_mode_to_texture_mode(tim.mode);
 
-        RECT* prect = tim.prect;
-
         bool has_clut = asset->mode == TextureMode::Palette4Bit || asset->mode == TextureMode::Palette8Bit;
         if( has_clut ) {
             Vec2<uint16> clut_position = asset->mode == TextureMode::Palette4Bit ? vram_allocator.allocate_clut_4() : vram_allocator.allocate_clut_8();
