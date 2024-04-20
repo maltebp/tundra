@@ -396,7 +396,10 @@ namespace td {
 
             td::ModelPart* model_part = model->asset.model_parts[part_index];
 
-            Vec3<uint8> part_real_color = td::Vec3<uint8>{model_part->color.x, model_part->color.y, model_part->color.z};
+            Vec3<uint8> part_real_color =
+                model_part->texture_index == 0 ?
+                td::Vec3<uint8>{model_part->color.x, model_part->color.y, model_part->color.z}
+                : td::Vec3<uint8>{255};
             if( model->color != Vec3<uint8>{255} ) {
                 //ZTD_DEBUG_LOG("Start color %s", part_real_color);
 
