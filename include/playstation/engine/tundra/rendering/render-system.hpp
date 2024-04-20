@@ -43,6 +43,8 @@ namespace td {
         // intensity of the light and the hue/saturation
         void set_light_color(uint8 light_index, Vec3<uint8> color);
 
+        uint32 get_num_triangles_rendered() const { return num_triangles_rendered; }
+
     private:
 
         void render_camera(Camera* camera);    
@@ -54,6 +56,8 @@ namespace td {
         void render_text(const Text* text, OrderingTableLayer& ordering_table_layer);
         
         const Vec2<uint16> frame_buffer_positions[2];
+
+        uint32 num_triangles_rendered = 0;
         
         DoubleBufferId active_buffer = DoubleBufferId::First;
 

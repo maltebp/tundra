@@ -159,6 +159,8 @@ namespace td {
 
         primitive_buffers[(uint8)active_buffer].clear();
 
+        num_triangles_rendered = 0;
+
         for(td::Camera* camera : Camera::get_all()) {
             camera->ordering_tables[(uint8)active_buffer].clear();
             this->render_camera(camera);
@@ -364,6 +366,8 @@ namespace td {
         primitive->r0 = sprite->color.x >> 1;
         primitive->g0 = sprite->color.y >> 1;
         primitive->b0 = sprite->color.z >> 1;
+
+        num_triangles_rendered += 2;
     }
 
     void RenderSystem::render_model(const TransformMatrix& camera_matrix, const Model* model, OrderingTableLayer& ordering_table_layer) {
@@ -493,6 +497,7 @@ namespace td {
                         internal::set_prim_color(prim, part_real_color);
 
                         internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
+                        num_triangles_rendered++;
                     }
                     else
                     {
@@ -509,6 +514,7 @@ namespace td {
                         internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
                         internal::compute_lit_color(prim->r1, model->asset.normals[model_part->normal_indices[i].y - 1]);
                         internal::compute_lit_color(prim->r2, model->asset.normals[model_part->normal_indices[i].z - 1]);
+                        num_triangles_rendered++;
                     }
                 }
                 else {
@@ -532,6 +538,7 @@ namespace td {
                         internal::set_prim_color(prim, part_real_color);
 
                         internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
+                        num_triangles_rendered++;
                     }
                     else
                     {
@@ -555,6 +562,7 @@ namespace td {
                         internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
                         internal::compute_lit_color(prim->r1, model->asset.normals[model_part->normal_indices[i].y - 1]);
                         internal::compute_lit_color(prim->r2, model->asset.normals[model_part->normal_indices[i].z - 1]);
+                        num_triangles_rendered++;
                     }
                 }
                 
@@ -572,6 +580,8 @@ namespace td {
             text->position.y.get_raw_integer(),
             text->text
         );
+
+        num_triangles_rendered += text->text.get_size() * 2;
     }
 
     bool internal::screen_triangle_is_in_screen(
