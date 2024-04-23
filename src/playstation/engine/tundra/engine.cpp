@@ -88,8 +88,6 @@ namespace td {
                 is_first_loop = false;
                 SetDispMask(1); 
             }
-
-            VSync(0);
         }
     }
 

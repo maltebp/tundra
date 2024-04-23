@@ -537,6 +537,12 @@ namespace td {
                             model->asset.mapped_uvs[model_part->uv_indices[i].z - 1]
                         );
 
+                        // part_real_color = Vec3<uint8>{
+                        //     (uint8)(part_real_color.x >> 1),
+                        //     (uint8)(part_real_color.y >> 1),
+                        //     (uint8)(part_real_color.z >> 1)
+                        // };
+
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
                         internal::set_prim_color(prim, part_real_color);
 
@@ -558,6 +564,12 @@ namespace td {
                             model->asset.mapped_uvs[model_part->uv_indices[i].y - 1],
                             model->asset.mapped_uvs[model_part->uv_indices[i].z - 1]
                         );
+
+                        // part_real_color = Vec3<uint8>{
+                        //     (uint8)(part_real_color.x >> 1),
+                        //     (uint8)(part_real_color.y >> 1),
+                        //     (uint8)(part_real_color.z >> 1)
+                        // };
 
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
                         internal::set_prim_color_3(prim, part_real_color);

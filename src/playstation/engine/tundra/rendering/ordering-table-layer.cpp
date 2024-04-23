@@ -51,6 +51,13 @@ namespace td {
 
     void OrderingTableLayer::add_font_to_front(PrimitiveBuffer& primitive_buffer, int32 x, int32 y, const td::String& text) {
         
+        if( text.get_size() == 0 ) return;
+
+        // WARNING: this does not work properly currently, so it won't actually add the node
+        // to the front, and it will not update which node is actually front. Only use fonts on a
+        // layer for only fonts.
+        // TODO: Fix this! (when adding more than one node text it would seemingly break)
+
         uint32 node_after_front_address = front_node->next_node_ptr;
         
         // TODO: This approach will not work once the primitive buffer allocates buffer
@@ -71,11 +78,11 @@ namespace td {
             allocated_ptr != nullptr,
             "Primitive buffer ran out of memory while writing font (memory has been corrupted) - increase primitive buffer size");
 
-        // Find the new front node by traversing text nodes
+        // // Find the new front node by traversing text nodes
         OrderingTableNode* current_node = front_node;
         while( current_node->next_node_ptr != node_after_front_address  ) {
-            current_node = reinterpret_cast<OrderingTableNode*>((uint32)current_node->next_node_ptr);
             TD_ASSERT(current_node->next_node_ptr != 0, "Text OT node points to nullptr"); 
+            current_node = reinterpret_cast<OrderingTableNode*>((uint32)current_node->next_node_ptr);
         }        
 
         front_node = current_node;
