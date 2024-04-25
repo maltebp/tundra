@@ -16,8 +16,8 @@ namespace td {
     OrderingTableLayer::OrderingTableLayer(uint16 resolution, UFixed16<12> far_plane) 
         :   resolution(resolution),
             far_plane(far_plane),
-            z_map_factor_3(UFixed32<12>{resolution} / (UFixed32<12>{far_plane} * 3)),
-            z_map_factor_4(UFixed32<12>{resolution} / (UFixed32<12>{far_plane} * 4)),
+            z_map_factor_3((uint16)(UFixed32<12>{resolution} / (UFixed32<12>{far_plane} * 3)).get_raw_integer()), // TODO: This should use an explicit cast
+            z_map_factor_4((uint16)(UFixed32<12>{resolution} / (UFixed32<12>{far_plane} * 4)).get_raw_integer()),
             ordering_table(resolution)
     {
         TD_ASSERT(resolution > 0, "Resolution must be larger than 0");
@@ -92,11 +92,11 @@ namespace td {
         return resolution;
     }
 
-    uint32 OrderingTableLayer::get_z_map_factor_3() const { 
+    uint16 OrderingTableLayer::get_z_map_factor_3() const { 
         return z_map_factor_3;
     }
 
-    uint32 OrderingTableLayer::get_z_map_factor_4() const { 
+    uint16 OrderingTableLayer::get_z_map_factor_4() const { 
         return z_map_factor_4;
     }
 }

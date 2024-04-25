@@ -91,7 +91,7 @@ extern void initialize(td::EngineSystems& engine_systems) {
 
     td::List<td::CameraLayerSettings> layer_settings;
     layer_settings.add({LAYER_FOREGROUND, 1});
-    layer_settings.add({LAYER_MIDDLE, ORDERING_TABLE_SIZE});
+    layer_settings.add({LAYER_MIDDLE, ORDERING_TABLE_SIZE, td::to_fixed(0.1)});
     layer_settings.add({LAYER_BACKGROUND, 1});
 
     camera = camera_entity->add_component<td::Camera>(camera_transform, layer_settings);

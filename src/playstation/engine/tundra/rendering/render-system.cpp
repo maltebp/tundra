@@ -35,6 +35,17 @@
 #include <tundra/gte/operations.hpp>
 
 
+#define set_zsf3( zsf3 ) __asm__ volatile ( \
+	"ctc2	%0, $29;"		\
+	:						\
+	: "r"( zsf3 ) )
+
+#define set_zsf4( zsf4 ) __asm__ volatile ( \
+	"ctc2	%0, $30;"		\
+	:						\
+	: "r"( zsf4 ) )
+
+
 namespace td {
 
     namespace internal {
@@ -128,6 +139,7 @@ namespace td {
     }
 
     RenderSystem::RenderSystem(
+        ITime& time,
         VramAllocator& vram_allocator,
         uint32 primitive_buffer_size
     )
@@ -135,6 +147,7 @@ namespace td {
                 vram_allocator.frame_buffer_1_position, 
                 vram_allocator.frame_buffer_2_position
             },
+            time(time),
             primitive_buffers{primitive_buffer_size, primitive_buffer_size},
             clear_color(128),
             ambient_color(128),
@@ -167,8 +180,9 @@ namespace td {
         }
 
         // Flush
-
         DrawSync(0);
+        last_frame_draw_duration = time.get_duration_since_start() - last_frame_draw_start;
+
 	    VSync(0);
         
         // The "active" render buffer is the one being displayed, and the one whose
@@ -192,6 +206,7 @@ namespace td {
         draw_env.b0 = clear_color.z;
         PutDrawEnv( &draw_env );
 
+        last_frame_draw_start = time.get_duration_since_start();
         for(td::Camera* camera : Camera::get_all()) {
             
             // TODO: Queue the drawing of the camera (now drawing a second will block while waiting)
@@ -392,6 +407,13 @@ namespace td {
         gte_SetRotMatrix( &gte::to_gte_matrix_ref(model_to_view_matrix) );
         gte_SetTransMatrix( &gte::to_gte_matrix_ref(model_to_view_matrix) );
 
+        volatile uint16 z_map_factor_3 = ordering_table_layer.get_z_map_factor_3();
+        set_zsf3(z_map_factor_3);
+
+        // TODO: I think this yields the wrong value for some reason
+        volatile uint16 z_map_factor_4 = ordering_table_layer.get_z_map_factor_4();
+        set_zsf4(z_map_factor_4);
+
         for( int part_index = 0; part_index < model->asset.num_parts; part_index++ ) {
 
             td::ModelPart* model_part = model->asset.model_parts[part_index];
@@ -454,19 +476,18 @@ namespace td {
 
                 td::uint32 ordering_table_index_fixed_20_12;
                 gte_stopz(&ordering_table_index_fixed_20_12);
-                td::uint32 ordering_table_index = ordering_table_index_fixed_20_12 >> 12;
 
-                // TODO: Set the layer factor
+                td::uint32 ordering_table_index = ordering_table_index_fixed_20_12 >> 12;
 
                 // In front, or on, near-plane
                 if( ordering_table_index == 0 ) {
-                    TD_DEBUG_LOG("Behind camera");
+                    // TD_DEBUG_LOG("Behind camera");
                     continue;
                 }
 
                 // Behind far-plane
                 if( ordering_table_index >= ordering_table_layer.get_resolution() ) {
-                    TD_DEBUG_LOG("Too far away");
+                    // TD_DEBUG_LOG("Too far away");
                     continue;
                 } 
 
@@ -537,12 +558,6 @@ namespace td {
                             model->asset.mapped_uvs[model_part->uv_indices[i].z - 1]
                         );
 
-                        // part_real_color = Vec3<uint8>{
-                        //     (uint8)(part_real_color.x >> 1),
-                        //     (uint8)(part_real_color.y >> 1),
-                        //     (uint8)(part_real_color.z >> 1)
-                        // };
-
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
                         internal::set_prim_color(prim, part_real_color);
 
@@ -564,12 +579,6 @@ namespace td {
                             model->asset.mapped_uvs[model_part->uv_indices[i].y - 1],
                             model->asset.mapped_uvs[model_part->uv_indices[i].z - 1]
                         );
-
-                        // part_real_color = Vec3<uint8>{
-                        //     (uint8)(part_real_color.x >> 1),
-                        //     (uint8)(part_real_color.y >> 1),
-                        //     (uint8)(part_real_color.z >> 1)
-                        // };
 
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
                         internal::set_prim_color_3(prim, part_real_color);

@@ -56,7 +56,7 @@ namespace td {
         Input input { controller_1, controller_2 };
 
         VramAllocator vram_allocator;
-        RenderSystem render_system{ vram_allocator, settings.primitive_buffer_size };   
+        RenderSystem render_system{ time, vram_allocator, settings.primitive_buffer_size };   
 
         AssetLoader asset_loader{vram_allocator};   
 

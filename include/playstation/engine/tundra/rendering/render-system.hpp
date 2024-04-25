@@ -6,6 +6,8 @@
 #include <tundra/core/vec/vec3.dec.hpp>
 #include <tundra/core/vec/vec3.hpp>
 #include <tundra/core/grid-allocator.fwd.hpp>
+#include <tundra/core/duration.hpp>
+#include <tundra/core/time.hpp>
 
 #include <tundra/engine/transform-matrix.hpp>
 
@@ -25,6 +27,7 @@ namespace td {
     public:
 
         RenderSystem(
+            ITime& time,
             VramAllocator& vram_allocator,
             uint32 primitive_buffer_size
         );
@@ -45,6 +48,8 @@ namespace td {
 
         uint32 get_num_triangles_rendered() const { return num_triangles_rendered; }
 
+        Duration get_last_frame_draw_duration() const { return last_frame_draw_duration; }
+
     private:
 
         void render_camera(Camera* camera);    
@@ -57,6 +62,8 @@ namespace td {
         
         const Vec2<uint16> frame_buffer_positions[2];
 
+        ITime& time;
+
         uint32 num_triangles_rendered = 0;
         
         DoubleBufferId active_buffer = DoubleBufferId::First;
@@ -65,6 +72,9 @@ namespace td {
         Vec3<uint8> clear_color;
 
         Vec3<uint8> ambient_color;
+
+        Duration last_frame_draw_duration = 0;
+        Duration last_frame_draw_start = 0;
         
         // Each row is the direction of a light
         alignas(4) Mat3x3<Fixed16<12>> light_directions = {};

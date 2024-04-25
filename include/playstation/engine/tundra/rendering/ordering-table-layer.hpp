@@ -38,17 +38,17 @@ namespace td {
         [[nodiscard]] uint16 get_resolution() const;
 
         // The Z factor that the sum of 3 z values are multiplied with to map it the ordering table
-        [[nodiscard]] uint32 get_z_map_factor_3() const;
+        [[nodiscard]] uint16 get_z_map_factor_3() const;
         
         // The Z factor that the sum of 4 z values are multiplied with to map it the ordering table
-        [[nodiscard]] uint32 get_z_map_factor_4() const;
+        [[nodiscard]] uint16 get_z_map_factor_4() const;
 
     private:
 
         const uint16 resolution;
         const UFixed16<12> far_plane;
-        const uint32 z_map_factor_3;
-        const uint32 z_map_factor_4;
+        const uint16 z_map_factor_3;
+        const uint16 z_map_factor_4;
         
         uint32 num_added_nodes = 0;
         OrderingTableNode* front_node;
