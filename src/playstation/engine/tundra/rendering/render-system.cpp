@@ -520,7 +520,10 @@ namespace td {
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
                         internal::set_prim_color(prim, part_real_color);
 
-                        internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
+                        if( model->is_lit ) {
+                            internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
+                        } 
+                        
                         num_triangles_rendered++;
                     }
                     else
@@ -535,9 +538,12 @@ namespace td {
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
                         internal::set_prim_color_3(prim, part_real_color);
 
-                        internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
-                        internal::compute_lit_color(prim->r1, model->asset.normals[model_part->normal_indices[i].y - 1]);
-                        internal::compute_lit_color(prim->r2, model->asset.normals[model_part->normal_indices[i].z - 1]);
+                        if( model->is_lit ) {
+                            internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
+                            internal::compute_lit_color(prim->r1, model->asset.normals[model_part->normal_indices[i].y - 1]);
+                            internal::compute_lit_color(prim->r2, model->asset.normals[model_part->normal_indices[i].z - 1]);    
+                        }
+                        
                         num_triangles_rendered++;
                     }
                 }
@@ -563,7 +569,10 @@ namespace td {
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
                         internal::set_prim_color(prim, adjusted_color);
 
-                        internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
+                        if( model->is_lit) {
+                            internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
+                        }
+                        
                         num_triangles_rendered++;
                     }
                     else
@@ -587,10 +596,12 @@ namespace td {
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
                         internal::set_prim_color_3(prim, adjusted_color);
 
-                        internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
-                        internal::compute_lit_color(prim->r1, model->asset.normals[model_part->normal_indices[i].y - 1]);
-                        internal::compute_lit_color(prim->r2, model->asset.normals[model_part->normal_indices[i].z - 1]);
-
+                        if( model->is_lit ) {
+                            internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
+                            internal::compute_lit_color(prim->r1, model->asset.normals[model_part->normal_indices[i].y - 1]);
+                            internal::compute_lit_color(prim->r2, model->asset.normals[model_part->normal_indices[i].z - 1]);
+                        }
+                        
                         num_triangles_rendered++;
                     }
                 }   

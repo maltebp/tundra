@@ -27,6 +27,9 @@ namespace td {
 
         Vec3<uint8> color { 255U, 255U, 255U };
 
+        // Set this to false to draw the model in the exact colors given without any lighting effects
+        bool is_lit = true;
+
     };
 
 }
