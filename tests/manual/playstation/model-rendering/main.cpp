@@ -33,8 +33,6 @@ constexpr td::Vec3<td::uint8> CLEAR_COLOR = { 255, 100, 50 };
 
 constexpr td::Vec3<td::uint8> AMBIENT_COLOR =
     { 150, 100, 40 };
-    // { 200, 60, 30 };
-    // { 200, 60, 30 };
 
 constexpr td::Vec3<td::Fixed16<12>> DIRECTIONAL_LIGHT_DIRECTIONS[3] {
     td::Vec3<td::Fixed16<12>>{  td::to_fixed(-0.71), td::to_fixed(-0.71), 0 },
@@ -91,7 +89,7 @@ extern void initialize(td::EngineSystems& engine_systems) {
 
     td::List<td::CameraLayerSettings> layer_settings;
     layer_settings.add({LAYER_FOREGROUND, 1});
-    layer_settings.add({LAYER_MIDDLE, ORDERING_TABLE_SIZE, td::to_fixed(0.1)});
+    layer_settings.add({LAYER_MIDDLE, ORDERING_TABLE_SIZE});
     layer_settings.add({LAYER_BACKGROUND, 1});
 
     camera = camera_entity->add_component<td::Camera>(camera_transform, layer_settings);

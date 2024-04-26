@@ -167,7 +167,6 @@ namespace td {
     void RenderSystem::render() {
 
         gte_SetBackColor( this->ambient_color.x, this->ambient_color.y, this->ambient_color.z );
-
         gte_SetColorMatrix(&gte::to_gte_matrix_ref(light_colors));
 
         primitive_buffers[(uint8)active_buffer].clear();
@@ -239,7 +238,7 @@ namespace td {
         // TODO: This could be a multiplication instead
         light_colors.set_column(
             light_index,
-            Vec3<Fixed16<12>>( Vec3<Fixed32<12>>{color} / (255) ));
+            Vec3<Fixed16<12>>( Vec3<Fixed32<12>>{color} >> 8 ));
     }
 
     void RenderSystem::render_camera(Camera* camera) {
@@ -418,12 +417,15 @@ namespace td {
 
             td::ModelPart* model_part = model->asset.model_parts[part_index];
 
+            const bool part_has_texture = model_part->texture_index > 0;
+
+            // We do not use the asset's diffuse color if it has a texture
             Vec3<uint8> part_real_color =
-                model_part->texture_index == 0 ?
-                td::Vec3<uint8>{model_part->color.x, model_part->color.y, model_part->color.z}
-                : td::Vec3<uint8>{255};
+                part_has_texture ?
+                td::Vec3<uint8>{255} : 
+                td::Vec3<uint8>{model_part->color.x, model_part->color.y, model_part->color.z};
+                
             if( model->color != Vec3<uint8>{255} ) {
-                //ZTD_DEBUG_LOG("Start color %s", part_real_color);
 
                 Vec3<UFixed32<12>> color_multiplier {
                     UFixed32<12>::from_raw_fixed_value((uint16)(UFixed32<12>{model->color.x}.get_raw_value() >> 8)),
@@ -436,8 +438,6 @@ namespace td {
                     (uint8)((color_multiplier.y * part_real_color.y).get_raw_integer()),
                     (uint8)((color_multiplier.z * part_real_color.z).get_raw_integer())
                 };
-
-                // TD_DEBUG_LOG("Real color %s", part_real_color);
             }
 
             for( int i = 0; i < model_part->num_triangles; i++ ) {
@@ -507,7 +507,7 @@ namespace td {
                     continue;
                 }        
                 
-                if( model_part->texture_index == 0 ) {
+                if( !part_has_texture ) {
                     if( !model_part->is_smooth_shaded ) {
 
                         POLY_F3* prim = internal::allocate_prim<POLY_F3>(
@@ -558,8 +558,10 @@ namespace td {
                             model->asset.mapped_uvs[model_part->uv_indices[i].z - 1]
                         );
 
+                        Vec3<uint8> adjusted_color = part_real_color >> 1;
+
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
-                        internal::set_prim_color(prim, part_real_color);
+                        internal::set_prim_color(prim, adjusted_color);
 
                         internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
                         num_triangles_rendered++;
@@ -580,15 +582,18 @@ namespace td {
                             model->asset.mapped_uvs[model_part->uv_indices[i].z - 1]
                         );
 
+                        Vec3<uint8> adjusted_color = part_real_color >> 1;
+
                         internal::set_prim_3_vertices(prim, v0, v1, v2);
-                        internal::set_prim_color_3(prim, part_real_color);
+                        internal::set_prim_color_3(prim, adjusted_color);
 
                         internal::compute_lit_color(prim->r0, model->asset.normals[model_part->normal_indices[i].x - 1]);
                         internal::compute_lit_color(prim->r1, model->asset.normals[model_part->normal_indices[i].y - 1]);
                         internal::compute_lit_color(prim->r2, model->asset.normals[model_part->normal_indices[i].z - 1]);
+
                         num_triangles_rendered++;
                     }
-                }
+                }   
                 
             }
         }

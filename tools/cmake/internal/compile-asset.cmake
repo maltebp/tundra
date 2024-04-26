@@ -28,6 +28,7 @@ endfunction()
 function(_td_compile_asset_texture asset_directory asset_name asset_input_path asset_output_path)
     # message("Compiling TEXTURE name = ${asset_name}, path = ${asset_path}, args: ${ARGN}")
     
+    set(texture_color_type -bpp 16)
     foreach(arg IN LISTS ARGN)
         if( ${arg} MATCHES PALETTE4 )
             set(texture_color_type -bpp 4)
