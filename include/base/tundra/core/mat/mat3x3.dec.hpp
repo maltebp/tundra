@@ -41,6 +41,9 @@ namespace td {
 
         [[nodiscard]] constexpr bool operator==(const Mat3x3& other) const;
 
+        [[nodiscard]] constexpr Mat3x3<T> operator>>(const uint32) const;
+        constexpr Mat3x3<T>& operator>>=(const uint32);
+
         // TODO: Implement regular multiplication
         // Why is there no multiply atm? A "fast" multiply on PS side is only available for 3x3
         // matrix in fixed 4.12 format, and using that will overwrite the current rotation or

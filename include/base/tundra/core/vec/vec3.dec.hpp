@@ -1,8 +1,10 @@
 #pragma once
 
+#include <type_traits>
+
+#include <tundra/core/types.hpp>
 #include <tundra/core/vec/vec2.dec.hpp>
 #include <tundra/core/vec/vec3.fwd.hpp>
-#include <type_traits>
 
 namespace td {
 
@@ -60,6 +62,9 @@ namespace td {
 
         [[nodiscard]] constexpr Vec3 operator/(const T& value) const ;
         constexpr Vec3& operator/=(const T& value);
+
+        [[nodiscard]] constexpr Vec3 operator>>(uint32 i) const ;
+        constexpr Vec3& operator>>=(uint32 i);
 
         [[nodiscard]] constexpr T dot(const Vec3& other) const;
 

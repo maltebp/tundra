@@ -62,6 +62,23 @@ namespace td {
     }
 
     template<typename T>
+    [[nodiscard]] constexpr Mat3x3<T> Mat3x3<T>::operator>>(const uint32 i) const {
+        return {
+            static_cast<T>(m00 >> i), static_cast<T>(m01 >> i), static_cast<T>(m02 >> i),
+            static_cast<T>(m10 >> i), static_cast<T>(m11 >> i), static_cast<T>(m12 >> i),
+            static_cast<T>(m20 >> i), static_cast<T>(m21 >> i), static_cast<T>(m22 >> i)
+        };
+    }
+
+    template<typename T>
+    [[nodiscard]] constexpr Mat3x3<T>& Mat3x3<T>::operator>>=(const uint32 i) {
+        m00 >>= i; m01 >>= i; m02 >>= i;
+        m10 >>= i; m11 >>= i; m12 >>= i;
+        m20 >>= i; m21 >>= i; m22 >>= i;
+        return *this;
+    }
+
+    template<typename T>
     constexpr void Mat3x3<T>::set_row(uint32 row_index, const Vec3<T>& row_values) {
         TD_ASSERT(row_index < 3, "Matrix row-index is out of bounds (was %d)", row_index);
         if( row_index == 0 ) {

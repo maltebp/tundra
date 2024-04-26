@@ -127,6 +127,17 @@ namespace td {
     }
 
     template<typename T>
+    [[nodiscard]] constexpr Vec3<T> Vec3<T>::operator>>(uint32 i) const {
+        return Vec3<T>{ static_cast<T>(x >> i), static_cast<T>(y >> i), static_cast<T>(z >> i) };
+    }
+
+    template<typename T>
+    constexpr Vec3<T>& Vec3<T>::operator>>=(uint32 i) {
+        x >>= i; y >>= i; z >>= i;
+        return *this;
+    }
+
+    template<typename T>
     [[nodiscard]] constexpr T Vec3<T>::dot(const Vec3& other) const {
         return x * other.x + y * other.y + z * other.z;
     }

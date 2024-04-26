@@ -135,6 +135,15 @@ namespace td {
                 return static_cast<TDerived&>(*this);
             }
 
+            constexpr TDerived operator>>(uint32 i) const{
+                return from_raw_fixed_value(static_cast<TStoreType>(value >> i));
+            }
+
+            constexpr TDerived& operator>>=(uint32 i) const {
+                value >>= i;
+                return *this;
+            }
+
             [[nodiscard]] constexpr explicit operator TStoreType() const {
                 return value >> TNumFractionBits; 
             }
