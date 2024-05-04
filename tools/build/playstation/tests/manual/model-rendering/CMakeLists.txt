@@ -17,6 +17,7 @@ td_target_assets(td.playstation.tests.manual.model-rendering ${TD_DIR_TESTS}/dat
     MODEL mdl_car models/car.obj
     TEXTURE tex_ball textures/circle.png PALETTE4
     TEXTURE tex_dog textures/herman.png PALETTE8
+    TEXTURE tex_strawberries textures/strawberries.png
 )
 
 target_link_libraries(td.playstation.tests.manual.model-rendering PRIVATE td.base)

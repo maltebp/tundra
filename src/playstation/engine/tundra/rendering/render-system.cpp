@@ -362,8 +362,8 @@ namespace td {
         uint8 uv_u0 = sprite->texture->load_info->texture_page_offset.x;
         uint8 uv_v0 = sprite->texture->load_info->texture_page_offset.y;
 
-        uint8 uv_u1 = sprite->texture->load_info->texture_page_offset.x + sprite->texture->pixels_width;
-        uint8 uv_v1 = sprite->texture->load_info->texture_page_offset.y + sprite->texture->pixels_height;
+        uint8 uv_u1 = sprite->texture->load_info->texture_page_offset.x + (uint8)(sprite->texture->pixels_width - 1U);
+        uint8 uv_v1 = sprite->texture->load_info->texture_page_offset.y + (uint8)(sprite->texture->pixels_height - 1U);
 
         primitive->u0 = uv_u0;
         primitive->v0 = uv_v0;
