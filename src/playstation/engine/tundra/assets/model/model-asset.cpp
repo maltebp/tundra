@@ -22,8 +22,8 @@ namespace td {
             };
 
             Vec2<uint8> mapped_uv {
-                (uint8)td::round(Fixed32<12>{uv.x} * texture->pixels_width).get_raw_integer(),
-                (uint8)td::round(Fixed32<12>{uv.y} * texture->pixels_height).get_raw_integer(),
+                (uint8)td::round(Fixed32<12>{uv.x} * (texture->pixels_width - 1)).get_raw_integer(),
+                (uint8)td::round(Fixed32<12>{uv.y} * (texture->pixels_height - 1)).get_raw_integer(),
             };
             
             // Flip the y (v) direction
