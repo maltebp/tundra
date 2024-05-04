@@ -21,14 +21,13 @@ namespace td {
                 Fixed16<12>::from_raw_fixed_value(uvs[i].y),
             };
 
+            // Flipping y (framebuffer has 0,0 in top-left, obj has 0,0 in bottom left)
+            uv.y = Fixed16<12>{1} - uv.y;
+
             Vec2<uint8> mapped_uv {
                 (uint8)td::round(Fixed32<12>{uv.x} * (texture->pixels_width - 1)).get_raw_integer(),
-                (uint8)td::round(Fixed32<12>{uv.y} * (texture->pixels_height - 1)).get_raw_integer(),
+                (uint8)td::round(Fixed32<12>{uv.y} * (texture->pixels_width - 1)).get_raw_integer(),
             };
-            
-            // Flip the y (v) direction
-            mapped_uv.y = texture->pixels_height - mapped_uv.y;
-
             // Making them relative to texture page 
             mapped_uv += {
                 texture->load_info->texture_page_offset.x,
