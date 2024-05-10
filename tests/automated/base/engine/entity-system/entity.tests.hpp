@@ -84,4 +84,34 @@ namespace td::entity_tests {
         TD_TEST_ASSERT_EQUAL(TestComponent::num_destructors_called,3U);
     }
 
+    // TD_TEST("entity-system/entity/test") {
+        
+    //     td::List<td::Entity*> entities;
+    //     td::List<TestComponent*> components_to_delete;
+    //     td::List<TestComponent*> components;
+        
+    //     for( td::uint32 i = 0; i < 25; i++ ) {
+    //         td::Entity* e = td::Entity::create();
+    //         entities.add(e);
+    //         if( i % 2 == 0 ) {
+    //             components.add(e->add_component<TestComponent>());
+    //         }
+    //         else {
+    //             components_to_delete.add(e->add_component<TestComponent>());
+    //         }
+    //     }
+
+    //     for( td::uint32 i = 0; i < components_to_delete.get_size(); i++ ) {
+    //         components_to_delete[i]->destroy();
+    //     }
+
+    //     for( td::uint32 i = 0; i < components.get_size(); i++ ) {
+    //         components[i]->destroy();
+    //     }
+
+    //     for(td::uint32 i = 0; i < entities.get_size(); i++ ) {
+    //         entities[i]->destroy();
+    //     }
+    // }
+
 }

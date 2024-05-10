@@ -190,7 +190,7 @@ namespace td::internal::registy_block_tests {
         TD_TEST_ASSERT_EQUAL(num_iterated_components, 5);
     }
 
-     TD_TEST("entity-system/registry-block/merging-holes") {
+     TD_TEST("entity-system/registry-block/merging-holes-1") {
         // This is a minimal reproducible example of a bug I ran into at some point
 
         // The original bug: 
@@ -222,4 +222,35 @@ namespace td::internal::registy_block_tests {
         TD_TEST_ASSERT_EQUAL(registry_block.get_num_holes(), 1);
     }
 
+    TD_TEST("entity-system/registry-block/interleaved-free") {
+        // This is a minimal reproducible example of a bug I ran into at some point,
+        // which is essentially the same as merging-holes-1, except this runs
+        // the merging of 2 holes, instead of just extending the previous hole
+        
+        RegistryBlock<TestComponent> registry_block{5}; 
+
+        TestComponent* c0 = registry_block.allocate_component();
+        TestComponent* c1 = registry_block.allocate_component();
+        TestComponent* c2 = registry_block.allocate_component();
+        TestComponent* c3 = registry_block.allocate_component();
+        TestComponent* c4 = registry_block.allocate_component();
+
+        TD_TEST_ASSERT_EQUAL(registry_block.get_num_holes(), 0);
+
+        registry_block.free_component(c1);
+        TD_TEST_ASSERT_EQUAL(registry_block.get_num_holes(), 1);
+
+        registry_block.free_component(c3);
+        TD_TEST_ASSERT_EQUAL(registry_block.get_num_holes(), 2);
+
+        registry_block.free_component(c0);
+        TD_TEST_ASSERT_EQUAL(registry_block.get_num_holes(), 2);
+
+        // This would fail with the original bug
+        registry_block.free_component(c2);
+        TD_TEST_ASSERT_EQUAL(registry_block.get_num_holes(), 1);
+
+        registry_block.free_component(c4);
+        TD_TEST_ASSERT_EQUAL(registry_block.get_num_holes(), 1);
+    }
 }
