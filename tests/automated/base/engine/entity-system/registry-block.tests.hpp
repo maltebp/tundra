@@ -190,4 +190,36 @@ namespace td::internal::registy_block_tests {
         TD_TEST_ASSERT_EQUAL(num_iterated_components, 5);
     }
 
+     TD_TEST("entity-system/registry-block/merging-holes") {
+        // This is a minimal reproducible example of a bug I ran into at some point
+
+        // The original bug: 
+        // Freeing a component, where previous entry is a single-entry hole,
+        // it would set the newly freed component (which is the new tail), to
+        // point to itself as the head of the hole it belongs to.
+
+        RegistryBlock<TestComponent> registry_block{5};
+        
+        // It has to be 4 components (with only 3, it would not happen)
+        TestComponent* c1 = registry_block.allocate_component();
+        TestComponent* c2 = registry_block.allocate_component();
+        TestComponent* c3 = registry_block.allocate_component();
+        TestComponent* c4 = registry_block.allocate_component();
+        TD_TEST_ASSERT_EQUAL(registry_block.get_num_holes(), 1);
+
+        registry_block.free_component(c2);
+        TD_TEST_ASSERT_EQUAL(registry_block.get_num_holes(), 2);
+
+        registry_block.free_component(c1);
+        TD_TEST_ASSERT_EQUAL(registry_block.get_num_holes(), 2);
+
+        // Original bug: This would cause an assertion, complaining 
+        // there is no hole starting at index 4
+        registry_block.free_component(c3); 
+        TD_TEST_ASSERT_EQUAL(registry_block.get_num_holes(), 2);
+
+        registry_block.free_component(c4);
+        TD_TEST_ASSERT_EQUAL(registry_block.get_num_holes(), 1);
+    }
+
 }

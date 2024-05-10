@@ -122,8 +122,8 @@ namespace td::internal {
         ComponentMetaData* component_meta_data = static_cast<ComponentMetaData*>(component);
         TD_ASSERT(component_meta_data->is_allocated(), "Component to destroy is not allocated");
 
-        bool component_is_first_entry = entries == component;
-        bool component_is_last_entry = entries + capacity - 1 == component;
+        bool component_is_first_entry = component == entries;
+        bool component_is_last_entry = component == entries + (capacity - 1);
 
         // Warning: these entries may be out of allocated memory!
         ComponentMetaData* previous_entry = static_cast<ComponentMetaData*>(component - 1);
@@ -158,9 +158,14 @@ namespace td::internal {
         }
         else if( previous_entry_is_hole ){
             // Append entry to existing hole
-            ComponentMetaData* hole_head = static_cast<ComponentMetaData*>(entries + previous_entry->hole_index);
-            hole_head->hole_index++;
-            component_meta_data->hole_index = previous_entry->hole_index;
+            ComponentMetaData* previous_hole_tail = previous_entry;
+            uint16 hole_head_index = previous_hole_tail->hole_index;
+            ComponentMetaData* previous_hole_head = static_cast<ComponentMetaData*>(entries + hole_head_index);
+
+            // Set the hole's tail index to point to next entry (the component we just freed)
+            previous_hole_head->hole_index++;
+
+            component_meta_data->hole_index = hole_head_index;
         }
         else if( next_entry_is_hole ){
             // Prepend entry to existing hole
@@ -176,7 +181,7 @@ namespace td::internal {
             TD_ASSERT(
                 element_to_replace < td::limits::numeric_limits<uint32>::max,
                 "RegistryBlock's hole starting at index %d was not found", 
-                hole_tail->hole_index);
+                current_head_index);
             
             // Hole head is now the entry before (i.e. the one we just deleted)
             hole_indices[element_to_replace] = new_head_index;
