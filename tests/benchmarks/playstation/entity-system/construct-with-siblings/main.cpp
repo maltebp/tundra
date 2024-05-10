@@ -32,6 +32,7 @@ td::Duration measure_construction(td::ITime& time) {
 
     for( td::uint32 i = 0; i < NUM_COMPONENTS / NUM_SIBLINGS; i++ ) {
         td::Entity* e = td::Entity::create();
+        entities.add(e);
     }
 
     return measure(time, create_components<TComponent>);
