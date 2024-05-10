@@ -133,12 +133,16 @@ namespace td::internal {
         bool next_entry_is_hole = !component_is_last_entry && !next_entry->is_allocated();
 
         if( next_entry_is_hole && previous_entry_is_hole ) {
-            // Merge the 2 holes
-            ComponentMetaData* merged_hole_head = static_cast<ComponentMetaData*>(entries + previous_entry->hole_index);
-            ComponentMetaData* merged_hole_tail = static_cast<ComponentMetaData*>(entries + next_entry->hole_index);
 
-            merged_hole_head->hole_index = next_entry->hole_index;
-            merged_hole_tail->hole_index = previous_entry->hole_index;
+            uint16 merged_hole_head_index = previous_entry->hole_index;
+            uint16 merged_hole_tail_index = next_entry->hole_index;
+
+            // Merge the 2 holes
+            ComponentMetaData* merged_hole_head = static_cast<ComponentMetaData*>(entries + merged_hole_head_index);
+            ComponentMetaData* merged_hole_tail = static_cast<ComponentMetaData*>(entries + merged_hole_tail_index);
+
+            merged_hole_head->hole_index = merged_hole_tail_index;
+            merged_hole_tail->hole_index = merged_hole_head_index;
 
             // We can leave this, the next and previous entries untouched, 
             // because they now reside within the hole
