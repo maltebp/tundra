@@ -9,13 +9,16 @@ const td::EngineSettings ENGINE_SETTINGS { 30000 };
 extern void initialize(td::EngineSystems&) { }
 
 constexpr td::uint32 NUM_COMPONENTS = 1000;
+constexpr td::uint32 NUM_SIBLINGS = 5;
 
 td::List<td::Entity*> entities;
 
 template<typename TComponent>
 void create_components() {
     for( td::uint32 i = 0; i < entities.get_size(); i++ ) {
-        entities[i]->add_component<TComponent>();
+        for( td::uint32 j = 0; j < NUM_SIBLINGS; j++ ) {
+            entities[i]->add_component<TComponent>();
+        }
     }
 }
 
@@ -27,8 +30,8 @@ td::Duration measure_construction(td::ITime& time) {
 
     entities.clear();
 
-    for( td::uint32 i = 0; i < NUM_COMPONENTS; i++ ) {
-        entities.add(td::Entity::create());
+    for( td::uint32 i = 0; i < NUM_COMPONENTS / NUM_SIBLINGS; i++ ) {
+        td::Entity* e = td::Entity::create();
     }
 
     return measure(time, create_components<TComponent>);

@@ -11,9 +11,12 @@ BASE_ARGS = [ '-testmode', '-run' ]
 # See https://pcsx-redux.consoledev.net/cli_flags/
 
 BENCHMARKS = [ 
-    'entity-system.iterate-no-holes',
-    'entity-system.iterate-interleaved-holes',
-    'entity-system.iterate-big-holes',
+    ('entity-system.iterate-no-holes', 1),
+    ('entity-system.iterate-interleaved-holes', 1),
+    ('entity-system.iterate-big-holes', 1),
+    ("entity-system.construct-empty", 1),
+    ("entity-system.construct-in-holes", 1),
+    ("entity-system.construct-with-siblings", 1),
 ]
 
 script_folder = Path(os.path.realpath(__file__)).parent
@@ -26,7 +29,7 @@ if benchmark_results_folder_path.exists():
     shutil.rmtree(benchmark_results_folder_path)
 benchmark_results_folder_path.mkdir()
 
-for benchmark in BENCHMARKS:
+for benchmark, num_repitions in BENCHMARKS:
     benchmark_path = benchmarks_folder / (benchmark + '.elf')
     if not Path.exists(benchmark_path): 
         print(f'Benchmark does not exist: "{benchmark_path}"', file=sys.stderr)
@@ -37,7 +40,7 @@ for benchmark in BENCHMARKS:
     headers = None
     values = []
     
-    for i in range(NUM_REPITIONS):
+    for i in range(num_repitions):
         if log_file_path.exists():
             log_file_path.unlink()        
 
@@ -80,5 +83,5 @@ for benchmark in BENCHMARKS:
 
     results_file.write(', '.join(headers) + "\n")
     
-    for i in range(NUM_REPITIONS):
+    for i in range(num_repitions):
         results_file.write(', '.join(values[i]) + "\n")

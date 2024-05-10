@@ -11,6 +11,7 @@ extern void initialize(td::EngineSystems&) { }
 constexpr td::uint32 NUM_COMPONENTS = 1000;
 
 td::List<td::Entity*> entities;
+td::List<td::Entity*> non_measured_entities;
 
 template<typename TComponent>
 void create_components() {
@@ -24,8 +25,25 @@ td::Duration measure_construction(td::ITime& time) {
     for(td::uint32 i = 0; i < entities.get_size(); i++ ) {
         entities[i]->destroy();
     }
-
     entities.clear();
+
+    for( td::uint32 i = 0 ; i < non_measured_entities.get_size(); i++ ) {
+        non_measured_entities[i]->destroy();
+    }
+    non_measured_entities.clear();
+
+    td::List<TComponent*> components_to_delete;
+    
+    for( td::uint32 i = 0; i < NUM_COMPONENTS * 2; i++ ) {
+        td::Entity* e = td::Entity::create();
+        non_measured_entities.add(e);
+        e->add_component<TComponent>();
+        components_to_delete.add(e->add_component<TComponent>());
+    }
+
+    for( td::uint32 i = 0; i < components_to_delete.get_size(); i++ ) {
+        components_to_delete[i]->destroy();
+    }
 
     for( td::uint32 i = 0; i < NUM_COMPONENTS; i++ ) {
         entities.add(td::Entity::create());
