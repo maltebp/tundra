@@ -1,7 +1,5 @@
 #pragma once
 
-#include "tundra/core/log.hpp"
-#include "tundra/engine/entity-system/internal/component-meta-data.hpp"
 #include <tundra/core/list.dec.hpp>
 
 namespace td::internal {
@@ -46,15 +44,6 @@ namespace td::internal {
         Iterator begin();
 
         Iterator end();
-
-        // TODO: Delete this
-        void print_meta_data() {
-            TD_DEBUG_LOG("Meta data: ");
-            for( uint16 i = 0; i < capacity; i++ ) {
-                ComponentMetaData* meta_data = static_cast<ComponentMetaData*>(entries + i);
-                TD_DEBUG_LOG("  i = %d, allocated = %s, hole_index = %d", i, meta_data->is_allocated() ? "true" : "false", meta_data->hole_index);
-            }
-        }
 
     private:
 
