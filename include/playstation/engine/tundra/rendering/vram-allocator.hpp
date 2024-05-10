@@ -1,7 +1,7 @@
 #pragma once
 
 #include <tundra/core/types.hpp>
-#include <tundra/core/list.dec.hpp>
+#include <tundra/core/list.hpp>
 #include <tundra/core/vec/vec2.dec.hpp>
 #include <tundra/core/grid-allocator.hpp>
 #include <tundra/assets/texture/texture-asset.hpp>

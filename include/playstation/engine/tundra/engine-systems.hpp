@@ -17,6 +17,7 @@ namespace td {
         Input& input;
         ISoundPlayer& sound_player;
         RenderSystem& render;
+        bool exit_requested = false;
 
     };
 

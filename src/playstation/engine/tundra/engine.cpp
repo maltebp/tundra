@@ -10,7 +10,6 @@
 #include <tundra/gte/initialize.hpp>
 #include <tundra/engine-systems.hpp>
 #include <tundra/rendering/vram-allocator.hpp>
-#include <tundra/rendering/vram-allocator.hpp>
 #include <tundra/rendering/primitive-buffer.hpp>
 #include <tundra/rendering/render-system.hpp>
 #include <tundra/input/input.hpp>
@@ -69,7 +68,7 @@ namespace td {
         Duration last_frame_time = time.get_duration_since_start();
         FrameTime frame_time;
 
-        while( true ) {
+        while( !systems.exit_requested ) {
 
             Duration this_frame_time = time.get_duration_since_start();
             Duration time_since_last_frame = this_frame_time - last_frame_time;

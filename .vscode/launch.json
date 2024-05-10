@@ -133,5 +133,22 @@
                 "load build/playstation/tests/manual/sound/Debug/td.playstation.tests.manual.sound.elf",
             ],
         },
+
+        // TODO: Remove once benchmarks are setup properly
+        {
+            "type": "gdb",
+            "request": "attach",
+            "name": "Benchmark Test",
+            "target": "localhost:3333",
+            "remote": true,
+            "executable": "build\\playstation\\bin\\benchmarks\\Release\\entity-system.iterate-big-holes.elf",
+            "gdbpath": "external/gdb-multiarch/bin/gdb-multiarch",
+            "cwd": "${workspaceRoot}",
+            "autorun": [
+                "set substitute-path /project .",
+                "monitor reset shellhalt",
+                "load build/playstation/bin/benchmarks/Release/entity-system.iterate-big-holes.elf",
+            ],
+        },
     ],
 }

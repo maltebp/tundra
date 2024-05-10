@@ -38,3 +38,7 @@ add_subdirectory(tests/automated)
 add_subdirectory(tests/manual/input)
 add_subdirectory(tests/manual/model-rendering)
 add_subdirectory(tests/manual/sound)
+
+add_subdirectory(tests/benchmarks/entity-system/iterate-no-holes)
+add_subdirectory(tests/benchmarks/entity-system/iterate-interleaved-holes)
+add_subdirectory(tests/benchmarks/entity-system/iterate-big-holes)

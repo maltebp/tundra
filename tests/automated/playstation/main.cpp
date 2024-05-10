@@ -13,8 +13,6 @@
 #include "tests/rendering/camera.tests.hpp"
 
 
-
-
 int main() {
 
     ResetGraph(0);
