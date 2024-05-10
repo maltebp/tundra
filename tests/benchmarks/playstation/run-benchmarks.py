@@ -17,6 +17,9 @@ BENCHMARKS = [
     ("entity-system.construct-empty", 1),
     ("entity-system.construct-in-holes", 1),
     ("entity-system.construct-with-siblings", 1),
+    ("entity-system.destroy-empty", 1),
+    ("entity-system.destroy-with-holes", 1), 
+    ("entity-system.destroy-with-siblings", 1),
 ]
 
 script_folder = Path(os.path.realpath(__file__)).parent
