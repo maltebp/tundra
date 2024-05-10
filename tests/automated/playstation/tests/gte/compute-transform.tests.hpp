@@ -292,6 +292,41 @@ namespace td::compute_transform_tests {
         e->destroy(); 
     }
 
+    TD_TEST("gte/compute-transform/with-parent/changing_parent_updates_transform") {
+     
+        Entity* e = Entity::create();
+
+        DynamicTransform* child = e->add_component<DynamicTransform>();
+        
+        Vec3<Fixed16<12>> v { 1, 1, 1 };
+        Vec3<Fixed32<12>> result;
+        Vec3<Fixed32<12>> expected;
+        TransformMatrix world_matrix;
+
+        expected = v;
+        world_matrix = gte::compute_world_matrix(child);     
+        result = gte::apply_transform_matrix(world_matrix, v);
+        TD_TEST_ASSERT_EQUAL(result, expected);
+        
+        DynamicTransform* parent = e->add_component<DynamicTransform>();
+        parent->set_rotation({0, 0, td::to_fixed(0.5) });
+        parent->set_scale({ 2, 2, 2 });
+        parent->set_translation({ 2, 2, 2 });
+        parent->add_child(child);
+
+        expected = { 0, 0, 4 };
+        world_matrix = gte::compute_world_matrix(child);     
+        result = gte::apply_transform_matrix(world_matrix, v);
+        TD_TEST_ASSERT_EQUAL(result, expected);
+
+        parent->remove_child(child);
+
+        expected = v;
+        world_matrix = gte::compute_world_matrix(child);     
+        result = gte::apply_transform_matrix(world_matrix, v);
+        TD_TEST_ASSERT_EQUAL(result, expected);
+    }
+
     TD_TEST("gte/compute_matrix/static_transform/no-parent") {
         
         Entity* e = Entity::create();

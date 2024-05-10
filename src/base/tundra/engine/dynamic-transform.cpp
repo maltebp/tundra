@@ -41,6 +41,10 @@ namespace td {
         
         new_child->parent_next_child = first_child;
         new_child->parent = this;
+        
+        // OPTIMIZATION: We could change only the flags that are actually relevant
+        new_child->dirty_flags = DirtyFlags::All;
+        new_child->mark_descendants_dirty(DirtyFlags::All);
     }
 
     void DynamicTransform::remove_child(DynamicTransform* child_to_remove) {
@@ -74,8 +78,8 @@ namespace td {
         }
 
         child_to_remove->parent = nullptr;
-        child_to_remove->dirty_flags |= DirtyFlags::RotationAndScale | DirtyFlags::Translation;
-        child_to_remove->mark_descendants_dirty(DirtyFlags::RotationAndScale | DirtyFlags::Translation);
+        child_to_remove->dirty_flags = DirtyFlags::All;
+        child_to_remove->mark_descendants_dirty(DirtyFlags::All);
     }
 
     [[nodiscard]] uint32 DynamicTransform::get_num_children() const {
