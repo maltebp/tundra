@@ -15,10 +15,6 @@ namespace td {
 
         static internal::Registry<TDerived>::Iterable get_all();
 
-    protected:
-
-        virtual void on_destroy() { }
-
     private:
     
         virtual void free() override final;

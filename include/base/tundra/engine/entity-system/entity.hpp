@@ -34,6 +34,9 @@ namespace td {
             ComponentBase* current = this->next;
             while( current != this ) {
                 TD_ASSERT(current->next != nullptr, "ComponentBase is not connected to another");
+
+                current->on_destroy();
+
                 ComponentBase* next = current->next;
                 current->flags &= ~internal::ComponentFlags::IsAlive;
 
