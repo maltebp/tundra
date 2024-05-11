@@ -2,6 +2,7 @@
 
 #include "tundra/core/assert.hpp"
 #include "tundra/core/string-util.hpp"
+#include "tundra/engine/entity-system/component.dec.hpp"
 #include "tundra/engine/entity-system/internal/registry-block.dec.hpp"
 #include "tundra/engine/entity-system/internal/registry.dec.hpp"
 #include <tundra/test-framework/test.hpp>
@@ -253,6 +254,29 @@ namespace td::component_ref_tests {
             TD_TEST_ASSERT_EQUAL(false, true);
         }
     }
+
+    // TODO: The entity system's destruction behaviour should change so this test will pass
+    // TD_TEST("engine/entity-system/component-ref/cyclic-references-do-not-prevent-destruction") {
+    //     class ReferenceComponent : public td::Component<ReferenceComponent> {
+    //     public:
+    //         td::ComponentRef<ReferenceComponent> ref;
+    //     };
+
+    //     td::Entity* e1 = td::Entity::create();
+    //     ReferenceComponent* c1 = e1->add_component<ReferenceComponent>();
+
+    //     td::Entity* e2 = td::Entity::create();
+    //     ReferenceComponent* c2 = e2->add_component<ReferenceComponent>();
+
+    //     c1->ref = c2;
+    //     c2->ref = c1;
+
+    //     e1->destroy();
+    //     e2->destroy();
+
+    //     TD_TEST_ASSERT_EQUAL(c1->is_allocated(), false);
+    //     TD_TEST_ASSERT_EQUAL(c2->is_allocated(), false);
+    // }
 
 }
 
