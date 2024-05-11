@@ -25,6 +25,8 @@ BENCHMARKS = [
     ("transforms.destroy-top-down", 1),
     ("transforms.destroy-bottom-up", 1),
     ("transforms.update-root", 1),
+    ("transforms.compute-no-changes", 3),
+    ("transforms.compute-all-dirty", 3),
 ]
 
 script_folder = Path(os.path.realpath(__file__)).parent
