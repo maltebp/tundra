@@ -37,23 +37,26 @@ namespace td::gte {
             case td::TransformType::Dynamic:
                 return compute_world_matrix(static_cast<const DynamicTransform*>(transform));
             default:
+                // TODO: This should fail when Release is enabled
                 TD_ASSERT(false, "Unknown TransformType");
+                break;
         }
     }
 
     extern const TransformMatrix& compute_world_matrix(const DynamicTransform* transform) {
         TD_ASSERT(gte::is_initialized(), "GTE is not initialized");
 
-        const TransformMatrix* parent_matrix = transform->parent == nullptr ? nullptr : &compute_world_matrix(transform->parent);
 
         bool scale_or_rotation_are_dirty = (transform->dirty_flags & DynamicTransform::DirtyFlags::RotationAndScale) == DynamicTransform::DirtyFlags::RotationAndScale;
         if( scale_or_rotation_are_dirty ) {
+            const TransformMatrix* parent_matrix = transform->parent == nullptr ? nullptr : &compute_world_matrix(transform->parent);
             transform->cached_world_matrix.scale_and_rotation = internal::compute_scale_rotation(
                 transform->scale, transform->rotation, parent_matrix);
         }
 
         bool translation_is_dirty = (transform->dirty_flags & DynamicTransform::DirtyFlags::Translation) == DynamicTransform::DirtyFlags::Translation;
         if( translation_is_dirty ) {
+            const TransformMatrix* parent_matrix = transform->parent == nullptr ? nullptr : &compute_world_matrix(transform->parent);
             transform->cached_world_matrix.translation = internal::compute_translation(
                 transform->translation, parent_matrix);
         }
