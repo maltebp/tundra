@@ -25,7 +25,7 @@ namespace td::registry_tests {
         TestComponent* c = internal::Registry<TestComponent>::create_component();
 
         TD_TEST_ASSERT_EQUAL(TestComponent::num_constructors_called, 1U);
-        TD_TEST_ASSERT_EQUAL(internal::Registry<TestComponent>::get_num_components(), 1U);
+        TD_TEST_ASSERT_EQUAL(internal::Registry<TestComponent>::get_num_allocated_components(), 1U);
 
         TD_TEST_ASSERT_EQUAL(c->a, 1);
         TD_TEST_ASSERT_EQUAL(c->b, 2);
@@ -48,7 +48,7 @@ namespace td::registry_tests {
             components.add(Reg::create_component());
         }
 
-        TD_TEST_ASSERT_EQUAL(Reg::get_num_components(), NUM_COMPONENTS);
+        TD_TEST_ASSERT_EQUAL(Reg::get_num_allocated_components(), NUM_COMPONENTS);
         TD_TEST_ASSERT_EQUAL(Reg::get_num_blocks(), NUM_BLOCKS);
 
         TD_TEST_ASSERT_EQUAL(TestComponent::num_constructors_called, NUM_COMPONENTS);
@@ -65,14 +65,14 @@ namespace td::registry_tests {
 
         TD_TEST_ASSERT_EQUAL(TestComponent::num_constructors_called, NUM_COMPONENTS);
         TD_TEST_ASSERT_EQUAL(TestComponent::num_destructors_called, NUM_COMPONENTS);
-        TD_TEST_ASSERT_EQUAL(Reg::get_num_components(), 0U);
+        TD_TEST_ASSERT_EQUAL(Reg::get_num_allocated_components(), 0U);
         TD_TEST_ASSERT_EQUAL(Reg::get_num_blocks(), NUM_BLOCKS);      
     }
 
     TD_TEST("engine/entity-system/registry/iterator/empty") {
         internal::Registry<TestComponent>::clear_block_list();
 
-        TD_ASSERT(internal::Registry<TestComponent>::get_num_components() == 0, "Registry was not clean when entering test");
+        TD_ASSERT(internal::Registry<TestComponent>::get_num_allocated_components() == 0, "Registry was not clean when entering test");
         
         int num_iterated_components = 0;
         for( TestComponent* component : internal::Registry<TestComponent>::get_all() ) {
@@ -161,7 +161,7 @@ namespace td::registry_tests {
     TD_TEST("engine/entity-system/registry/iterator/some-empty-blocks") {
         internal::Registry<TestComponent>::clear_block_list();
         
-        TD_ASSERT(internal::Registry<TestComponent>::get_num_components() == 0, "Registry was not clean when entering test");
+        TD_ASSERT(internal::Registry<TestComponent>::get_num_allocated_components() == 0, "Registry was not clean when entering test");
 
         using Reg = internal::Registry<TestComponent>;
         const uint32 NUM_BLOCKS = 4;
@@ -191,6 +191,6 @@ namespace td::registry_tests {
         remove_all_from_block(1);
         remove_all_from_block(3);
 
-        TD_ASSERT(internal::Registry<TestComponent>::get_num_components() == 0, "Test didn't clean up properly");
+        TD_ASSERT(internal::Registry<TestComponent>::get_num_allocated_components() == 0, "Test didn't clean up properly");
     }
 }

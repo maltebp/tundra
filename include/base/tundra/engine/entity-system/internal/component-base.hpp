@@ -18,6 +18,8 @@ namespace td::internal {
 
         virtual void free() = 0;
 
+        virtual void on_destroy() { }
+
         [[nodiscard]] uint8 get_reference_count() const;
 
         [[nodiscard]] Entity* get_entity();

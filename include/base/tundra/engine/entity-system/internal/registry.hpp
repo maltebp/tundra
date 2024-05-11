@@ -54,12 +54,12 @@ namespace td::internal {
 
     template<typename TComponent>
     void Registry<TComponent>::clear_block_list() {
-        TD_ASSERT(get_num_components() == 0, "All components must be destroyed before clearing blocks");
+        TD_ASSERT(get_num_allocated_components() == 0, "All components must be destroyed before clearing blocks");
         blocks.clear();
     }
 
     template<typename TComponent>
-    uint32 Registry<TComponent>::get_num_components() { 
+    uint32 Registry<TComponent>::get_num_allocated_components() { 
         // We can track this when components are created instead, if 
         // accumulating this when needed becomes a performance issue
 
@@ -76,7 +76,7 @@ namespace td::internal {
 
     template<typename TComponent>
     Registry<TComponent>::Iterable Registry<TComponent>::get_all() {
-        return {};
+        return Registry<TComponent>::Iterable();
     }
 
     template<typename TComponent>   
@@ -91,6 +91,7 @@ namespace td::internal {
         return blocks.get_last();
     }
 
+    // OPTIMIZATION: This is a bit messy, and I'm pretty sure it can be optimized
     template<typename TComponent>
     class Registry<TComponent>::Iterator {
     public:
@@ -107,14 +108,14 @@ namespace td::internal {
             else {
                 block_index = 0;
                 block_iterator = Registry::blocks[0].begin();
-                skip_if_hole_or_block_end();
+                move_to_next_valid_if_at_invalid();
             }
         }
 
         constexpr bool operator==(const Iterator& other) const {
             
-            if( block_index >= Registry::get_num_blocks() ) {
-                return other.block_index >= Registry::get_num_blocks();
+            if( is_at_end_of_last_block() ) {
+                return other.is_at_end_of_last_block();
             }
             else {
                 return block_index == other.block_index && block_iterator == other.block_iterator;
@@ -122,15 +123,16 @@ namespace td::internal {
         }
 
         constexpr Iterator& operator++() {
-            if( block_index >= Registry::get_num_blocks() ) return *this;
+            if( is_at_end_of_last_block() ) return *this;
 
             TD_ASSERT(
                 block_iterator != BlockIterator{},
                 "Block index is less than number of blocks, but iterator is nullptr"
-            );
+            );           
 
             ++block_iterator;
-            skip_if_hole_or_block_end();
+            move_to_next_valid_if_at_invalid(); 
+
             return *this;
         }
 
@@ -141,12 +143,29 @@ namespace td::internal {
 
     private:
 
-        void skip_if_hole_or_block_end() {
+        bool is_at_end_of_last_block() const { return block_index >= Registry::get_num_blocks(); }
 
-            if( block_index >= Registry::get_num_blocks() ) return;
+        void move_to_next_valid_if_at_invalid() {
+            if( is_at_end_of_last_block() ) return;
 
-            bool reached_end_of_block = block_iterator == Registry::blocks[block_index].end();
-            if( !reached_end_of_block ) return;
+            while(true) {
+                
+                move_to_next_block_if_at_current_block_end();
+                if( is_at_end_of_last_block() ) return;
+                
+                TComponent* component = *block_iterator;
+                if( component->is_alive() ) return;
+
+                ++block_iterator;
+            }
+        }
+
+        void move_to_next_block_if_at_current_block_end() {
+
+            if( is_at_end_of_last_block() ) return;
+
+            bool is_at_end_of_current_block = block_iterator == Registry::blocks[block_index].end();
+            if( !is_at_end_of_current_block ) return;
 
             // Find next, non-empty block
             block_index++;

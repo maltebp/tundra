@@ -66,6 +66,8 @@ namespace td::entity_tests {
         TD_TEST_ASSERT_EQUAL(component_1->is_alive(), false);
         TD_TEST_ASSERT_EQUAL(component_2->is_alive(), false);
         TD_TEST_ASSERT_EQUAL(component_3->is_alive(), false);
+
+        TD_TEST_ASSERT_EQUAL(td::internal::Registry<TestComponent>::get_num_allocated_components(), 0U);
     }
 
     TD_TEST("entity-system/entity/destroy-component") {
@@ -87,12 +89,11 @@ namespace td::entity_tests {
 
         TD_TEST_ASSERT_EQUAL(TestComponent::num_destructors_called,3U);
     }
-    
 
     TD_TEST("entity-system/entity/get-all") {
 
         TD_ASSERT(
-            internal::Registry<td::Entity>::get_num_components() == 0, 
+            internal::Registry<td::Entity>::get_num_allocated_components() == 0, 
             "Entities was not cleared before running the test"
         );
 

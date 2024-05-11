@@ -45,4 +45,25 @@ namespace td::component_tests {
         TD_TEST_ASSERT_EQUAL(components.get_size(), 0U);
     }
 
+    TD_TEST("engine/entity-system/component/on-destroy") {
+        static td::uint32 num_on_destroy_called = 0;
+        
+        class ComponentWithOnDestroy : public Component<ComponentWithOnDestroy> {
+        public:
+            virtual void on_destroy() override { num_on_destroy_called++; }
+        };
+
+        td::Entity* e = td::Entity::create();
+        ComponentWithOnDestroy* c1 = e->add_component<ComponentWithOnDestroy>();
+        e->add_component<ComponentWithOnDestroy>();
+
+        TD_TEST_ASSERT_EQUAL(num_on_destroy_called, 0U);
+
+        c1->destroy();
+        TD_TEST_ASSERT_EQUAL(num_on_destroy_called, 1U);
+
+        e->destroy();
+        TD_TEST_ASSERT_EQUAL(num_on_destroy_called, 2U);
+    }
+
 }

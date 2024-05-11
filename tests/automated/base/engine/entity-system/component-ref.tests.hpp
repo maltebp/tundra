@@ -2,6 +2,9 @@
 
 #include "tundra/core/assert.hpp"
 #include "tundra/core/string-util.hpp"
+#include "tundra/engine/entity-system/component.dec.hpp"
+#include "tundra/engine/entity-system/internal/registry-block.dec.hpp"
+#include "tundra/engine/entity-system/internal/registry.dec.hpp"
 #include <tundra/test-framework/test.hpp>
 #include <tundra/test-framework/test-assert.hpp>
 #include <tundra/test-framework/utility/constructor-statistics.hpp>
@@ -47,10 +50,13 @@ namespace td::component_ref_tests {
         TD_TEST_ASSERT_EQUAL(c_deref->c, 3);
 
         TD_TEST_ASSERT_EQUAL(TestComponent::num_constructors_called, 1U);
+
+        e->destroy();
     }
 
     TD_TEST("engine/entity-system/component-ref/copy-constructor") {
         TestComponent::reset_constructor_counters();
+        
         Entity* e = Entity::create();
         TestComponent* c = e->add_component<TestComponent>();
 
@@ -61,6 +67,8 @@ namespace td::component_ref_tests {
 
         TD_TEST_ASSERT_EQUAL(*c_ref_1, TestComponent{});
         TD_TEST_ASSERT_EQUAL(*c_ref_2, TestComponent{});
+
+        e->destroy();
     }
 
     TD_TEST("engine/entity-system/component-ref/equality") {
@@ -80,6 +88,8 @@ namespace td::component_ref_tests {
         TD_TEST_ASSERT_NOT_EQUAL(ref_3, ref_2);
         TD_TEST_ASSERT_NOT_EQUAL(ref_3, c);
         TD_TEST_ASSERT_EQUAL(ref_3, nullptr);
+
+        e->destroy();
     }
 
     TD_TEST("engine/entity-system/component-ref/reference-count-is-adjusted") {
@@ -95,6 +105,8 @@ namespace td::component_ref_tests {
         }        
 
         TD_TEST_ASSERT_EQUAL(c->get_reference_count(), 0);
+
+        e->destroy();
     }
 
     TD_TEST("engine/entity-system/component-ref/when-component-is-destroyed-component-is-not-freed-until-all-references-are-released") {
@@ -182,6 +194,89 @@ namespace td::component_ref_tests {
 
         e->destroy();
     }
+
+    TD_TEST("engine/entity-system/component-ref/iterate-only-alive-components-1") {
+        TD_ASSERT(
+            td::internal::Registry<TestComponent>::get_num_allocated_components() == 0U,
+            "%d TestComponents are still alive when running test",
+            td::internal::Registry<TestComponent>::get_num_allocated_components()
+        );
+
+        TestComponent::reset_constructor_counters();
+        
+        Entity* e = Entity::create();
+
+        e->add_component<TestComponent>();
+        TestComponent* c_2 = e->add_component<TestComponent>();
+        e->add_component<TestComponent>();
+
+        {
+            ComponentRef<TestComponent> c2_ref = c_2;
+            c_2->destroy();
+            
+            TD_TEST_ASSERT_EQUAL(td::internal::Registry<TestComponent>::get_num_allocated_components(), 3U);
+
+            td::uint32 num_iterated_components = 0;
+            for( TestComponent* component : TestComponent::get_all() ) {
+                num_iterated_components++;
+                TD_TEST_ASSERT_EQUAL(component->is_alive(), true);
+            }
+            TD_TEST_ASSERT_EQUAL(num_iterated_components, 2U);
+        }        
+
+        e->destroy();
+    }
+
+    TD_TEST("engine/entity-system/component-ref/iterate-only-alive-components-2") {
+        TD_ASSERT(
+            td::internal::Registry<TestComponent>::get_num_allocated_components() == 0U,
+            "%d TestComponents are still alive when running test",
+            td::internal::Registry<TestComponent>::get_num_allocated_components()
+        );
+
+        constexpr td::uint32 NUM_COMPONENTS = 100;
+
+        td::List<ComponentRef<TestComponent>> refs;
+
+        for(td::uint32 i = 0; i < NUM_COMPONENTS; i++ ) {
+            Entity* e = Entity::create();
+            TestComponent* component = e->add_component<TestComponent>();
+            refs.add(component);
+        }
+        
+        for( td::Entity* entity : td::Entity::get_all() ) {
+            entity->destroy();
+        }
+
+        TD_TEST_ASSERT_EQUAL(td::internal::Registry<TestComponent>::get_num_allocated_components(), NUM_COMPONENTS);
+        
+        for( [[maybe_unused]] TestComponent* _ : TestComponent::get_all() ) {
+            TD_TEST_ASSERT_EQUAL(false, true);
+        }
+    }
+
+    // TODO: The entity system's destruction behaviour should change so this test will pass
+    // TD_TEST("engine/entity-system/component-ref/cyclic-references-do-not-prevent-destruction") {
+    //     class ReferenceComponent : public td::Component<ReferenceComponent> {
+    //     public:
+    //         td::ComponentRef<ReferenceComponent> ref;
+    //     };
+
+    //     td::Entity* e1 = td::Entity::create();
+    //     ReferenceComponent* c1 = e1->add_component<ReferenceComponent>();
+
+    //     td::Entity* e2 = td::Entity::create();
+    //     ReferenceComponent* c2 = e2->add_component<ReferenceComponent>();
+
+    //     c1->ref = c2;
+    //     c2->ref = c1;
+
+    //     e1->destroy();
+    //     e2->destroy();
+
+    //     TD_TEST_ASSERT_EQUAL(c1->is_allocated(), false);
+    //     TD_TEST_ASSERT_EQUAL(c2->is_allocated(), false);
+    // }
 
 }
 
