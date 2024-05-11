@@ -40,8 +40,8 @@ namespace td {
         }
 
         [[nodiscard]] constexpr Fixed32<12> to_milliseconds() const { 
-            constexpr int32 MAX_FIXED_INTEGER = 524287; // TODO: This should be implemented in Fixed class
-            constexpr int64 MAX_MICROSECONDS = MAX_FIXED_INTEGER * 1000LL;
+            [[maybe_unused]] constexpr int32 MAX_FIXED_INTEGER = 524287; // TODO: This should be implemented in Fixed class
+            [[maybe_unused]] constexpr int64 MAX_MICROSECONDS = MAX_FIXED_INTEGER * 1000LL;
 
             // TODO: This only looks at the integer part, and not the fraction part
             TD_ASSERT(
@@ -52,8 +52,8 @@ namespace td {
         }
 
         [[nodiscard]] constexpr Fixed32<12> to_seconds() const { 
-            constexpr int32 MAX_FIXED_INTEGER = 524287; // TODO: This should be implemented in Fixed class
-            constexpr int64 MAX_MICROSECONDS = MAX_FIXED_INTEGER * 1000000LL;
+            [[maybe_unused]] constexpr int32 MAX_FIXED_INTEGER = 524287; // TODO: This should be implemented in Fixed class
+            [[maybe_unused]] constexpr int64 MAX_MICROSECONDS = MAX_FIXED_INTEGER * 1000000LL;
 
             // TODO: This only looks at the integer part, and not the fraction part
             TD_ASSERT(

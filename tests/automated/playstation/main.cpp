@@ -14,6 +14,7 @@
 
 
 int main() {
+    TD_ASSERT(false, "This should not run");
 
     ResetGraph(0);
 
