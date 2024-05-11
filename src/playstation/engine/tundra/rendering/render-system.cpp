@@ -45,10 +45,19 @@
 	:						\
 	: "r"( zsf4 ) )
 
-
 namespace td {
 
     namespace internal {
+
+        // TODO: This should really be refactors
+        volatile td::Duration last_draw_sync_time;
+        ITime* g_time = nullptr;
+
+        void draw_sync_callback() {
+            if( g_time != nullptr ) {
+                last_draw_sync_time = g_time->get_duration_since_start();
+            }
+        }
 
         const uint16 SCREEN_WIDTH = 320;
         const uint16 SCREEN_HEIGHT = 240;
@@ -162,10 +171,14 @@ namespace td {
         
         // FntLoad(font_vram_allocation.position.x, font_vram_allocation.position.y); 
         FntLoad(font_vram_allocation.position.x >> 1, font_vram_allocation.position.y);
+
+        DrawSyncCallback(internal::draw_sync_callback);
+        internal::g_time = &time;
     }
 
     void RenderSystem::render() {
-
+        
+        td::Duration submit_start = time.get_duration_since_start();
         gte_SetBackColor( this->ambient_color.x, this->ambient_color.y, this->ambient_color.z );
         gte_SetColorMatrix(&gte::to_gte_matrix_ref(light_colors));
 
@@ -178,15 +191,20 @@ namespace td {
             this->render_camera(camera);
         }
 
+        submit_duration = time.get_duration_since_start() - submit_start;
+
         // Flush
         DrawSync(0);
-        last_frame_draw_duration = time.get_duration_since_start() - last_frame_draw_start;
+        td::Duration non_volatile_duration = internal::last_draw_sync_time;
+        last_frame_draw_duration = non_volatile_duration - last_frame_draw_start;
 
 	    VSync(0);
         
         // The "active" render buffer is the one being displayed, and the one whose
         // ordering table and primitive buffer we are submitting to.
         // The inactive render buffer is drawing it's ordering-table to its framebuffer
+
+        last_frame_draw_start = time.get_duration_since_start();
 
         DoubleBufferId inactive_buffer = active_buffer == DoubleBufferId::First ? DoubleBufferId::Second : DoubleBufferId::First;
 
@@ -205,7 +223,8 @@ namespace td {
         draw_env.b0 = clear_color.z;
         PutDrawEnv( &draw_env );
 
-        last_frame_draw_start = time.get_duration_since_start();
+        internal::last_draw_sync_time.microseconds = 0;
+
         for(td::Camera* camera : Camera::get_all()) {
             
             // TODO: Queue the drawing of the camera (now drawing a second will block while waiting)

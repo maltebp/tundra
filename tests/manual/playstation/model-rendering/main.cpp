@@ -212,7 +212,9 @@ extern void initialize(td::EngineSystems& engine_systems) {
 
 }
 
-extern void update(td::EngineSystems&, const td::FrameTime&) {
+extern void update(td::EngineSystems& engine_systems, const td::FrameTime&) {
+
+    std::printf("draw: %s\n", td::to_string(engine_systems.render.get_last_draw_duration().to_milliseconds()).get_c_string());
     
     for( td::Sprite* sprite : td::Sprite::get_all() ) {
         sprite->rotation += td::to_fixed(0.005);

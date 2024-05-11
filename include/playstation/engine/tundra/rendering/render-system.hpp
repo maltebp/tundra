@@ -48,7 +48,9 @@ namespace td {
 
         uint32 get_num_triangles_rendered() const { return num_triangles_rendered; }
 
-        Duration get_last_frame_draw_duration() const { return last_frame_draw_duration; }
+        Duration get_last_draw_duration() const { return last_frame_draw_duration; }
+        
+        Duration get_submit_duration() const { return submit_duration; }
 
     private:
 
@@ -73,6 +75,7 @@ namespace td {
 
         Vec3<uint8> ambient_color;
 
+        Duration submit_duration = 0;
         Duration last_frame_draw_duration = 0;
         Duration last_frame_draw_start = 0;
         

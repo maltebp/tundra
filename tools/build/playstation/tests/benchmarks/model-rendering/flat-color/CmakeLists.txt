@@ -1,0 +1,27 @@
+cmake_minimum_required(VERSION 3.21)
+
+set( TD_PROJECT_NAME model-rendering.flat-color)
+
+set( TD_PROJECT_DIR_SRC ${TD_DIR_TESTS}/benchmarks/playstation/model-rendering/flat-color)
+
+set( TD_PROJECT_SOURCES
+	${TD_PROJECT_DIR_SRC}/main.cpp
+)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/benchmarks)
+psn00bsdk_add_executable(${TD_PROJECT_NAME} GPREL ${TD_PROJECT_SOURCES})
+
+td_target_assets(${TD_PROJECT_NAME} ${TD_DIR_TESTS}/data 
+    MODEL mdl_plane_1x1 models/plane_1x1_flat_untextured.obj    
+    MODEL mdl_plane_2x2 models/plane_2x2_flat_untextured.obj    
+    MODEL mdl_plane_16x16 models/plane_16x16.obj
+)
+
+target_link_libraries(${TD_PROJECT_NAME} PRIVATE td.base)
+target_link_libraries(${TD_PROJECT_NAME} PRIVATE td.playstation.engine)
+
+target_include_directories(${TD_PROJECT_NAME} 
+    PRIVATE ${TD_TESTS_DIR_SRC}
+    PRIVATE ${TD_DIR_TESTS}/benchmarks/playstation)
+
+source_group(TREE ${TD_PROJECT_DIR_SRC} PREFIX src FILES ${TD_PROJECT_SOURCES})
