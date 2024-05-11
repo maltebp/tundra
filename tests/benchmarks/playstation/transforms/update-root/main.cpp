@@ -50,7 +50,6 @@ td::Duration destroy_top_down(td::ITime& time, const td::List<td::uint32>& hiera
 
         std::HeapUsage heap_usage;
         std::GetHeapUsage(&heap_usage);
-        std::printf("Memory: %d (max = %d)\n", heap_usage.alloc, heap_usage.alloc_max);
     }
 
     // The measured destruction
@@ -62,22 +61,9 @@ td::Duration destroy_top_down(td::ITime& time, const td::List<td::uint32>& hiera
     }
     td::Duration duration = time.get_duration_since_start() - start;
     
-    td::uint32 num_entities_destroyed = 0;
     for( td::Entity* entity : td::Entity::get_all() ) {
         entity->destroy();
-        num_entities_destroyed++;
     }
-    std::printf("Num entities destroyed: %u\n", num_entities_destroyed);
-
-    std::printf("Entities: %u / %u\n",
-        td::internal::Registry<td::Entity>::get_num_allocated_components(),
-        td::internal::Registry<td::Entity>::get_num_blocks() * td::internal::Registry<td::Entity>::BLOCK_SIZE
-    );   
-
-    std::printf("Transforms: %u / %u\n",
-        td::internal::Registry<td::DynamicTransform>::get_num_allocated_components(),
-        td::internal::Registry<td::DynamicTransform>::get_num_blocks() * td::internal::Registry<td::DynamicTransform>::BLOCK_SIZE
-    );   
 
     return duration;
 }

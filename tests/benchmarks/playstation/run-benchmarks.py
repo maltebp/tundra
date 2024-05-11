@@ -22,6 +22,9 @@ BENCHMARKS = [
     ("entity-system.destroy-with-siblings", 1),
     ("transforms.construct-top-down", 1),
     ("transforms.construct-bottom-up", 1),
+    ("transforms.destroy-top-down", 1),
+    ("transforms.destroy-bottom-up", 1),
+    ("transforms.update-root", 1),
 ]
 
 script_folder = Path(os.path.realpath(__file__)).parent

@@ -12,7 +12,7 @@ const td::EngineSettings ENGINE_SETTINGS { 30000 };
 
 extern void initialize(td::EngineSystems&) { }
 
-void construct_top_down_recursion(
+void construct_bottom_up_recursion(
     td::ITime& time, 
     const td::List<td::uint32>& hierarchy, 
     td::List<td::Entity*>& entities, 
@@ -29,14 +29,15 @@ void construct_top_down_recursion(
         entities.remove_at(entities.get_size() - 1);
 
         td::DynamicTransform* child = entity->add_component<td::DynamicTransform>();
+    
+        construct_bottom_up_recursion(time, hierarchy, entities, child, current_depth + 1, transforms_in_destruction_order);
+
         parent->add_child(child);
         transforms_in_destruction_order.add(child);
-
-        construct_top_down_recursion(time, hierarchy, entities, child, current_depth + 1, transforms_in_destruction_order);
     }
 }
 
-td::Duration destroy_top_down(td::ITime& time, const td::List<td::uint32>& hierarchy) {
+td::Duration destroy_bottom_up(td::ITime& time, const td::List<td::uint32>& hierarchy) {
 
     print_hierarchy(hierarchy);
 
@@ -56,10 +57,10 @@ td::Duration destroy_top_down(td::ITime& time, const td::List<td::uint32>& hiera
         entities.remove_at(entities.get_size() - 1);
 
         td::DynamicTransform* root = entity->add_component<td::DynamicTransform>();
-        transforms_in_destruction_order.add(root);
-
-        construct_top_down_recursion(time, hierarchy, entities, root, 0, transforms_in_destruction_order);    
         
+        construct_bottom_up_recursion(time, hierarchy, entities, root, 0, transforms_in_destruction_order);    
+        
+        transforms_in_destruction_order.add(root);        
     }
 
     // The measured destruction
@@ -78,10 +79,10 @@ td::Duration destroy_top_down(td::ITime& time, const td::List<td::uint32>& hiera
 
 extern void update(td::EngineSystems& engine_systems, const td::FrameTime&) {
     
-    td::Duration duration_small = destroy_top_down(engine_systems.time, HIERARCHY_SMALL);
-    td::Duration duration_medium = destroy_top_down(engine_systems.time, HIERARCHY_MEDIUM);
-    td::Duration duration_large = destroy_top_down(engine_systems.time, HIERARCHY_LARGE);
-    td::Duration duration_wide = destroy_top_down(engine_systems.time, HIERARCHY_WIDE);
+    td::Duration duration_small = destroy_bottom_up(engine_systems.time, HIERARCHY_SMALL);
+    td::Duration duration_medium = destroy_bottom_up(engine_systems.time, HIERARCHY_MEDIUM);
+    td::Duration duration_large = destroy_bottom_up(engine_systems.time, HIERARCHY_LARGE);
+    td::Duration duration_wide = destroy_bottom_up(engine_systems.time, HIERARCHY_WIDE);
 
     std::printf("Small, Medium, Large, Wide\n");
     
