@@ -83,10 +83,15 @@ namespace td {
             return count;
         }
 
+        static internal::Registry<Entity>::Iterable get_all() {
+            return internal::Registry<Entity>::get_all();
+        }
+
+
     private:
 
         virtual void free() override final {
-            internal::Registry<Entity>::free_component(static_cast<Entity*>(this));
+            internal::Registry<Entity>::free_component(this);
         }
 
         Entity() = default;

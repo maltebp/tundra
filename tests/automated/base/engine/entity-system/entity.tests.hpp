@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tundra/core/log.hpp"
+#include "tundra/engine/entity-system/internal/registry.dec.hpp"
 #include <tundra/test-framework/test.hpp>
 #include <tundra/test-framework/test-assert.hpp>
 #include <tundra/test-framework/utility/constructor-statistics.hpp>
@@ -42,6 +44,8 @@ namespace td::entity_tests {
         TD_TEST_ASSERT_EQUAL(component_2->a, 1);
         TD_TEST_ASSERT_EQUAL(component_2->b, 2);
         TD_TEST_ASSERT_EQUAL(component_2->c, 3);
+
+        entity->destroy();
     }
 
     TD_TEST("entity-system/entity/destroy") {
@@ -82,6 +86,48 @@ namespace td::entity_tests {
         entity->destroy();
 
         TD_TEST_ASSERT_EQUAL(TestComponent::num_destructors_called,3U);
+    }
+    
+
+    TD_TEST("entity-system/entity/get-all") {
+
+        TD_ASSERT(
+            internal::Registry<td::Entity>::get_num_components() == 0, 
+            "Entities was not cleared before running the test"
+        );
+
+        td::List<Entity*> not_found_entities;
+        td::List<Entity*> not_destroyed_entities;
+
+        for( td::uint32 i = 0; i < 100; i++ ) {
+            Entity* entity = Entity::create();    
+            not_found_entities.add(entity);
+            not_destroyed_entities.add(entity);
+        }
+
+        for( td::Entity* entity : td::Entity::get_all() ) {
+            bool entity_was_found = not_found_entities.remove(entity);
+            TD_TEST_ASSERT_EQUAL(entity_was_found, true);           
+        }
+
+        TD_TEST_ASSERT_EQUAL(not_found_entities.get_size(), 0U);           
+
+        // Destroying the entities
+        for( td::Entity* entity : td::Entity::get_all() ) {
+            entity->destroy();
+            
+            bool was_found = not_destroyed_entities.remove(entity);
+            TD_TEST_ASSERT_EQUAL(was_found, true);                       
+        }
+        TD_TEST_ASSERT_EQUAL(not_destroyed_entities.get_size(), 0U);       
+        
+        // Ensuring there are no more entities
+        td::uint32 num_entities_remaining = 0U;
+        for( [[maybe_unused]] td::Entity* entity : td::Entity::get_all() ) {
+            num_entities_remaining++;
+        }
+
+        TD_TEST_ASSERT_EQUAL(num_entities_remaining, 0U);       
     }
 
 }
