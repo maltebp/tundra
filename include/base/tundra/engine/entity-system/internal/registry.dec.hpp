@@ -32,6 +32,8 @@ namespace td::internal {
         // Only use this for testing and if you know what you are doing
         static void clear_block_list();
 
+        // Returns the number of alive components + the number dead components
+        // that have not been freed yet
         static uint32 get_num_allocated_components();
 
         static uint32 get_num_blocks();
