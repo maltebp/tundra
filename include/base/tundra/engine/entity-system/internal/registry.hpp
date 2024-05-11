@@ -54,12 +54,12 @@ namespace td::internal {
 
     template<typename TComponent>
     void Registry<TComponent>::clear_block_list() {
-        TD_ASSERT(get_num_components() == 0, "All components must be destroyed before clearing blocks");
+        TD_ASSERT(get_num_allocated_components() == 0, "All components must be destroyed before clearing blocks");
         blocks.clear();
     }
 
     template<typename TComponent>
-    uint32 Registry<TComponent>::get_num_components() { 
+    uint32 Registry<TComponent>::get_num_allocated_components() { 
         // We can track this when components are created instead, if 
         // accumulating this when needed becomes a performance issue
 

@@ -92,7 +92,7 @@ namespace td::entity_tests {
     TD_TEST("entity-system/entity/get-all") {
 
         TD_ASSERT(
-            internal::Registry<td::Entity>::get_num_components() == 0, 
+            internal::Registry<td::Entity>::get_num_allocated_components() == 0, 
             "Entities was not cleared before running the test"
         );
 

@@ -61,19 +61,19 @@ namespace td::entity_system_chaotic_test {
 
         internal::Registry<Entity>::clear_block_list();
 
-        TD_TEST_ASSERT_EQUAL(internal::Registry<Entity>::get_num_components(), 0U);
+        TD_TEST_ASSERT_EQUAL(internal::Registry<Entity>::get_num_allocated_components(), 0U);
 
         List<Entity*> set_1 = create_entity_set(100, component_refs);
 
-        TD_TEST_ASSERT_EQUAL(internal::Registry<Entity>::get_num_components(), 100U);
+        TD_TEST_ASSERT_EQUAL(internal::Registry<Entity>::get_num_allocated_components(), 100U);
 
         List<Entity*> set_2 = create_entity_set(100, component_refs);
 
-        TD_TEST_ASSERT_EQUAL(internal::Registry<Entity>::get_num_components(), 200U);
+        TD_TEST_ASSERT_EQUAL(internal::Registry<Entity>::get_num_allocated_components(), 200U);
 
         destroy_entity_set(set_1);
 
-        TD_TEST_ASSERT_EQUAL(internal::Registry<Entity>::get_num_components(), 100U);
+        TD_TEST_ASSERT_EQUAL(internal::Registry<Entity>::get_num_allocated_components(), 100U);
 
         List<Entity*> set_3 = create_entity_set(50, component_refs);
         List<Entity*> set_4 = create_entity_set(50, component_refs);

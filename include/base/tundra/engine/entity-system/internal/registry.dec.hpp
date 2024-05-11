@@ -32,7 +32,7 @@ namespace td::internal {
         // Only use this for testing and if you know what you are doing
         static void clear_block_list();
 
-        static uint32 get_num_components();
+        static uint32 get_num_allocated_components();
 
         static uint32 get_num_blocks();
 
