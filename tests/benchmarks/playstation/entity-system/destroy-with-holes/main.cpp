@@ -2,7 +2,8 @@
 
 #include <tundra/engine/entity-system/entity.hpp>
 
-#include "general.hpp"
+#include "base.hpp"
+#include "entity-system/base.hpp"
 #include "tundra/core/list.dec.hpp"
 #include "tundra/core/types.hpp"
 

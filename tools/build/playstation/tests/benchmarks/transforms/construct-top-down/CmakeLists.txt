@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 
-set( TD_PROJECT_NAME entity-system.construct-in-holes)
+set( TD_PROJECT_NAME transforms.construct-top-down)
 
-set( TD_PROJECT_DIR_SRC ${TD_DIR_TESTS}/benchmarks/playstation/entity-system/construct-in-holes )
+set( TD_PROJECT_DIR_SRC ${TD_DIR_TESTS}/benchmarks/playstation/transforms/construct-top-down)
 
 set( TD_PROJECT_SOURCES
 	${TD_PROJECT_DIR_SRC}/main.cpp

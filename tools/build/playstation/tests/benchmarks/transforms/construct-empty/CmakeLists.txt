@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 
-set( TD_PROJECT_NAME entity-system.construct-in-holes)
+set( TD_PROJECT_NAME entity-system.construct-empty)
 
-set( TD_PROJECT_DIR_SRC ${TD_DIR_TESTS}/benchmarks/playstation/entity-system/construct-in-holes )
+set( TD_PROJECT_DIR_SRC ${TD_DIR_TESTS}/benchmarks/playstation/entity-system/construct-empty )
 
 set( TD_PROJECT_SOURCES
 	${TD_PROJECT_DIR_SRC}/main.cpp
@@ -16,6 +16,6 @@ target_link_libraries(${TD_PROJECT_NAME} PRIVATE td.playstation.engine)
 
 target_include_directories(${TD_PROJECT_NAME} 
     PRIVATE ${TD_TESTS_DIR_SRC}
-    PRIVATE ${TD_DIR_TESTS}/benchmarks/playstation)
+    PRIVATE ${TD_DIR_TESTS}/benchmarks/playstation/entity-system)
 
 source_group(TREE ${TD_PROJECT_DIR_SRC} PREFIX src FILES ${TD_PROJECT_SOURCES})

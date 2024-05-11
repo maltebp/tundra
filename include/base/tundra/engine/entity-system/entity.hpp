@@ -87,7 +87,6 @@ namespace td {
             return internal::Registry<Entity>::get_all();
         }
 
-
     private:
 
         virtual void free() override final {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <tundra/engine/entity-system/component.hpp>
-#include <tundra/core/time.hpp>
 
 class SmallComponent : public td::Component<SmallComponent> {
 public:
@@ -36,13 +35,6 @@ public:
     td::uint32 data16;
 };
 
-static td::Duration measure(td::ITime& time, void (*function_to_measure)()) {
-    td::Duration start = time.get_duration_since_start();
-    function_to_measure();
-    td::Duration end = time.get_duration_since_start();
-    return end - start;
-}
-
 namespace internal {
     static volatile td::uint32 count = 0;
 }
@@ -55,5 +47,3 @@ void iterate_components() {
         internal::count = internal::count + 1;
     }
 }
-
-static __inline__ void pcsx_exit(int16_t code) { *((volatile int16_t* )0x1f802082) = code; }

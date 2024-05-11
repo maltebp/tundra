@@ -1,7 +1,7 @@
     #pragma once
 
 #include "tundra/engine/entity-system/internal/component-meta-data.hpp"
-#include <tundra/core/vec/vec3.dec.hpp>
+#include <tundra/core/vec/vec3.hpp>
 #include <tundra/engine/entity-system/component-ref.hpp>
 #include <tundra/engine/transform-matrix.hpp>
 #include <tundra/engine/transform.hpp>

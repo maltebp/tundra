@@ -20,6 +20,8 @@ BENCHMARKS = [
     ("entity-system.destroy-empty", 1),
     ("entity-system.destroy-with-holes", 1), 
     ("entity-system.destroy-with-siblings", 1),
+    ("transforms.construct-top-down", 1),
+    ("transforms.construct-bottom-up", 1),
 ]
 
 script_folder = Path(os.path.realpath(__file__)).parent
@@ -38,7 +40,7 @@ for benchmark, num_repitions in BENCHMARKS:
         print(f'Benchmark does not exist: "{benchmark_path}"', file=sys.stderr)
         sys.exit(1)
 
-    print(f"Running benchmark: {benchmark_path}")
+    print(f"Running benchmark: {benchmark}")
 
     headers = None
     values = []
