@@ -20,7 +20,7 @@ set(_TD_MODEL_COMPILER_PATH ${TUNDRA_DIR}/bin/release/td-asset-compiler.exe)
 # Some generatl setup
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
-add_compile_options("$<$<CONFIG:RELEASE>:-DNO_ASSERT>")
+add_compile_options("$<$<CONFIG:RELEASE>:-DTD_NO_ASSERTS>")
 
 # Setup for psn00bsdk
 set( CMAKE_MAKE_PROGRAM "${TD_DIR_EXTERNAL}/psn00bsdk/bin/ninja.exe" CACHE FILEPATH "" )

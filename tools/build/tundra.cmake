@@ -6,7 +6,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
 
-add_compile_options("$<$<CONFIG:RELEASE>:-DNO_ASSERT>")
+add_compile_options("$<$<CONFIG:RELEASE>:-DTD_NO_ASSERTS>")
 
 get_filename_component(TD_DIR_ROOT ${CMAKE_CURRENT_LIST_DIR}/../.. ABSOLUTE)
 get_filename_component(TD_DIR_SRC ${CMAKE_CURRENT_LIST_DIR}/../../src ABSOLUTE)
