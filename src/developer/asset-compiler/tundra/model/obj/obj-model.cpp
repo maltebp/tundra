@@ -11,10 +11,11 @@
 namespace td::ac {
 
 	ObjFace triangulate_face(const ObjFace& face) {
+		if( face.indices.size() == 3 ) return face;
 
 		ObjFace triangulated_face;
 
-			const Int3 first_indices = face.indices[0];
+		const Int3 first_indices = face.indices[0];
 		Int3 previous_indices = face.indices[1];
 		for( int i = 2; i < face.indices.size(); i++ ) {
 			triangulated_face.indices.push_back(first_indices);
@@ -64,7 +65,7 @@ namespace td::ac {
 		
 
 		model_asset->num_uvs = (uint16)this->uvs.size();
-		model_asset->uvs = new ::Vec2<int16>[model_asset->num_normals];
+		model_asset->uvs = new ::Vec2<int16>[model_asset->num_uvs];
 		for( int i = 0; i < model_asset->num_uvs; i++ ) {
 			model_asset->uvs[i] = {
 				(int16)(FIXED_4_12_ONE * (this->uvs[i].x)),
@@ -141,10 +142,12 @@ namespace td::ac {
 			}
 		}
 
+		TD_ASSERT(model_parts.size() <= std::numeric_limits<uint16>::max(), "Too many model parts (was %ll", model_parts.size());
+
 		model_asset->num_parts = (uint16)model_parts.size();
 		model_asset->model_parts = new ModelPart*[model_asset->num_parts];
 
-		for( std::size_t i = 0; i < model_parts.size(); i++ ) {
+		for( uint16 i = 0; i < model_asset->num_parts; i++ ) {
 			model_asset->model_parts[i] = model_parts[i];
 		}
 
