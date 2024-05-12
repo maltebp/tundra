@@ -3,6 +3,7 @@
 #include "tundra/core/assert.hpp"
 #include "tundra/core/string-util.hpp"
 #include "tundra/engine/entity-system/component.dec.hpp"
+#include "tundra/engine/entity-system/internal/component-base.hpp"
 #include "tundra/engine/entity-system/internal/registry-block.dec.hpp"
 #include "tundra/engine/entity-system/internal/registry.dec.hpp"
 #include <tundra/test-framework/test.hpp>
@@ -253,6 +254,27 @@ namespace td::component_ref_tests {
         for( [[maybe_unused]] TestComponent* _ : TestComponent::get_all() ) {
             TD_TEST_ASSERT_EQUAL(false, true);
         }
+    }
+
+    TD_TEST("engine/entity-system/component-ref/ref-to-base-class-destroy") {
+
+        class Base : public internal::ComponentBase {
+        public:
+            virtual ~Base() = default;
+        };
+
+        class Derived : public td::Component<Derived, Base> { public: int i = 0; };
+
+        Entity* e = Entity::create();
+
+        {
+            ComponentRef<Base> base_ref = e->add_component<Derived>();
+            e->destroy();
+
+            TD_TEST_ASSERT_EQUAL(td::internal::Registry<Derived>::get_num_allocated_components(), 1U);
+        }
+
+        TD_TEST_ASSERT_EQUAL(td::internal::Registry<Derived>::get_num_allocated_components(), 0U);
     }
 
     // TODO: The entity system's destruction behaviour should change so this test will pass
