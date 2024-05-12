@@ -213,7 +213,7 @@ extern void initialize(td::EngineSystems& engine_systems) {
     };
 
     create_text("This is some text", { 90, 60 });
-    create_text("This is some more text", { 80, 210});
+    create_text("This is some more text", { 70, 210});
     create_text("... and more text!", {100, 220});
 }
 
