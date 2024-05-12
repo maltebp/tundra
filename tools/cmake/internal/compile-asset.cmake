@@ -16,7 +16,8 @@ function(_td_compile_asset_model target asset_name asset_input_path asset_output
         ${_TD_MODEL_COMPILER_PATH}
         ${asset_input_path}
         ${asset_output_path}
-        OUTPUT_FILE ${asset_output_path}.log)
+        OUTPUT_FILE ${asset_output_path}.log
+        ERROR_FILE ${asset_output_path}.log)
 
     if( NOT EXISTS ${asset_output_path} )
         message(FATAL_ERROR "When compiling ${asset_path}: ouput asset was not created - something went wrong!")
