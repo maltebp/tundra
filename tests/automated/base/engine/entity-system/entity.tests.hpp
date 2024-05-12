@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tundra/core/log.hpp"
+#include "tundra/engine/entity-system/component-ref.hpp"
 #include "tundra/engine/entity-system/internal/registry.dec.hpp"
 #include <tundra/test-framework/test.hpp>
 #include <tundra/test-framework/test-assert.hpp>
@@ -88,6 +89,27 @@ namespace td::entity_tests {
         entity->destroy();
 
         TD_TEST_ASSERT_EQUAL(TestComponent::num_destructors_called,3U);
+    }
+
+    TD_TEST("entity-system/entity/destroy-entity-with-component-refs") {
+
+        TD_ASSERT(
+            internal::Registry<TestComponent>::get_num_allocated_components() == 0, 
+            "%d TestComponent still allocated when starting test",
+            internal::Registry<TestComponent>::get_num_allocated_components()
+        );
+        
+        Entity* entity = Entity::create();
+
+        {
+            ComponentRef<TestComponent> ref = entity->add_component<TestComponent>();
+            TD_TEST_ASSERT_EQUAL(internal::Registry<TestComponent>::get_num_allocated_components(), 1U);
+            entity->destroy();
+            
+            TD_TEST_ASSERT_EQUAL(internal::Registry<TestComponent>::get_num_allocated_components(), 1U);
+        }
+        
+        TD_TEST_ASSERT_EQUAL(internal::Registry<TestComponent>::get_num_allocated_components(), 0U);
     }
 
     TD_TEST("entity-system/entity/get-all") {
