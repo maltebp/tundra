@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.21)
+
+set( TD_PROJECT_NAME sprite-rendering.textures)
+
+set( TD_PROJECT_DIR_SRC ${TD_DIR_TESTS}/benchmarks/playstation/sprite-rendering/textures)
+
+set( TD_PROJECT_SOURCES
+	${TD_PROJECT_DIR_SRC}/main.cpp
+)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/benchmarks)
+psn00bsdk_add_executable(${TD_PROJECT_NAME} GPREL ${TD_PROJECT_SOURCES})
+
+td_target_assets(${TD_PROJECT_NAME} ${TD_DIR_TESTS}/data 
+    TEXTURE tex_rainbow_32 textures/rainbow_32x32.png
+    TEXTURE tex_rainbow_128 textures/rainbow_128x128.png
+    TEXTURE tex_rainbow_256 textures/rainbow_256x256.png
+    TEXTURE tex_rainbow_256_p textures/rainbow_256x256_palette8.png PALETTE8
+)
+
+target_link_libraries(${TD_PROJECT_NAME} PRIVATE td.base)
+target_link_libraries(${TD_PROJECT_NAME} PRIVATE td.playstation.engine)
+
+target_include_directories(${TD_PROJECT_NAME} 
+    PRIVATE ${TD_TESTS_DIR_SRC}
+    PRIVATE ${TD_DIR_TESTS}/benchmarks/playstation)
+
+source_group(TREE ${TD_PROJECT_DIR_SRC} PREFIX src FILES ${TD_PROJECT_SOURCES})

@@ -1,7 +1,5 @@
 #include <tundra/startup.hpp>
 
-#include <cstdlib>
-
 #include <tundra/engine/entity-system/entity.hpp>
 #include <tundra/core/duration.hpp>
 #include <tundra/core/fixed.hpp>
@@ -9,35 +7,27 @@
 #include <tundra/engine/dynamic-transform.hpp>
 #include <tundra/rendering/render-system.hpp>
 #include <tundra/rendering/camera.hpp>
+#include <tundra/assets/model/model-asset.hpp>
+#include <tundra/assets/texture/texture-asset.hpp>
+#include <tundra/rendering/model.hpp>
 
 #include "base.hpp"
 
 #include "model-rendering/base.hpp"
-#include "tundra/assets/model/model-asset.hpp"
-#include "tundra/assets/texture/texture-asset.hpp"
-#include "tundra/rendering/model.hpp"
+#include "tundra/rendering/sprite.hpp"
 
 const td::EngineSettings ENGINE_SETTINGS { 30000 };
 
 namespace assets {
-    extern "C" const uint8_t mdl_plane_1x1[];
-    extern "C" const uint8_t mdl_plane_2x2[];
-    extern "C" const uint8_t mdl_plane_16x16[];
-
-    extern "C" const uint8_t mdl_plane_1x1_flat_textured[];
-    extern "C" const uint8_t mdl_plane_2x2_flat_textured[];
-    extern "C" const uint8_t mdl_plane_16x16_flat_textured[];
-
-    extern "C" const uint8_t mdl_plane_1x1_smooth[];
-    extern "C" const uint8_t mdl_plane_2x2_smooth[];
-    extern "C" const uint8_t mdl_plane_16x16_smooth[];
-
-    extern "C" const uint8_t tex_herman[];
+    extern "C" const uint8_t tex_rainbow_32[];
+    extern "C" const uint8_t tex_rainbow_128[];
+    extern "C" const uint8_t tex_rainbow_256[];
+    extern "C" const uint8_t tex_rainbow_256_p[];
 }
 
 struct Test {
     td::String name = "NO TEST";
-    const td::ModelAsset* model = nullptr;
+    const td::TextureAsset* model = nullptr;
     td::uint32 count = 0;
 };
 
@@ -52,7 +42,7 @@ struct TestResult {
 td::List<Test> tests;
 Test current_test;
 td::List<TestResult> results;
-td::List<td::Entity*> models;
+td::List<td::Entity*> sprite_entities;
 
 td::List<td::Fixed32<12>> submission_time;
 td::List<td::Fixed32<12>> draw_time;
@@ -71,32 +61,36 @@ void start_new_test(const Test& test) {
 
     current_test = test;
 
-    for( td::uint32 i = 0; i < models.get_size(); i++ ) {
-        models[i]->destroy();
+    for( td::uint32 i = 0; i < sprite_entities.get_size(); i++ ) {
+        sprite_entities[i]->destroy();
     }    
-    models.clear();
+    sprite_entities.clear();
 
-    td::Fixed32<12> step_size = td::Fixed32<12>{1} / (int)test.count;
+    td::Vec2<td::Fixed32<12>> size { 
+        td::Fixed32<12>{ (td::int32)(320 / test.count) }, 
+        td::Fixed32<12>{ (td::int32)(240 / test.count) } 
+    };
+
+    td::Vec2<td::Fixed32<12>> half_size = size * td::Fixed32<12>{td::to_fixed(0.5)};
+
     for( td::uint32 i = 0; i < test.count; i++ ) {
         for( td::uint32 j = 0; j < test.count; j++ ) {
             td::Entity* entity = td::Entity::create();
-            td::DynamicTransform* transform = entity->add_component<td::DynamicTransform>();
-            transform->set_translation({step_size * (int)i, step_size * (int)j, 0});
-            transform->set_rotation({td::to_fixed(-0.25), 0, 0});
-            entity->add_component<td::Model>(*test.model, 0U, transform);
-            models.add(entity);
+            td::Sprite* sprite = entity->add_component<td::Sprite>(0U);
+            sprite->texture = test.model;
+            sprite->size = size;
+            sprite->position = { size.x * (int)i, size.y * (int)j }; 
+            sprite->position += half_size;
+            sprite_entities.add(entity);
         }        
     }
 
     frame_count = 0;
     is_first_frame_in_test = true;
-        
 }
 
 extern void initialize(td::EngineSystems& engine_systems) { 
     engine_systems.render.set_clear_color({255U,255U,255U});
-    engine_systems.render.set_light_direction(0, {td::to_fixed(0.71), 0, td::to_fixed(0.71)});
-    engine_systems.render.set_light_color(0, {80, 80, 80});
 
     td::Entity* camera_entity = td::Entity::create();
     td::DynamicTransform* camera_transform = camera_entity->add_component<td::DynamicTransform>();
@@ -111,20 +105,26 @@ extern void initialize(td::EngineSystems& engine_systems) {
     draw_time.reserve(NUM_FRAMES * 2);
     num_triangles_rendered.reserve(NUM_FRAMES * 2);
 
-    const td::TextureAsset* herman = engine_systems.asset_load.load_texture(assets::tex_herman);
+    const td::TextureAsset* rainbow_32 = engine_systems.asset_load.load_texture(assets::tex_rainbow_32);
+    const td::TextureAsset* rainbow_128 = engine_systems.asset_load.load_texture(assets::tex_rainbow_128);
+    const td::TextureAsset* rainbow_256 = engine_systems.asset_load.load_texture(assets::tex_rainbow_256);
+    const td::TextureAsset* rainbow_256_p = engine_systems.asset_load.load_texture(assets::tex_rainbow_256_p);
 
-    // TODO: Add models
-    tests.add({ "Small", engine_systems.asset_load.load_model(assets::mdl_plane_1x1), 16 });
-    tests.add({ "Medium", engine_systems.asset_load.load_model(assets::mdl_plane_2x2), 8 });
-    tests.add({ "Large", engine_systems.asset_load.load_model(assets::mdl_plane_16x16), 1 });
+    tests.add({ "1 x 32x32", rainbow_32, 1U });
+    tests.add({ "64 x 32x32", rainbow_32, 8U });
+    tests.add({ "256 x 32x32", rainbow_32, 16U });
 
-    tests.add({ "1x1 textured", engine_systems.asset_load.load_model(assets::mdl_plane_1x1_flat_textured, herman), 16 });
-    tests.add({ "2x2 textured", engine_systems.asset_load.load_model(assets::mdl_plane_2x2_flat_textured, herman), 8 });
-    tests.add({ "16x16 textured", engine_systems.asset_load.load_model(assets::mdl_plane_16x16_flat_textured, herman), 1 });
+    tests.add({ "1 x 128x128", rainbow_128, 1U });
+    tests.add({ "64 x 128x128", rainbow_128, 8U });
+    tests.add({ "256 x 128x128", rainbow_128, 16U });
 
-    tests.add({ "1x1 smooth", engine_systems.asset_load.load_model(assets::mdl_plane_1x1_smooth), 16 });
-    tests.add({ "2x2 smooth", engine_systems.asset_load.load_model(assets::mdl_plane_2x2_smooth), 8 });
-    tests.add({ "16x16 smooth", engine_systems.asset_load.load_model(assets::mdl_plane_16x16_smooth), 1 });
+    tests.add({ "1 x 256x256", rainbow_256, 1U });
+    tests.add({ "64 x 256x256", rainbow_256, 8U });
+    tests.add({ "256 x 256x256", rainbow_256, 16U });
+
+    tests.add({ "1 x 256x256 CLUT", rainbow_256_p, 1U });
+    tests.add({ "64 x 256x256 CLUT", rainbow_256_p, 8U });
+    tests.add({ "256 x 256x256 CLUT", rainbow_256_p, 16U });
 
     Test next_test = tests[0];
     tests.remove_at(0);

@@ -1,7 +1,5 @@
 #include <tundra/startup.hpp>
 
-#include <cstdlib>
-
 #include <tundra/engine/entity-system/entity.hpp>
 #include <tundra/core/duration.hpp>
 #include <tundra/core/fixed.hpp>
@@ -23,16 +21,6 @@ namespace assets {
     extern "C" const uint8_t mdl_plane_1x1[];
     extern "C" const uint8_t mdl_plane_2x2[];
     extern "C" const uint8_t mdl_plane_16x16[];
-
-    extern "C" const uint8_t mdl_plane_1x1_flat_textured[];
-    extern "C" const uint8_t mdl_plane_2x2_flat_textured[];
-    extern "C" const uint8_t mdl_plane_16x16_flat_textured[];
-
-    extern "C" const uint8_t mdl_plane_1x1_smooth[];
-    extern "C" const uint8_t mdl_plane_2x2_smooth[];
-    extern "C" const uint8_t mdl_plane_16x16_smooth[];
-
-    extern "C" const uint8_t tex_herman[];
 }
 
 struct Test {
@@ -81,7 +69,11 @@ void start_new_test(const Test& test) {
         for( td::uint32 j = 0; j < test.count; j++ ) {
             td::Entity* entity = td::Entity::create();
             td::DynamicTransform* transform = entity->add_component<td::DynamicTransform>();
-            transform->set_translation({step_size * (int)i, step_size * (int)j, 0});
+            transform->set_translation({
+                step_size * (int)i,
+                step_size * (int)j,
+                200 // This z is out of view
+            });
             transform->set_rotation({td::to_fixed(-0.25), 0, 0});
             entity->add_component<td::Model>(*test.model, 0U, transform);
             models.add(entity);
@@ -111,20 +103,9 @@ extern void initialize(td::EngineSystems& engine_systems) {
     draw_time.reserve(NUM_FRAMES * 2);
     num_triangles_rendered.reserve(NUM_FRAMES * 2);
 
-    const td::TextureAsset* herman = engine_systems.asset_load.load_texture(assets::tex_herman);
-
-    // TODO: Add models
-    tests.add({ "Small", engine_systems.asset_load.load_model(assets::mdl_plane_1x1), 16 });
-    tests.add({ "Medium", engine_systems.asset_load.load_model(assets::mdl_plane_2x2), 8 });
-    tests.add({ "Large", engine_systems.asset_load.load_model(assets::mdl_plane_16x16), 1 });
-
-    tests.add({ "1x1 textured", engine_systems.asset_load.load_model(assets::mdl_plane_1x1_flat_textured, herman), 16 });
-    tests.add({ "2x2 textured", engine_systems.asset_load.load_model(assets::mdl_plane_2x2_flat_textured, herman), 8 });
-    tests.add({ "16x16 textured", engine_systems.asset_load.load_model(assets::mdl_plane_16x16_flat_textured, herman), 1 });
-
-    tests.add({ "1x1 smooth", engine_systems.asset_load.load_model(assets::mdl_plane_1x1_smooth), 16 });
-    tests.add({ "2x2 smooth", engine_systems.asset_load.load_model(assets::mdl_plane_2x2_smooth), 8 });
-    tests.add({ "16x16 smooth", engine_systems.asset_load.load_model(assets::mdl_plane_16x16_smooth), 1 });
+    tests.add({ "1x1 flat", engine_systems.asset_load.load_model(assets::mdl_plane_1x1), 16 });
+    tests.add({ "2x2 flat", engine_systems.asset_load.load_model(assets::mdl_plane_2x2), 8 });
+    tests.add({ "16x16 flat", engine_systems.asset_load.load_model(assets::mdl_plane_16x16), 1 });
 
     Test next_test = tests[0];
     tests.remove_at(0);

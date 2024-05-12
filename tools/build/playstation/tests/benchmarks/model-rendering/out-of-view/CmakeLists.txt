@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 
-set( TD_PROJECT_NAME model-rendering.flat-color)
+set( TD_PROJECT_NAME model-rendering.out-of-view)
 
-set( TD_PROJECT_DIR_SRC ${TD_DIR_TESTS}/benchmarks/playstation/model-rendering/flat-color)
+set( TD_PROJECT_DIR_SRC ${TD_DIR_TESTS}/benchmarks/playstation/model-rendering/out-of-view)
 
 set( TD_PROJECT_SOURCES
 	${TD_PROJECT_DIR_SRC}/main.cpp
@@ -15,15 +15,6 @@ td_target_assets(${TD_PROJECT_NAME} ${TD_DIR_TESTS}/data
     MODEL mdl_plane_1x1 models/plane_1x1_flat_untextured.obj    
     MODEL mdl_plane_2x2 models/plane_2x2_flat_untextured.obj    
     MODEL mdl_plane_16x16 models/plane_16x16.obj
-
-    MODEL mdl_plane_1x1_flat_textured models/plane_1x1_flat_textured.obj    
-    MODEL mdl_plane_2x2_flat_textured models/plane_2x2_flat_textured.obj    
-    MODEL mdl_plane_16x16_flat_textured models/plane_16x16_flat_textured.obj    
-
-    
-    MODEL mdl_plane_1x1_smooth models/plane_1x1_smooth.obj    
-    MODEL mdl_plane_2x2_smooth models/plane_2x2_smooth.obj    
-    MODEL mdl_plane_16x16_smooth models/plane_16x16_smooth.obj    
 
     TEXTURE tex_herman textures/herman.png PALETTE8
 )

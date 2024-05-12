@@ -52,6 +52,11 @@ namespace td {
         
         Duration get_submit_duration() const { return submit_duration; }
 
+        uint32 get_num_allocated_bytes_in_buffer() const { 
+            DoubleBufferId inactive_buffer = active_buffer == DoubleBufferId::First ? DoubleBufferId::Second : DoubleBufferId::First;
+            return primitive_buffers[(uint8)inactive_buffer].get_num_allocated_byte();
+        }
+
     private:
 
         void render_camera(Camera* camera);    
