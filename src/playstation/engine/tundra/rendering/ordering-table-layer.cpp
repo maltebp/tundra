@@ -70,7 +70,13 @@ namespace td {
             x, y,
             text.get_c_string());
 
-        uint32 allocated_size = (uint32)((byte*)allocation_ptr - allocation_end);
+        TD_ASSERT(
+            allocation_end >= allocation_ptr,
+            "FntSort returned pointer end pointer (%p) that is before starting pointer (%p)",
+            allocation_end, allocation_ptr
+        );
+
+        uint32 allocated_size = (uint32)(allocation_end - allocation_ptr);
         TD_ASSERT(allocated_size > 0, "FntSort allocated no primitives");
         
         void* allocated_ptr = primitive_buffer.allocate(allocated_size - 1);

@@ -206,10 +206,15 @@ extern void initialize(td::EngineSystems& engine_systems) {
 
     // Create text
 
-    td::Text* text = td::Entity::create()->add_component<td::Text>(LAYER_FOREGROUND);
-    text->position = { 100, 210 };
-    text->text = "This is some text";
+    auto create_text = [](const td::String& text, td::Vec2<td::Fixed32<12>> position) {
+        td::Text* text_component = td::Entity::create()->add_component<td::Text>(LAYER_FOREGROUND);
+        text_component->position = position;
+        text_component->text = text;
+    };
 
+    create_text("This is some text", { 90, 60 });
+    create_text("This is some more text", { 80, 210});
+    create_text("... and more text!", {100, 220});
 }
 
 extern void update(td::EngineSystems& engine_systems, const td::FrameTime&) {
