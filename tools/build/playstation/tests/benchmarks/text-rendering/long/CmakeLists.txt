@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.21)
+
+set( TD_PROJECT_NAME text-rendering.long)
+
+set( TD_PROJECT_DIR_SRC ${TD_DIR_TESTS}/benchmarks/playstation/text-rendering/long)
+
+set( TD_PROJECT_SOURCES
+	${TD_PROJECT_DIR_SRC}/main.cpp
+)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/benchmarks)
+psn00bsdk_add_executable(${TD_PROJECT_NAME} GPREL ${TD_PROJECT_SOURCES})
+
+target_link_libraries(${TD_PROJECT_NAME} PRIVATE td.base)
+target_link_libraries(${TD_PROJECT_NAME} PRIVATE td.playstation.engine)
+
+target_include_directories(${TD_PROJECT_NAME} 
+    PRIVATE ${TD_TESTS_DIR_SRC}
+    PRIVATE ${TD_DIR_TESTS}/benchmarks/playstation)
+
+source_group(TREE ${TD_PROJECT_DIR_SRC} PREFIX src FILES ${TD_PROJECT_SOURCES})
+
+psn00bsdk_add_cd_image(
+	${TD_PROJECT_NAME}.iso      # Target name
+	${TD_PROJECT_NAME} # Output file name (.bin and .cue)
+	${CMAKE_CURRENT_SOURCE_DIR}/iso.xml  # Path to config file
+	DEPENDS ${TD_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/system.cnf
+)
