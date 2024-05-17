@@ -10,23 +10,30 @@ PCSX_REDUX_PATH = 'C:/Users/malte/tools/pcsx-redux/pcsx-redux.exe'
 BASE_ARGS = [ '-testmode', '-run' ]
 # See https://pcsx-redux.consoledev.net/cli_flags/
 
+
+# DuckStation CLI: https://github.com/stenzek/duckstation/wiki/Command-Line-Arguments
+
 BENCHMARKS = [ 
-    ('entity-system.iterate-no-holes', 1),
-    ('entity-system.iterate-interleaved-holes', 1),
-    ('entity-system.iterate-big-holes', 1),
-    ("entity-system.construct-empty", 1),
-    ("entity-system.construct-in-holes", 1),
-    ("entity-system.construct-with-siblings", 1),
-    ("entity-system.destroy-empty", 1),
-    ("entity-system.destroy-with-holes", 1), 
-    ("entity-system.destroy-with-siblings", 1),
-    ("transforms.construct-top-down", 1),
-    ("transforms.construct-bottom-up", 1),
-    ("transforms.destroy-top-down", 1),
-    ("transforms.destroy-bottom-up", 1),
-    ("transforms.update-root", 1),
-    ("transforms.compute-no-changes", 3),
-    ("transforms.compute-all-dirty", 3),
+    # ('entity-system.iterate-no-holes', 1),
+    # ('entity-system.iterate-interleaved-holes', 1),
+    # ('entity-system.iterate-big-holes', 1),
+    # ("entity-system.construct-empty", 1),
+    # ("entity-system.construct-in-holes", 1),
+    # ("entity-system.construct-with-siblings", 1),
+    # ("entity-system.destroy-empty", 1),
+    # ("entity-system.destroy-with-holes", 1), 
+    # ("entity-system.destroy-with-siblings", 1),
+    # ("transforms.construct-top-down", 1),
+    # ("transforms.construct-bottom-up", 1),
+    # ("transforms.destroy-top-down", 1),
+    # ("transforms.destroy-bottom-up", 1),
+    # ("transforms.update-root", 1),
+    # ("transforms.compute-no-changes", 1),
+    # ("transforms.compute-all-dirty", 1),
+    ("transforms.compute-all-dirty-bottom-to-top", 1),
+    ("model-rendering.flat-color", 1),
+    ("model-rendering.out-of-view", 1),
+    ("sprite-rendering.textures", 1),
 ]
 
 script_folder = Path(os.path.realpath(__file__)).parent

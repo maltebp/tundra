@@ -19,3 +19,10 @@ target_include_directories(${TD_PROJECT_NAME}
     PRIVATE ${TD_DIR_TESTS}/benchmarks/playstation)
 
 source_group(TREE ${TD_PROJECT_DIR_SRC} PREFIX src FILES ${TD_PROJECT_SOURCES})
+
+psn00bsdk_add_cd_image(
+	${TD_PROJECT_NAME}.iso      # Target name
+	${TD_PROJECT_NAME} # Output file name (.bin and .cue)
+	${CMAKE_CURRENT_SOURCE_DIR}/iso.xml  # Path to config file
+	DEPENDS ${TD_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/system.cnf
+)
