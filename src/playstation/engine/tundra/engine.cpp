@@ -41,7 +41,7 @@ namespace td {
         // Set the origin of screen space
         gte_SetGeomOffset(320 / 2, 240/ 2);
         
-        // Set screen depth (basically FOV control, W/2 works best)
+        // Set screen depth (basically FOV)
         gte_SetGeomScreen(320 / 2);
 
         PlayStationTime time;

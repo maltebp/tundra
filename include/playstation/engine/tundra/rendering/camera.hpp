@@ -38,6 +38,10 @@ namespace td {
 
         OrderingTableLayer& get_ordering_table_layer(DoubleBufferId ordering_table_id, uint32 layer_id);
 
+        void set_field_of_view(td::Fixed32<12> field_of_view);
+
+        td::Fixed32<12> get_field_of_view() { return field_of_view; }
+
         void look_at(const Vec3<Fixed32<12>>& target);
 
         const ComponentRef<DynamicTransform> transform;
@@ -47,6 +51,11 @@ namespace td {
     private:
 
         OrderingTable ordering_tables[2];
+
+        td::Fixed32<12> field_of_view = 30;
+
+        // Cached calculation based on fov
+        uint16 h_register_value; 
 
         friend class RenderSystem;
         

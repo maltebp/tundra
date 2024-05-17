@@ -141,6 +141,15 @@ namespace td {
         return radians * PI_MULTIPLY_FACTOR;
     }
 
+    // Returns radians to "number of revolutions" (i.e. 1 is 360 degrees or 2 PI)
+    template<typename TFixed>
+    [[nodiscard]] constexpr TFixed degrees_to_radians(TFixed degrees) 
+        noexcept requires(std::is_base_of<internal::FixedNonTemplateBase, TFixed>::value) 
+    {
+        constexpr TFixed DEG_TO_RAD_FACTOR = td::to_fixed(0.017453292519943);
+        return degrees * DEG_TO_RAD_FACTOR;
+    }
+
     template<typename TFixed>
     [[nodiscard]] constexpr TFixed sqrt(TFixed x) 
         noexcept requires(std::is_base_of<internal::FixedNonTemplateBase, TFixed>::value) 
@@ -333,4 +342,19 @@ namespace td {
     {
         return radians_to_revolutions(atan2_radians(y, x));
     }
+
+    template <typename TFixed>
+    [[nodiscard]] constexpr TFixed tan_degrees(TFixed x) noexcept
+        requires(std::is_base_of<internal::FixedNonTemplateBase, TFixed>::value) 
+    {
+        TFixed x_radians = degrees_to_radians(x);
+        TFixed cx = cos_radians(x_radians);
+
+        // Tangent goes to infinity at 90 and -90 degrees.
+        // We can't represent that with fixed-point maths.
+        TD_ASSERT(::td::abs(cx).get_raw_value() > 1, "Invalid tan value");
+
+        return sin_radians(x_radians) / cx;
+    }
+
 }

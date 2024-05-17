@@ -245,6 +245,9 @@ namespace td {
 
         TD_ASSERT(camera->transform != nullptr, "Camera's transform is nullptr");
 
+        // Set screen depth (basically FOV)
+        gte_SetGeomScreen(camera->h_register_value);
+
         const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
 
         for( Model* model : Model::get_all() ) {
