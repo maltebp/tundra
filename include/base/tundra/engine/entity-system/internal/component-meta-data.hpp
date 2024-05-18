@@ -18,11 +18,17 @@ namespace td::internal {
     class ComponentMetaData {
     public:
 
-        [[nodiscard]] bool is_allocated() const;
+        [[nodiscard]] bool is_alive() const { 
+            return (bool)(flags & ComponentFlags::IsAlive);
+        }
 
-        [[nodiscard]] bool is_alive() const;
+        [[nodiscard]] bool is_allocated() const { 
+            return (bool)(flags & ComponentFlags::IsAllocated);
+        }
 
-        [[nodiscard]] bool is_entity() const;
+        [[nodiscard]] bool is_entity() const { 
+            return (bool)(flags & ComponentFlags::IsEntity);
+        }
 
     private:
 

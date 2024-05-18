@@ -43,6 +43,22 @@ namespace td::internal {
         
         static Iterable get_all();
 
+        static void for_each(void(*callback)(TComponent* t)) {
+            for( td::uint32 i = 0; i < blocks.get_size(); i++ ) {
+                RegistryBlock<TComponent>& block = blocks[i];
+                for( td::uint16 j = 0; j < block.capacity; j++ ) {
+                    TComponent* entry = &block.entries[j];
+                    // if( !entry->is_allocated() ) {
+                    //     j = entry->hole_index + 1;
+                    // }
+                    // else 
+                    if( entry->is_alive() ) {
+                        callback(entry);
+                    }
+                }
+            }
+        }
+
         // TODO: Make this tweakable by user (this number is pulled out of a hat)
         static inline constexpr uint32 BLOCK_SIZE = 25; 
         

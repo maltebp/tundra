@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tundra/engine/entity-system/internal/registry-block.dec.hpp"
 #include <tundra/engine/entity-system/internal/registry.dec.hpp>
 
 #include <tundra/core/assert.hpp>
@@ -91,99 +92,71 @@ namespace td::internal {
         return blocks.get_last();
     }
 
-    // OPTIMIZATION: This is a bit messy, and I'm pretty sure it can be optimized
     template<typename TComponent>
     class Registry<TComponent>::Iterator {
     public:
-
-        using BlockIterator = RegistryBlock<TComponent>::Iterator;
 
         enum class Type { Begin, End };
 
         constexpr Iterator(Type type) {
             if( type == Type::End || Registry::get_num_blocks() == 0 ) {
                 block_index = Registry::get_num_blocks();
-                block_iterator = {};
+                index_in_block = 0;
             }
             else {
                 block_index = 0;
-                block_iterator = Registry::blocks[0].begin();
-                move_to_next_valid_if_at_invalid();
+                index_in_block = 0;
+                block = &Registry::blocks[0];
+                if( !is_at_end_of_last_block() ) {
+                    increment_while_at_invalid();
+                }
             }
         }
 
         constexpr bool operator==(const Iterator& other) const {
-            
-            if( is_at_end_of_last_block() ) {
-                return other.is_at_end_of_last_block();
-            }
-            else {
-                return block_index == other.block_index && block_iterator == other.block_iterator;
-            }
+            return block_index == other.block_index && index_in_block == other.index_in_block;
         }
 
-        constexpr Iterator& operator++() {
-            if( is_at_end_of_last_block() ) return *this;
+        constexpr Iterator& operator++() {        
 
-            TD_ASSERT(
-                block_iterator != BlockIterator{},
-                "Block index is less than number of blocks, but iterator is nullptr"
-            );           
-
-            ++block_iterator;
-            move_to_next_valid_if_at_invalid(); 
+            ++index_in_block;
+            increment_while_at_invalid(); 
 
             return *this;
         }
 
         constexpr TComponent* operator*() {
             TD_ASSERT(block_index < Registry::get_num_blocks(), "Dereferencing end iterator");
-            return *block_iterator;
+            return &block->entries[index_in_block];
         }
 
     private:
 
         bool is_at_end_of_last_block() const { return block_index >= Registry::get_num_blocks(); }
 
-        void move_to_next_valid_if_at_invalid() {
-            if( is_at_end_of_last_block() ) return;
-
-            while(true) {
-                
-                move_to_next_block_if_at_current_block_end();
-                if( is_at_end_of_last_block() ) return;
-                
-                TComponent* component = *block_iterator;
-                if( component->is_alive() ) return;
-
-                ++block_iterator;
-            }
-        }
-
-        void move_to_next_block_if_at_current_block_end() {
-
-            if( is_at_end_of_last_block() ) return;
-
-            bool is_at_end_of_current_block = block_iterator == Registry::blocks[block_index].end();
-            if( !is_at_end_of_current_block ) return;
-
-            // Find next, non-empty block
-            block_index++;
-            while(block_index < Registry::get_num_blocks()) {
-                RegistryBlock<TComponent>& block = Registry::blocks[block_index];
-                if( block.get_num_allocated_components() > 0 ) {
-                    block_iterator = block.begin();
-                    break;
+        void increment_while_at_invalid() {
+            while( true ) {
+                if( index_in_block >= block->capacity ) {
+                    block_index++;   
+                    index_in_block = 0;
                 }
-                else {
-                    block_index++;
+
+                if( block_index >= Registry::get_num_blocks() ) return;
+                block = &Registry::blocks[block_index];
+                
+                if( block->entries[index_in_block].is_alive() ) return;
+
+                if( !block->entries[index_in_block].is_allocated() ) {
+                    index_in_block = block->entries[index_in_block].hole_index;
                 }
+
+                index_in_block++;
             }
         }
 
         uint32 block_index;
-
-        BlockIterator block_iterator;
+        uint32 index_in_block;
+        RegistryBlock<TComponent>* block;
 
     };
 
