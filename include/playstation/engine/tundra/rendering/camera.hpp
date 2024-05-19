@@ -40,7 +40,7 @@ namespace td {
 
         void set_field_of_view(td::Fixed32<12> field_of_view);
 
-        td::Fixed32<12> get_field_of_view() { return field_of_view; }
+        td::Fixed32<12> get_field_of_view() { return field_of_view_degrees; }
 
         void look_at(const Vec3<Fixed32<12>>& target);
 
@@ -52,10 +52,10 @@ namespace td {
 
         OrderingTable ordering_tables[2];
 
-        td::Fixed32<12> field_of_view = 30;
+        td::Fixed32<12> field_of_view_degrees = 60;
 
         // Cached calculation based on fov
-        uint16 h_register_value; 
+        uint16 near_plane_distance; 
 
         friend class RenderSystem;
         

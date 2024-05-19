@@ -47,8 +47,8 @@ constexpr td::Vec3<td::uint8> DIRECTIONAL_LIGHT_COLORS[3] {
 };
 
 
-constexpr td::Fixed32<12> CAMERA_HEIGHT { td::to_fixed(0.1) };
-constexpr td::Fixed32<12> CAMERA_XZ_DISTANCE {td::to_fixed(0.2)};
+constexpr td::Fixed32<12> CAMERA_HEIGHT { td::to_fixed(0.15) };
+constexpr td::Fixed32<12> CAMERA_XZ_DISTANCE {td::to_fixed(0.3)};
 constexpr td::Vec3<td::Fixed32<12>> CAMERA_TARGET { 0 };
 
 constexpr td::uint32 LAYER_FOREGROUND = 0;

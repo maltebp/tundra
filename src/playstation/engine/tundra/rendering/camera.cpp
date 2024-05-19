@@ -15,8 +15,7 @@ namespace td {
 
     constexpr static uint16 field_of_view_to_h_register_value(td::Fixed32<12> field_of_view) {
         constexpr td::Fixed32<12> WIDTH = 320;
-        return (uint16)(((WIDTH - 1) * td::tan_degrees(field_of_view / 2) / 2)).get_raw_integer();
-        // 0.5*(w-1)*tan(0.5*fov)
+        return (uint16)((WIDTH * td::to_fixed(0.5)) / td::tan_degrees(field_of_view / 2)).get_raw_integer();
     }        
 
     List<uint32> get_layer_ids(const List<CameraLayerSettings>& layer_settings) {
@@ -42,7 +41,7 @@ namespace td {
         :   transform(transform),
             layers_to_render(get_layer_ids(layers_to_render)),
             ordering_tables{get_ordering_table_settings(layers_to_render), get_ordering_table_settings(layers_to_render)},
-            h_register_value(field_of_view_to_h_register_value(field_of_view))
+            near_plane_distance(field_of_view_to_h_register_value(field_of_view_degrees))
     { 
         TD_ASSERT(layers_to_render.get_size() > 0, "Must render at least one layer");
     }
@@ -53,11 +52,11 @@ namespace td {
         return ordering_tables[(uint8)ordering_table_id].get_layer(ordering_table_layer_index);
     }
 
-    void Camera::set_field_of_view(td::Fixed32<12> field_of_view) {
-        TD_ASSERT(field_of_view > 0, "Field of view must be larger than 0 (was %s)", field_of_view);
-        TD_ASSERT(field_of_view < 180, "Field of view must be less than 180 (was %s)", field_of_view);
-        this->field_of_view = field_of_view;
-        h_register_value = field_of_view_to_h_register_value(field_of_view);
+    void Camera::set_field_of_view(td::Fixed32<12> field_of_view_degrees) {
+        TD_ASSERT(field_of_view_degrees > 0, "Field of view must be larger than 0 (was %s)", field_of_view_degrees);
+        TD_ASSERT(field_of_view_degrees < 180, "Field of view must be less than 180 (was %s)", field_of_view_degrees);
+        this->field_of_view_degrees = field_of_view_degrees;
+        near_plane_distance = field_of_view_to_h_register_value(field_of_view_degrees);
     }
 
     void Camera::look_at(const Vec3<Fixed32<12>>& target) {
