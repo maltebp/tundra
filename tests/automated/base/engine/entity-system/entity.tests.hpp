@@ -71,6 +71,28 @@ namespace td::entity_tests {
         TD_TEST_ASSERT_EQUAL(td::internal::Registry<TestComponent>::get_num_allocated_components(), 0U);
     }
 
+    TD_TEST("entity-system/entity/destroy-group-destroys-entity") {
+        TestComponent::reset_constructor_counters();
+
+        Entity* entity = Entity::create();
+
+        TestComponent* component_1 = entity->add_component<TestComponent>();
+        TestComponent* component_2 = entity->add_component<TestComponent>();
+        TestComponent* component_3 = entity->add_component<TestComponent>();
+
+        TD_TEST_ASSERT_EQUAL(TestComponent::num_destructors_called, 0U);
+
+        component_1->destroy_group();
+
+        TD_TEST_ASSERT_EQUAL(TestComponent::num_destructors_called, 3U);
+
+        TD_TEST_ASSERT_EQUAL(component_1->is_alive(), false);
+        TD_TEST_ASSERT_EQUAL(component_2->is_alive(), false);
+        TD_TEST_ASSERT_EQUAL(component_3->is_alive(), false);
+
+        TD_TEST_ASSERT_EQUAL(td::internal::Registry<TestComponent>::get_num_allocated_components(), 0U);
+    }
+
     TD_TEST("entity-system/entity/destroy-component") {
         TestComponent::reset_constructor_counters();
 
