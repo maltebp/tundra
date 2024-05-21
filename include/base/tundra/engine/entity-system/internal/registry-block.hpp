@@ -11,8 +11,9 @@ namespace td::internal {
 
 
     template<typename TComponent>
-    RegistryBlock<TComponent>::RegistryBlock(uint16 capacity) 
-        :   capacity(capacity),
+    RegistryBlock<TComponent>::RegistryBlock(td::uint8 index, uint16 capacity) 
+        :   index(index),
+            capacity(capacity),
             entries((TComponent*) ::operator new(sizeof(TComponent) * capacity))
     {
         // There are some edge cases that I am not handling to support a block
@@ -31,7 +32,8 @@ namespace td::internal {
 
     template<typename TComponent>
     RegistryBlock<TComponent>::RegistryBlock(RegistryBlock&& other) 
-        :   capacity(other.capacity),
+        :   index(other.index),
+            capacity(other.capacity),
             entries(other.entries),
             hole_indices(td::move(other.hole_indices)),
             num_entries(other.num_entries)

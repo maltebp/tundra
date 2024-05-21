@@ -40,13 +40,14 @@ namespace td::internal {
         static Iterable get_all();
 
         // TODO: Make this tweakable by user (this number is pulled out of a hat)
-        static inline constexpr uint32 BLOCK_SIZE = 25; 
+        static inline constexpr uint32 BLOCK_SIZE = 25  ; 
         
     private:
 
         static RegistryBlock<TComponent>& get_free_block();
 
         static inline List<RegistryBlock<TComponent>> blocks;
+        static inline List<typename RegistryBlock<TComponent>::BlockIndex> free_blocks;
 
     };
 

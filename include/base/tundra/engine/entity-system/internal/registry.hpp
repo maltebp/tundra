@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tundra/core/limits.hpp"
 #include "tundra/engine/entity-system/internal/registry-block.dec.hpp"
 #include <tundra/engine/entity-system/internal/registry.dec.hpp>
 
@@ -14,13 +15,22 @@ namespace td::internal {
     template<typename TComponent>
     template<typename ... TArgs>
     TComponent* Registry<TComponent>::create_component(TArgs&& ... args) {
+        
+        RegistryBlock<TComponent>& block = get_free_block();
+        bool block_is_filled = block.get_num_allocated_components() == BLOCK_SIZE - 1;
 
-        TComponent* component = get_free_block().allocate_component();
+        if( block_is_filled ) {
+            // We are always given the last block
+            free_blocks.remove_at(free_blocks.get_size() - 1);
+        }
+
+        TComponent* component = block.allocate_component();
         new(component) TComponent(forward<TArgs>(args)...);
 
         component->flags |= ComponentFlags::IsAllocated | ComponentFlags::IsAlive; 
         component->reference_count = 0;
         component->next = component;
+        component->block_index = block.index;
         
         return component;
     }
@@ -39,18 +49,18 @@ namespace td::internal {
 
         TD_ASSERT( !component->is_alive(), "Component is still alive when freed");
         TD_ASSERT( component->is_allocated(), "Component has not been allocated when freed");
+        TD_ASSERT(
+            component->block_index < blocks.get_size(), 
+            "Component block index is out of bounds (was %d, but there are only %d blocks)", 
+            component->block_index, blocks.get_size()
+        );
         
-        RegistryBlock<TComponent>* owning_block = nullptr;
-        for( uint32 i = 0; i < blocks.get_size(); i++ ) {
-            if( blocks[i].component_belongs_to_block(component) ) {
-                owning_block = &blocks[i];
-                break;
-            }
-        }
-        
-        TD_ASSERT(owning_block != nullptr, "Component was not part of any block");
+        RegistryBlock<TComponent>& owning_block = blocks[component->block_index];        
         component->~TComponent();
-        owning_block->free_component(component);
+        if( !owning_block.has_free_entry() ) {
+            free_blocks.add(owning_block.index);
+        }
+        owning_block.free_component(component);
     }   
 
     template<typename TComponent>
@@ -82,14 +92,21 @@ namespace td::internal {
 
     template<typename TComponent>   
     RegistryBlock<TComponent>& Registry<TComponent>::get_free_block() {
-        for( uint32 i = 0; i < blocks.get_size(); i++ ) {
-            RegistryBlock<TComponent>& block = blocks[i];
-            if( block.has_free_entry() ) return block;
-        }
+        if( free_blocks.get_size() > 0 ) return blocks[free_blocks.get_last()];
+
+        TD_ASSERT(
+            blocks.get_size() < td::limits::numeric_limits<decltype(RegistryBlock<TComponent>::index)>::max(),
+            "Maximum number of %d blocks reached",
+            td::limits::numeric_limits<decltype(RegistryBlock<TComponent>::index)::max()
+        );
+
+        td::uint8 new_block_index = static_cast<decltype(RegistryBlock<TComponent>::index)>(blocks.get_size());
 
         // No blocks are free, so we allocate new
-        blocks.add(RegistryBlock<TComponent>(BLOCK_SIZE));
-        return blocks.get_last();
+        blocks.add(RegistryBlock<TComponent>(new_block_index, BLOCK_SIZE));
+        free_blocks.add(new_block_index);
+        
+        return blocks[free_blocks.get_last()];
     }
 
     template<typename TComponent>
