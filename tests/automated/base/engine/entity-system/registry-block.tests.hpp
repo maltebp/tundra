@@ -21,7 +21,7 @@ namespace td::internal::registy_block_tests {
 
     TD_TEST("entity-system/registry-block/create-and-delete") {
 
-        RegistryBlock<TestComponent> registry_block{2};
+        RegistryBlock<TestComponent> registry_block{0, 2};
 
         TestComponent* component_1 = registry_block.allocate_component();
         TD_TEST_ASSERT_EQUAL(registry_block.get_num_allocated_components(), 1);
@@ -40,7 +40,7 @@ namespace td::internal::registy_block_tests {
 
     TD_TEST("entity-system/registry-block/extending-hole") {
 
-        RegistryBlock<TestComponent> registry_block{3};
+        RegistryBlock<TestComponent> registry_block{0, 3};
 
         TestComponent* component_1;
         TestComponent* component_2;
@@ -80,7 +80,7 @@ namespace td::internal::registy_block_tests {
 
     TD_TEST("entity-system/registry-block/merging-hole") {
 
-        RegistryBlock<TestComponent> registry_block{3};
+        RegistryBlock<TestComponent> registry_block{0, 3};
 
         TestComponent* component_1 = registry_block.allocate_component();
         TestComponent* component_2 = registry_block.allocate_component();
@@ -100,7 +100,7 @@ namespace td::internal::registy_block_tests {
 
     TD_TEST("entity-system/registry-block/delete-and-recreate") {
 
-        RegistryBlock<TestComponent> registry_block{10};
+        RegistryBlock<TestComponent> registry_block{0, 10};
 
         List<TestComponent*> allocated_components;
 
@@ -141,7 +141,7 @@ namespace td::internal::registy_block_tests {
         // it would set the newly freed component (which is the new tail), to
         // point to itself as the head of the hole it belongs to.
 
-        RegistryBlock<TestComponent> registry_block{5};
+        RegistryBlock<TestComponent> registry_block{0, 5};
         
         // It has to be 4 components (with only 3, it would not happen)
         TestComponent* c1 = registry_block.allocate_component();
@@ -170,7 +170,7 @@ namespace td::internal::registy_block_tests {
         // which is essentially the same as merging-holes-1, except this runs
         // the merging of 2 holes, instead of just extending the previous hole
         
-        RegistryBlock<TestComponent> registry_block{5}; 
+        RegistryBlock<TestComponent> registry_block{0, 5}; 
 
         TestComponent* c0 = registry_block.allocate_component();
         TestComponent* c1 = registry_block.allocate_component();

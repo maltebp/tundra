@@ -43,6 +43,7 @@ namespace td::internal {
 
         ComponentFlags flags;
         uint8_t reference_count;
+        uint8_t block_index;
         
         union {
             ComponentBase* next;

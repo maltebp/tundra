@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tundra/core/types.hpp"
 #include <tundra/core/list.dec.hpp>
 
 namespace td::internal {
@@ -14,7 +15,9 @@ namespace td::internal {
     class RegistryBlock {
     public:
 
-        RegistryBlock(uint16 capacity);
+        using BlockIndex = td::uint8;
+
+        RegistryBlock(BlockIndex index, uint16 capacity);
 
         RegistryBlock(const RegistryBlock&) = delete;
 
@@ -44,6 +47,7 @@ namespace td::internal {
 
     private:
 
+        const BlockIndex index;
         const uint16 capacity;
         TComponent* entries;
         td::List<uint16> hole_indices; // Indices of entries that are hole heads
