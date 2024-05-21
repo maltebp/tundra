@@ -18,6 +18,15 @@ namespace td::internal {
     class ComponentMetaData {
     public:
 
+        struct HoleData {
+            
+            // If this is the hole head, this is the index of the hole tail, and
+            // if it is the tail, it is the index of the hole head.
+            uint16 index_to_opposite_end;
+
+            uint16 index_in_hole_list;
+        };
+
         [[nodiscard]] bool is_alive() const { 
             return (bool)(flags & ComponentFlags::IsAlive);
         }
@@ -36,8 +45,8 @@ namespace td::internal {
         uint8_t reference_count;
         
         union {
-            ComponentBase* next; // TODO: Should this be a pointer to a component?
-            uint16 hole_index;
+            ComponentBase* next;
+            HoleData hole_data;
         };
 
         template<typename TComponent>

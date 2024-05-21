@@ -80,25 +80,29 @@ void td::List<T>::reserve(td::uint32 capacity_to_reserve) {
 }
 
 template<typename T>
-void td::List<T>::add(const T& element) {
+td::uint32 td::List<T>::add(const T& element) {
     if( size == capacity ) {
         uint32 new_size = capacity == 0 ? 2 : capacity * 2;
         reallocate(new_size);
     }
 
-    new (elements + size) T(element);
+    td::uint32 index = size;
+    new (elements + index) T(element);
     size++;
+    return index;
 }
 
 template<typename T>
-void td::List<T>::add(T&& element) {
+td::uint32 td::List<T>::add(T&& element) {
     if( size == capacity ) {
         uint32 new_size = capacity == 0 ? 2 : capacity * 2;
         reallocate(new_size);
     }
 
-    new (elements + size) T(td::move(element));
+    td::uint32 index = size;
+    new (elements + index) T(td::move(element));
     size++;
+    return index;
 }
 
 template<typename T>

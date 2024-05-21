@@ -55,11 +55,11 @@ namespace td::internal {
 
         // Set head to point to tail
         ComponentMetaData* hole_head = static_cast<ComponentMetaData*>(entries);
-        hole_head->hole_index = capacity - 1;
+        hole_head->hole_data.index_to_opposite_end = capacity - 1;
 
         // Set tail to point to head
         ComponentMetaData* hole_tail = static_cast<ComponentMetaData*>(entries + capacity - 1);
-        hole_tail->hole_index = 0;
+        hole_tail->hole_data.index_to_opposite_end = 0;
 
         hole_indices.clear();
         hole_indices.add(0);
@@ -80,14 +80,14 @@ namespace td::internal {
 
         ComponentMetaData* hole_head = static_cast<ComponentMetaData*>(entries + head_index);
 
-        uint16 tail_index = hole_head->hole_index;
+        uint16 tail_index = hole_head->hole_data.index_to_opposite_end;
     
         TD_ASSERT(
             tail_index < capacity, 
             "RegistryBlock's hole's tail index was out of bounds (index was %d, but capacity is %d)",
             tail_index, capacity);
 
-        TComponent* hole_tail_entry = static_cast<TComponent*>(entries + hole_head->hole_index);
+        TComponent* hole_tail_entry = static_cast<TComponent*>(entries + hole_head->hole_data.index_to_opposite_end);
 
         // Adjust the hole
         ComponentMetaData* hole_tail = static_cast<ComponentMetaData*>(hole_tail_entry);
@@ -105,8 +105,8 @@ namespace td::internal {
                 new_tail_index, capacity);
             
             ComponentMetaData* new_tail = static_cast<ComponentMetaData*>(entries + new_tail_index);
-            new_tail->hole_index = head_index;
-            hole_head->hole_index = new_tail_index;
+            new_tail->hole_data.index_to_opposite_end = head_index;
+            hole_head->hole_data.index_to_opposite_end = new_tail_index;
         }            
 
         hole_tail_entry->flags |= ComponentFlags::IsAllocated;
@@ -134,69 +134,63 @@ namespace td::internal {
 
         if( next_entry_is_hole && previous_entry_is_hole ) {
 
-            uint16 merged_hole_head_index = previous_entry->hole_index;
-            uint16 merged_hole_tail_index = next_entry->hole_index;
+            uint16 merged_hole_head_index = previous_entry->hole_data.index_to_opposite_end;
+            uint16 merged_hole_tail_index = next_entry->hole_data.index_to_opposite_end;
 
             // Merge the 2 holes
             ComponentMetaData* merged_hole_head = static_cast<ComponentMetaData*>(entries + merged_hole_head_index);
             ComponentMetaData* merged_hole_tail = static_cast<ComponentMetaData*>(entries + merged_hole_tail_index);
 
-            merged_hole_head->hole_index = merged_hole_tail_index;
-            merged_hole_tail->hole_index = merged_hole_head_index;
+            merged_hole_head->hole_data.index_to_opposite_end = merged_hole_tail_index;
+            merged_hole_tail->hole_data.index_to_opposite_end = merged_hole_head_index;
 
-            // We can leave this, the next and previous entries untouched, 
-            // because they now reside within the hole
-
-            // I believe this is a bit faster than looking for the index in
-            // the regular way and then deleting it
-            for(uint32 i = 0; i < hole_indices.get_size(); i++ ) {
-                ComponentMetaData* hole_entry = static_cast<ComponentMetaData*>(entries + hole_indices[i]);
-                if( hole_entry == next_entry ) {
-                    // Move last to new slot and delete the end (we don't care)
-                    // about the order in this list
-                    hole_indices[i] = hole_indices.get_last();
-                    hole_indices.remove_at(hole_indices.get_size() - 1);
-                    break;
-                }
-            }
+            // Remove the next entry from the hole list
+            uint16 last_hole_index = hole_indices.get_last();
+            ComponentMetaData* last_hole = entries + hole_indices.get_last();
+            last_hole->hole_data.index_in_hole_list = next_entry->hole_data.index_in_hole_list;
+            hole_indices[next_entry->hole_data.index_in_hole_list] = last_hole_index;
+            hole_indices.remove_at(hole_indices.get_size() - 1);
         }
         else if( previous_entry_is_hole ){
             // Append entry to existing hole
             ComponentMetaData* previous_hole_tail = previous_entry;
-            uint16 hole_head_index = previous_hole_tail->hole_index;
+            uint16 hole_head_index = previous_hole_tail->hole_data.index_to_opposite_end;
             ComponentMetaData* previous_hole_head = static_cast<ComponentMetaData*>(entries + hole_head_index);
 
             // Set the hole's tail index to point to next entry (the component we just freed)
-            previous_hole_head->hole_index++;
+            previous_hole_head->hole_data.index_to_opposite_end++;
 
-            component_meta_data->hole_index = hole_head_index;
+            component_meta_data->hole_data.index_to_opposite_end = hole_head_index;
         }
         else if( next_entry_is_hole ){
             // Prepend entry to existing hole
             ComponentMetaData* hole_head = next_entry;
-            ComponentMetaData* hole_tail = static_cast<ComponentMetaData*>(entries + hole_head->hole_index);
+            ComponentMetaData* hole_tail = static_cast<ComponentMetaData*>(entries + hole_head->hole_data.index_to_opposite_end);
             
-            uint16 tail_index = hole_head->hole_index;
-            uint16 current_head_index = hole_tail->hole_index;
+            uint16 tail_index = hole_head->hole_data.index_to_opposite_end;
+            uint16 current_head_index = hole_tail->hole_data.index_to_opposite_end;
             uint16 new_head_index = current_head_index - 1;
 
             // Remove current head from list
-            uint32 element_to_replace = hole_indices.index_of(current_head_index);
+            uint32 hole_index_in_hole_list = hole_head->hole_data.index_in_hole_list;
             TD_ASSERT(
-                element_to_replace < td::limits::numeric_limits<uint32>::max,
+                hole_index_in_hole_list < td::limits::numeric_limits<uint32>::max,
                 "RegistryBlock's hole starting at index %d was not found", 
                 current_head_index);
             
             // Hole head is now the entry before (i.e. the one we just deleted)
-            hole_indices[element_to_replace] = new_head_index;
+            hole_indices[hole_index_in_hole_list] = new_head_index;
 
-            hole_tail->hole_index = new_head_index;
-            component_meta_data->hole_index = tail_index;
+            hole_tail->hole_data.index_to_opposite_end = new_head_index;
+            component_meta_data->hole_data.index_to_opposite_end = tail_index;
+            component_meta_data->hole_data.index_in_hole_list = hole_head->hole_data.index_in_hole_list;
         }
         else {
             // Add new hole
-            component_meta_data->hole_index = get_index_of_component(component);
-            hole_indices.add(component_meta_data->hole_index);
+            component_meta_data->hole_data.index_to_opposite_end = get_index_of_component(component);
+            component_meta_data->hole_data.index_in_hole_list = (uint16)hole_indices.add(
+                component_meta_data->hole_data.index_to_opposite_end
+            );
         }
 
         component_meta_data->flags = ComponentFlags::None;
