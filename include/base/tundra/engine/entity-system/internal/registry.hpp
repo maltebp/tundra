@@ -64,6 +64,19 @@ namespace td::internal {
     }   
 
     template<typename TComponent>
+    void Registry<TComponent>::reserve(td::uint32 num_components_to_reserve) {
+        int32 missing_capacity = (int32)num_components_to_reserve - (int32)get_capacity();
+        if( missing_capacity > 0 ) {
+            uint32 required_additional_blocks = (uint32)((missing_capacity / (int32)BLOCK_SIZE) + 1);
+            blocks.reserve(blocks.get_size() + uint32(required_additional_blocks));
+            free_blocks.reserve(free_blocks.get_size() + required_additional_blocks);
+            for( td::uint32 i = 0; i < required_additional_blocks; i++ ) {
+                allocate_block();
+            }
+        }
+    }
+
+    template<typename TComponent>
     void Registry<TComponent>::clear_block_list() {
         TD_ASSERT(get_num_allocated_components() == 0, "All components must be destroyed before clearing blocks");
         blocks.clear();
@@ -86,6 +99,9 @@ namespace td::internal {
     uint32 Registry<TComponent>::get_num_blocks() { return blocks.get_size(); }
 
     template<typename TComponent>
+    uint32 Registry<TComponent>::get_capacity() { return blocks.get_size() * BLOCK_SIZE; }
+
+    template<typename TComponent>
     Registry<TComponent>::Iterable Registry<TComponent>::get_all() {
         return Registry<TComponent>::Iterable();
     }
@@ -93,7 +109,11 @@ namespace td::internal {
     template<typename TComponent>   
     RegistryBlock<TComponent>& Registry<TComponent>::get_free_block() {
         if( free_blocks.get_size() > 0 ) return blocks[free_blocks.get_last()];
+        return allocate_block();
+    }
 
+    template<typename TComponent>   
+    RegistryBlock<TComponent>& Registry<TComponent>::allocate_block() {
         TD_ASSERT(
             blocks.get_size() < td::limits::numeric_limits<decltype(RegistryBlock<TComponent>::index)>::max(),
             "Maximum number of %d blocks reached",

@@ -15,6 +15,9 @@ namespace td {
 
         static internal::Registry<TDerived>::Iterable get_all();
 
+        // Ensures that there is allocated room for at least num_components
+        static void reserve(td::uint32 num_components);
+
     private:
     
         virtual void free() override final;
