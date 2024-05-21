@@ -44,7 +44,7 @@ namespace td {
             static constexpr inline unsigned char min = 0;
             static constexpr inline unsigned char max = UCHAR_MAX;
         };
-
+    
         template<>
         struct numeric_limits<unsigned short> {
             static constexpr inline unsigned short min = 0;

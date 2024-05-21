@@ -2,6 +2,7 @@
 
 #include "tundra/core/limits.hpp"
 #include "tundra/engine/entity-system/internal/registry-block.dec.hpp"
+#include <limits>
 #include <tundra/engine/entity-system/internal/registry.dec.hpp>
 
 #include <tundra/core/assert.hpp>
@@ -80,6 +81,7 @@ namespace td::internal {
     void Registry<TComponent>::clear_block_list() {
         TD_ASSERT(get_num_allocated_components() == 0, "All components must be destroyed before clearing blocks");
         blocks.clear();
+        free_blocks.clear();
     }
 
     template<typename TComponent>
@@ -115,9 +117,9 @@ namespace td::internal {
     template<typename TComponent>   
     RegistryBlock<TComponent>& Registry<TComponent>::allocate_block() {
         TD_ASSERT(
-            blocks.get_size() < td::limits::numeric_limits<decltype(RegistryBlock<TComponent>::index)>::max(),
-            "Maximum number of %d blocks reached",
-            td::limits::numeric_limits<decltype(RegistryBlock<TComponent>::index)::max()
+            blocks.get_size() < (td::uint32)std::numeric_limits<decltype(RegistryBlock<TComponent>::index)>::max,
+            "Maximum number of %u blocks reached",
+            (td::uint32)std::numeric_limits<decltype(RegistryBlock<TComponent>::index)>::max
         );
 
         td::uint8 new_block_index = static_cast<decltype(RegistryBlock<TComponent>::index)>(blocks.get_size());
