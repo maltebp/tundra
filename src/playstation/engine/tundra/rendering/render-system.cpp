@@ -62,6 +62,9 @@ namespace td {
         const uint16 SCREEN_WIDTH = 320;
         const uint16 SCREEN_HEIGHT = 240;
 
+        const uint16 SCREEN_WIDTH_CLIP = (uint16)(320 * 1.25);
+        const uint16 SCREEN_HEIGHT_CLIP = (uint16)(320 * 1.25);
+
         SVECTOR* vec3_int16_as_svector(const ::Vec3<td::int16>& vec3) {
             return const_cast<SVECTOR*>(reinterpret_cast<const SVECTOR*>(&vec3));
         };
@@ -263,6 +266,9 @@ namespace td {
     void RenderSystem::render_camera(Camera* camera) {
 
         TD_ASSERT(camera->transform != nullptr, "Camera's transform is nullptr");
+
+        // Set screen depth (basically FOV)
+        gte_SetGeomScreen(camera->near_plane_distance);
 
         const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
 
@@ -647,8 +653,8 @@ namespace td {
         const DVECTOR* v0, const DVECTOR* v1, const DVECTOR* v2
     ) {
         auto is_vertex_in_Screen = [&](const DVECTOR* v) -> bool {
-            if( v->vx < 0 || v->vx > (int16)SCREEN_WIDTH ) return false;
-            if( v->vy < 0 || v->vy > (int16)SCREEN_HEIGHT ) return false;
+            if( v->vx < 0 || v->vx > (int16)SCREEN_WIDTH_CLIP ) return false;
+            if( v->vy < 0 || v->vy > (int16)SCREEN_HEIGHT_CLIP ) return false;
             return true;
         };
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tundra/core/assert.hpp>
 #include <tundra/engine/entity-system/internal/component-meta-data.hpp>
 
 namespace td::internal {
@@ -19,6 +20,32 @@ namespace td::internal {
         virtual void free() = 0;
 
         virtual void on_destroy() { }
+
+        void destroy_group() {
+            TD_ASSERT(is_alive(), "Component is not alive when destroyed");
+            TD_ASSERT(is_allocated(), "Component is not allocated when destroyed");
+
+            // We have special routine for this, because we do not want the components
+            // remove themselves from the component chain
+
+            // Destroy children
+            internal::ComponentBase* current = this;
+            do {
+                TD_ASSERT(current->next != nullptr, "ComponentBase is not connected to another");
+
+                current->on_destroy();
+
+                internal::ComponentBase* next = current->next;
+
+                current->flags &= ~internal::ComponentFlags::IsAlive;
+
+                if( current->reference_count == 0 ) {
+                    current->free();
+                }
+
+                current = next;
+            } while ( current != this );
+        }
 
         [[nodiscard]] uint8 get_reference_count() const;
 

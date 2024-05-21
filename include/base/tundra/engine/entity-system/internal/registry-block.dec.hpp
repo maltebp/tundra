@@ -7,6 +7,9 @@ namespace td::internal {
     // TODO: It might be beneficial to make this a non-template class, to limit
     // memory cost of instructions
 
+    template<typename T>
+    class Registry;
+
     template<typename TComponent>
     class RegistryBlock {
     public:
@@ -39,12 +42,6 @@ namespace td::internal {
     
         [[nodiscard]] uint16 get_index_of_component(TComponent* component) const;
 
-        class Iterator;
-
-        Iterator begin();
-
-        Iterator end();
-
     private:
 
         const uint16 capacity;
@@ -53,6 +50,7 @@ namespace td::internal {
         uint16 num_entries = 0;
 
         friend class RegistryBlockTester;
+        friend class ::td::internal::Registry<TComponent>;
 
     };
 
