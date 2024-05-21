@@ -27,9 +27,9 @@ namespace td {
 
         void reserve(td::uint32 capacity_to_reserve);
 
-        void add(const T& element);
+        td::uint32 add(const T& element);
 
-        void add(T&& element);
+        td::uint32 add(T&& element);
 
         // Removes first element matching type - returns true if any elements was found
         bool remove(const T& element);

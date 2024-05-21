@@ -147,7 +147,7 @@ namespace td::internal {
                 if( block->entries[index_in_block].is_alive() ) return;
 
                 if( !block->entries[index_in_block].is_allocated() ) {
-                    index_in_block = block->entries[index_in_block].hole_index;
+                    index_in_block = block->entries[index_in_block].hole_data.index_to_opposite_end;
                 }
 
                 index_in_block++;
