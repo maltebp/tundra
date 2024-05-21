@@ -35,4 +35,9 @@ namespace td {
         return internal::Registry<TDerived>::get_all();
     }
 
+    template<typename TDerived, typename TBase>
+    void Component<TDerived, TBase>::reserve(td::uint32 num_components) {
+        internal::Registry<TDerived>::reserve(num_components);
+    }
+
 }

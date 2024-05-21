@@ -31,20 +31,26 @@ namespace td::internal {
         // Only use this for testing and if you know what you are doing
         static void clear_block_list();
 
+        static void reserve(td::uint32);
+
         // Returns the number of alive components + the number dead components
         // that have not been freed yet
         static uint32 get_num_allocated_components();
 
         static uint32 get_num_blocks();
+
+        static uint32 get_capacity();
         
         static Iterable get_all();
 
         // TODO: Make this tweakable by user (this number is pulled out of a hat)
-        static inline constexpr uint32 BLOCK_SIZE = 25  ; 
+        static inline constexpr uint32 BLOCK_SIZE = 1000; 
         
     private:
 
         static RegistryBlock<TComponent>& get_free_block();
+
+        static RegistryBlock<TComponent>& allocate_block();
 
         static inline List<RegistryBlock<TComponent>> blocks;
         static inline List<typename RegistryBlock<TComponent>::BlockIndex> free_blocks;
