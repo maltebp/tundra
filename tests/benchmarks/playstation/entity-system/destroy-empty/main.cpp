@@ -11,12 +11,12 @@ extern void initialize(td::EngineSystems&) { }
 
 constexpr td::uint32 NUM_COMPONENTS = 1000;
 
-td::List<td::internal::ComponentBase*> components;
+td::List<td::internal::ComponentBase*> components_to_destroy;
 
 template<typename TComponent>
 void destroy_entity() {
-    for( td::uint32 i = 0; i < components.get_size(); i++ ) {
-        components[i]->destroy();
+    for( td::uint32 i = 0; i < components_to_destroy.get_size(); i++ ) {
+        components_to_destroy[i]->destroy();
     }
 }
 
@@ -28,11 +28,11 @@ td::Duration measure_construction(td::ITime& time) {
         td::Entity* e = td::Entity::create();
         TComponent* component = e->add_component<TComponent>();
         entities.add(e);
-        components.add(component);
+        components_to_destroy.add(component);
     }
 
     td::Duration duration = measure(time, destroy_entity<TComponent>);
-    components.clear();
+    components_to_destroy.clear();
 
     for(td::uint32 i = 0; i < entities.get_size(); i++ ) {
         entities[i]->destroy();

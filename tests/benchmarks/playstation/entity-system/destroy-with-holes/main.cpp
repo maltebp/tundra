@@ -25,7 +25,7 @@ template<typename TComponent>
 td::Duration measure_construction(td::ITime& time) {
 
     td::List<td::Entity*> entities;
-    td::List<TComponent*> components_to_destroy;
+    td::List<TComponent*> components_to_destroy;    
 
     for( td::uint32 i = 0; i < NUM_COMPONENTS; i++ ) {
         td::Entity* e = td::Entity::create();

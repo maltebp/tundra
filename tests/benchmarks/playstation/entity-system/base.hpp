@@ -17,6 +17,11 @@ public:
     volatile td::byte data[64];
 };
 
+class DummyComponent : public td::Component<DummyComponent> {
+public:
+    td::uint32 data;
+};
+
 namespace internal {
     static volatile td::uint32 count = 0;
 }

@@ -5,46 +5,35 @@
 #include "base.hpp"
 #include "entity-system/base.hpp"
 #include "tundra/core/types.hpp"
-#include "tundra/engine/entity-system/internal/component-base.hpp"
 
 const td::EngineSettings ENGINE_SETTINGS { 30000 };
 
 extern void initialize(td::EngineSystems&) { }
 
 constexpr td::uint32 NUM_COMPONENTS = 1000;
-constexpr td::uint32 SIBLINGS = 4;
+constexpr td::uint32 SIBLINGS = 5;
 
-td::List<td::internal::ComponentBase*> components_to_destroy;
 td::List<td::Entity*> entities;
-    
-void destroy_components() {
-    for( td::uint32 i = 0; i < components_to_destroy.get_size(); i++ ) {
-        components_to_destroy[i]->destroy();
+
+void destroy_entities() {
+    for( td::uint32 i = 0; i < entities.get_size(); i++ ) {
+        entities[i]->destroy();
     }
 }
 
 template<typename TComponent>
 td::Duration measure_construction(td::ITime& time) {
 
-    for( td::uint32 i = 0; i < entities.get_size(); i++ ) {
-        entities[i]->destroy();
-    }
-    entities.clear();
-    components_to_destroy.clear();
-
-    for( td::uint32 i = 0; i < NUM_COMPONENTS; i++ ) {
+    for( td::uint32 i = 0; i < NUM_COMPONENTS / SIBLINGS; i++ ) {
         td::Entity* e = td::Entity::create();
-        for( td::uint32 j = 0; j < SIBLINGS; j++ ) {
+        for( td::uint32 j = 0; j < SIBLINGS - 1; j++ ) {
             e->add_component<TComponent>();
         }
         entities.add(e);
     }
 
-    for( td::uint32 i = 0; i < entities.get_size(); i++ ) {
-        components_to_destroy.add(entities[i]->add_component<TComponent>());
-    }
-    
-    td::Duration duration = measure(time, destroy_components);
+    td::Duration duration = measure(time, destroy_entities);
+    entities.clear();
 
     return duration;
 }
