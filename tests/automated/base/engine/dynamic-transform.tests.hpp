@@ -84,7 +84,7 @@ namespace td::dynamic_transform_tests {
     }
 
     TD_TEST("engine/dynamic-transform/removing-first-child") {
-                TD_TEST_ASSERT_EQUAL(internal::Registry<DynamicTransform>::get_num_allocated_components(), 0U);
+        TD_TEST_ASSERT_EQUAL(internal::Registry<DynamicTransform>::get_num_allocated_components(), 0U);
 
         Entity* e = Entity::create();
 
