@@ -44,10 +44,13 @@ namespace td {
 
         void operator=(const ComponentRef<TComponent>& other) {
             other.clear_if_dead();
-            clear();
-            this->component = other.component;
-            if( component != nullptr ) {
-                component->reference_count++;
+
+            if( &other != this ) {
+                clear();
+                this->component = other.component;
+                if( component != nullptr ) {
+                    component->reference_count++;
+                }
             }
         }
 
