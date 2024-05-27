@@ -93,6 +93,42 @@ namespace td::component_ref_tests {
         e->destroy();
     }
 
+    TD_TEST("engine/entity-system/component-ref/assign-to-self-when-alive") {
+        Entity* e = Entity::create();
+        TestComponent* c = e->add_component<TestComponent>();
+        
+        ComponentRef<TestComponent> ref_1 = c;
+        ComponentRef<TestComponent>& ref_1_ref = ref_1;
+
+        TD_TEST_ASSERT_EQUAL(ref_1, ref_1_ref);
+        
+        ref_1 = ref_1_ref;
+
+        TD_TEST_ASSERT_EQUAL(ref_1, ref_1_ref);
+        TD_TEST_ASSERT_EQUAL(ref_1, c);
+        TD_TEST_ASSERT_EQUAL(ref_1_ref, c);
+
+        e->destroy();
+    }
+
+    TD_TEST("engine/entity-system/component-ref/assign-to-self-when-dead") {
+        Entity* e = Entity::create();
+        TestComponent* c = e->add_component<TestComponent>();
+        
+        ComponentRef<TestComponent> ref_1 = c;
+        ComponentRef<TestComponent>& ref_1_ref = ref_1;
+
+        c->destroy();
+        ref_1 = ref_1_ref;
+        
+        TD_TEST_ASSERT_EQUAL(c->is_allocated(), false);
+        TD_TEST_ASSERT_EQUAL(ref_1, ref_1_ref);
+        TD_TEST_ASSERT_EQUAL(ref_1, nullptr);
+        TD_TEST_ASSERT_EQUAL(ref_1_ref, nullptr);
+
+        e->destroy();
+    }
+
     TD_TEST("engine/entity-system/component-ref/reference-count-is-adjusted") {
         TestComponent::reset_constructor_counters();
         
