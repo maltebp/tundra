@@ -8,6 +8,7 @@
 #include "tundra/core/duration.hpp"
 #include "tundra/core/fixed.hpp"
 #include "tundra/core/list.dec.hpp"
+#include "tundra/core/log.hpp"
 #include "tundra/engine/dynamic-transform.hpp"
 
 const td::EngineSettings ENGINE_SETTINGS { 30000 };
@@ -33,7 +34,7 @@ void construct_top_down_recursion(
     }
 }
 
-td::Duration construct(td::ITime& time, const td::List<td::uint32>& hierarchy) {
+td::Duration update_root(td::ITime& time, const td::List<td::uint32>& hierarchy) {
 
     print_hierarchy(hierarchy);
 
@@ -70,10 +71,10 @@ td::Duration construct(td::ITime& time, const td::List<td::uint32>& hierarchy) {
 
 extern void update(td::EngineSystems& engine_systems, const td::FrameTime&) {
     
-    td::Duration duration_small = construct(engine_systems.time, HIERARCHY_SMALL);
-    td::Duration duration_medium = construct(engine_systems.time, HIERARCHY_MEDIUM);
-    td::Duration duration_large = construct(engine_systems.time, HIERARCHY_LARGE);
-    td::Duration duration_wide = construct(engine_systems.time, HIERARCHY_WIDE);
+    td::Duration duration_small = update_root(engine_systems.time, HIERARCHY_SMALL);
+    td::Duration duration_medium = update_root(engine_systems.time, HIERARCHY_MEDIUM);
+    td::Duration duration_large = update_root(engine_systems.time, HIERARCHY_LARGE);
+    td::Duration duration_wide = update_root(engine_systems.time, HIERARCHY_WIDE);
 
     std::printf("Small, Medium, Large, Wide\n");
     
