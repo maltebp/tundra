@@ -9,43 +9,45 @@ namespace td {
     
     void DynamicTransform::on_destroy() {
 
-        if( parent != nullptr ) {
-            parent->remove_child(this);
-        }
-
         if( first_child != nullptr ) {
             DynamicTransform* current_child = first_child;
             do {
                 current_child->dirty_flags |= DirtyFlags::RotationAndScale | DirtyFlags::Translation;
                 current_child->mark_descendants_dirty(DirtyFlags::RotationAndScale | DirtyFlags::Translation);
 
-                DynamicTransform* next = current_child->parent_next_child;
+                DynamicTransform* next = current_child->next_sibling;
 
                 current_child->parent = nullptr;
-                current_child->parent_next_child = nullptr;
+                current_child->next_sibling = nullptr;
+                current_child->previous_sibling = nullptr;
 
                 current_child = next;
             } while( current_child != first_child );
 
             first_child = nullptr;
         }
+
+        if( parent != nullptr ) {
+            parent->remove_child(this);
+        }
     }
 
     void DynamicTransform::add_child(const ComponentRef<DynamicTransform>& new_child) {
         TD_ASSERT(new_child->parent == nullptr, "Child to add already has a parent");
-        
+
         if( first_child == nullptr ) {
             first_child = new_child;
+            new_child->next_sibling = new_child;
+            new_child->previous_sibling = new_child;
         }
         else {
-            DynamicTransform* last_child = first_child;
-            while( last_child->parent_next_child != first_child ) {
-                last_child = last_child->parent_next_child;
-            }
-            last_child->parent_next_child = new_child;
+            new_child->next_sibling = first_child;
+            new_child->previous_sibling = first_child->previous_sibling;
+            
+            first_child->previous_sibling->next_sibling = new_child;
+            first_child->previous_sibling = new_child;
         }
         
-        new_child->parent_next_child = first_child;
         new_child->parent = this;
         
         // OPTIMIZATION: We could change only the flags that are actually relevant
@@ -59,32 +61,20 @@ namespace td {
         TD_ASSERT(child_to_remove->parent == this, "DynamicTransform child to remove has a different parent");
         TD_ASSERT(first_child != nullptr, "DynamicTransform has parent, but parent has no children");
 
-        // OPTIMIZATION: If the last child's sibling pointer is a nullptr, we
-        // do not have to traverse the entire list of children when the child to
-        // remove is the first child
+        child_to_remove->previous_sibling->next_sibling = child_to_remove->next_sibling;
+        child_to_remove->next_sibling->previous_sibling = child_to_remove->previous_sibling;
 
-        DynamicTransform* previous_sibling = this->first_child;
-        DynamicTransform* sibling = previous_sibling->parent_next_child;
-        while(sibling != child_to_remove && sibling != this->first_child) {
-            previous_sibling = sibling;
-            sibling = sibling->parent_next_child;
-        }
-        TD_ASSERT(sibling == child_to_remove, "Child to remove is not a child of this DynamicTransform");
-
-        bool is_only_child = previous_sibling == child_to_remove;
-        if( is_only_child ) {
-            child_to_remove->parent_next_child = nullptr;
-            this->first_child = nullptr;
-        }
-        else {
-            previous_sibling->parent_next_child = child_to_remove->parent_next_child;
-            if( child_to_remove == this->first_child ) {
-                this->first_child = child_to_remove->parent_next_child;
+        if( child_to_remove == first_child ) {
+            if( child_to_remove->next_sibling == child_to_remove ) {
+                first_child = nullptr;
+            } else {
+                first_child = child_to_remove->next_sibling;
             }
         }
 
+        child_to_remove->next_sibling = nullptr;
+        child_to_remove->previous_sibling = nullptr;
         child_to_remove->parent = nullptr;
-        child_to_remove->parent_next_child = nullptr;
         child_to_remove->dirty_flags = DirtyFlags::All;
         child_to_remove->mark_descendants_dirty(DirtyFlags::All);
     }
@@ -96,14 +86,10 @@ namespace td {
         DynamicTransform* current = first_child;
         do {    
             num_children++;
-            current = current->parent_next_child;
+            current = current->next_sibling;
         } while(current != first_child);
 
         return num_children;
-    }
-
-    [[nodiscard]] DynamicTransform* DynamicTransform::get_parent() const {
-        return parent;
     }
 
     void DynamicTransform::set_scale(const Vec3<Fixed32<12>>& scale) {
@@ -154,7 +140,7 @@ namespace td {
         this->translation += translation;
         dirty_flags |= DirtyFlags::Translation;
 
-        // TODO: Optimization (for all set/add): We can avoid marking descendants
+        // OPTIMIZATION: (for all set/add): We can avoid marking descendants
         // if we already have marked them once (we should be able to determine this
         // based on whether we're marked outselves?)
         mark_descendants_dirty(DirtyFlags::Translation);
@@ -171,7 +157,7 @@ namespace td {
         do {
             current_child->dirty_flags |= flags;
             current_child->mark_descendants_dirty(flags);
-            current_child = current_child->parent_next_child;
+            current_child = current_child->next_sibling;
         } while( current_child != first_child );
     }
 

@@ -36,7 +36,7 @@ namespace td {
         void remove_child(DynamicTransform* child_to_remove);
         [[nodiscard]] uint32 get_num_children() const;
 
-        [[nodiscard]] DynamicTransform* get_parent() const;
+        [[nodiscard]] DynamicTransform* get_parent() const { return parent; }
 
         void set_scale(const Vec3<Fixed32<12>>& scale);
         void add_scale(const Vec3<Fixed32<12>>& scale);
@@ -64,7 +64,8 @@ namespace td {
         Vec3<Fixed32<12>> translation { 0 };
 
         ComponentRef<DynamicTransform> parent { nullptr };
-        ComponentRef<DynamicTransform> parent_next_child { nullptr };
+        ComponentRef<DynamicTransform> next_sibling { nullptr };
+        ComponentRef<DynamicTransform> previous_sibling { nullptr };
         ComponentRef<DynamicTransform> first_child { nullptr };
 
         mutable DirtyFlags dirty_flags = DirtyFlags::All;
