@@ -29,9 +29,8 @@ void construct_bottom_up_recursion(
         entities.remove_at(entities.get_size() - 1);
 
         td::DynamicTransform* child = entity->add_component<td::DynamicTransform>();
-    
-        construct_bottom_up_recursion(time, hierarchy, entities, child, current_depth + 1, transforms_in_destruction_order);
 
+        construct_bottom_up_recursion(time, hierarchy, entities, child, current_depth + 1, transforms_in_destruction_order);
         parent->add_child(child);
         transforms_in_destruction_order.add(child);
     }
@@ -57,17 +56,19 @@ td::Duration destroy_bottom_up(td::ITime& time, const td::List<td::uint32>& hier
         entities.remove_at(entities.get_size() - 1);
 
         td::DynamicTransform* root = entity->add_component<td::DynamicTransform>();
-        
+
         construct_bottom_up_recursion(time, hierarchy, entities, root, 0, transforms_in_destruction_order);    
-        
         transforms_in_destruction_order.add(root);        
     }
 
     // The measured destruction
     td::Duration start = time.get_duration_since_start();
     for( td::uint32 i = 0; i < transforms_in_destruction_order.get_size(); i++ ) {
-        transforms_in_destruction_order[i]->destroy();
+        transforms_in_destruction_order[(td::uint32)i]->destroy();
     }
+    // for( td::int32 i = (td::int32)transforms_in_destruction_order.get_size() - 1; i >= 0; i-- ) {
+    //     transforms_in_destruction_order[(td::uint32)i]->destroy();
+    // }
     td::Duration duration = time.get_duration_since_start() - start;
     
     for( td::Entity* entity : td::Entity::get_all() ) {

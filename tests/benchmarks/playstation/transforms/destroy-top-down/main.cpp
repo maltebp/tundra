@@ -36,7 +36,7 @@ void construct_top_down_recursion(
     }
 }
 
-td::Duration destroy_top_down(td::ITime& time, const td::List<td::uint32>& hierarchy) {
+td::Duration construct(td::ITime& time, const td::List<td::uint32>& hierarchy) {
 
     print_hierarchy(hierarchy);
 
@@ -78,10 +78,10 @@ td::Duration destroy_top_down(td::ITime& time, const td::List<td::uint32>& hiera
 
 extern void update(td::EngineSystems& engine_systems, const td::FrameTime&) {
     
-    td::Duration duration_small = destroy_top_down(engine_systems.time, HIERARCHY_SMALL);
-    td::Duration duration_medium = destroy_top_down(engine_systems.time, HIERARCHY_MEDIUM);
-    td::Duration duration_large = destroy_top_down(engine_systems.time, HIERARCHY_LARGE);
-    td::Duration duration_wide = destroy_top_down(engine_systems.time, HIERARCHY_WIDE);
+    td::Duration duration_small = construct(engine_systems.time, HIERARCHY_SMALL);
+    td::Duration duration_medium = construct(engine_systems.time, HIERARCHY_MEDIUM);
+    td::Duration duration_large = construct(engine_systems.time, HIERARCHY_LARGE);
+    td::Duration duration_wide = construct(engine_systems.time, HIERARCHY_WIDE);
 
     std::printf("Small, Medium, Large, Wide\n");
     

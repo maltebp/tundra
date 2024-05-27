@@ -158,13 +158,13 @@
             "name": "Benchmark Test (Redux)",
             "target": "localhost:3333",
             "remote": true,
-            "executable": "build\\playstation\\bin\\benchmarks\\Release\\entity-system.destroy-with-siblings.elf",
+            "executable": "build\\playstation\\bin\\benchmarks\\Release\\transforms.destroy-bottom-up.elf",
             "gdbpath": "external/gdb-multiarch/bin/gdb-multiarch",
             "cwd": "${workspaceRoot}",
             "autorun": [
                 "set substitute-path /project .",
                 "monitor reset shellhalt",
-                "load build/playstation/bin/benchmarks/Release/entity-system.destroy-with-siblings.elf",
+                "load build/playstation/bin/benchmarks/Release/transforms.destroy-bottom-up.elf",
             ],
         },
 
