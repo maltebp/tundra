@@ -42,7 +42,7 @@ void construct_top_down_recursion(
     }
 }
 
-td::Duration construct(td::ITime& time, const td::List<td::uint32>& hierarchy) {
+td::Duration compute_no_changes(td::ITime& time, const td::List<td::uint32>& hierarchy) {
 
     print_hierarchy(hierarchy);
 
@@ -88,10 +88,10 @@ td::Duration construct(td::ITime& time, const td::List<td::uint32>& hierarchy) {
 
 extern void update(td::EngineSystems& engine_systems, const td::FrameTime&) {
     
-    td::Duration duration_small = construct(engine_systems.time, HIERARCHY_SMALL);
-    td::Duration duration_medium = construct(engine_systems.time, HIERARCHY_MEDIUM);
-    td::Duration duration_large = construct(engine_systems.time, HIERARCHY_LARGE);
-    td::Duration duration_wide = construct(engine_systems.time, HIERARCHY_WIDE);
+    td::Duration duration_small = compute_no_changes(engine_systems.time, HIERARCHY_SMALL);
+    td::Duration duration_medium = compute_no_changes(engine_systems.time, HIERARCHY_MEDIUM);
+    td::Duration duration_large = compute_no_changes(engine_systems.time, HIERARCHY_LARGE);
+    td::Duration duration_wide = compute_no_changes(engine_systems.time, HIERARCHY_WIDE);
 
     std::printf("Small, Medium, Large, Wide\n");
     

@@ -9,7 +9,6 @@
 #include "tundra/core/fixed.hpp"
 #include "tundra/core/list.dec.hpp"
 #include "tundra/engine/dynamic-transform.hpp"
-#include "tundra/engine/transform-matrix.hpp"
 
 const td::EngineSettings ENGINE_SETTINGS { 30000 };
 
@@ -85,7 +84,7 @@ extern void update(td::EngineSystems& engine_systems, const td::FrameTime&) {
     td::Duration duration_medium = construct(engine_systems.time, HIERARCHY_MEDIUM);
     td::Duration duration_large = construct(engine_systems.time, HIERARCHY_LARGE);
     td::Duration duration_wide = construct(engine_systems.time, HIERARCHY_WIDE);
-
+    
     std::printf("Small, Medium, Large, Wide\n");
     
     std::printf("%s, %s, %s, %s\n", 

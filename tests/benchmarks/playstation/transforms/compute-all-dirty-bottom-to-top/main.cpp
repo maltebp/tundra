@@ -9,7 +9,6 @@
 #include "tundra/core/fixed.hpp"
 #include "tundra/core/list.dec.hpp"
 #include "tundra/engine/dynamic-transform.hpp"
-#include "tundra/engine/transform-matrix.hpp"
 
 const td::EngineSettings ENGINE_SETTINGS { 30000 };
 
