@@ -1,3 +1,4 @@
+#include "tundra/core/list.dec.hpp"
 #include <tundra/engine/dynamic-transform.hpp>
 
 #include <tundra/core/assert.hpp>
@@ -150,15 +151,33 @@ namespace td {
         return this->translation;
     }
 
+    // We cannot have this as internal in the function, because it will call
+    // std::atexit, which is it not defined
+    static td::List<DynamicTransform*> mark_descendants_dirty_stack;
+
     void DynamicTransform::mark_descendants_dirty(DirtyFlags flags) {
-        if( first_child == nullptr ) return;
+        // Traversing using a non-recursive BFS, because 
+        // recursion was 10x slower in some cases
 
-        DynamicTransform* current_child = first_child;
-        do {
-            current_child->dirty_flags |= flags;
-            current_child->mark_descendants_dirty(flags);
-            current_child = current_child->next_sibling;
-        } while( current_child != first_child );
+        mark_descendants_dirty_stack.clear();
+
+        auto add_children_to_stack = [](DynamicTransform* parent) {
+            if( parent->first_child == nullptr ) return;
+            DynamicTransform* current_child = parent->first_child;
+            do {
+                mark_descendants_dirty_stack.add(current_child);
+            } while( current_child != parent->first_child );
+        };
+
+        add_children_to_stack(this);
+
+        while( mark_descendants_dirty_stack.get_size() > 0 ) {
+            DynamicTransform* current = mark_descendants_dirty_stack.get_last();
+            mark_descendants_dirty_stack.remove_at(mark_descendants_dirty_stack.get_size() - 1);            
+
+            current->dirty_flags = flags;
+
+            add_children_to_stack(current);
+        }
     }
-
 }
