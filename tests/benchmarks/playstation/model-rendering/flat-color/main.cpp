@@ -100,7 +100,7 @@ extern void initialize(td::EngineSystems& engine_systems) {
 
     td::Entity* camera_entity = td::Entity::create();
     td::DynamicTransform* camera_transform = camera_entity->add_component<td::DynamicTransform>();
-    camera_transform->set_translation({td::to_fixed(0.5), td::to_fixed(0.5), td::to_fixed(-0.8)});
+    camera_transform->set_translation({td::to_fixed(0.5), td::to_fixed(0.5), td::to_fixed(-1.2)});
 
     td::List<td::CameraLayerSettings> layer_settings;
     layer_settings.add({0, 2048});

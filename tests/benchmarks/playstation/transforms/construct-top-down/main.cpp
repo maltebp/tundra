@@ -60,6 +60,8 @@ td::Duration construct_top_down(td::ITime& time, const td::List<td::uint32>& hie
 }
 
 extern void update(td::EngineSystems& engine_systems, const td::FrameTime&) {
+
+    td::DynamicTransform::reserve(25*255);
     
     td::Duration duration_small = construct_top_down(engine_systems.time, HIERARCHY_SMALL);
     td::Duration duration_medium = construct_top_down(engine_systems.time, HIERARCHY_MEDIUM);

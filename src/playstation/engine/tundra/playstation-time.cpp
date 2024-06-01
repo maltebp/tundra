@@ -80,7 +80,7 @@ namespace td {
             // bit-shift it by 12, divide it by a fixed point number of 12 fraction bits
             // and then get out the whole number of times it was divisible with no full
             // precision
-            volatile uint32 non_accumulated_cycles = (uint32)(TIMER_VALUE(TIMER_2_ID) & 0x0FFFF) * 8 + remainder_cycles;
+            volatile uint32 non_accumulated_cycles = ((uint32)(TIMER_VALUE(TIMER_2_ID) & 0x0FFFF) + remainder_cycles) * 8;
             const UFixed32<12> CYCLES_PER_MICROSECOND { td::to_fixed(33.8688) };
             uint32 non_accumulated_micro_seconds = (non_accumulated_cycles << 12) / CYCLES_PER_MICROSECOND.get_raw_value();
 

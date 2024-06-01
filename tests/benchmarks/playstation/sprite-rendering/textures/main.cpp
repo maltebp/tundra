@@ -19,7 +19,7 @@
 const td::EngineSettings ENGINE_SETTINGS { 30000 };
 
 namespace assets {
-    extern "C" const uint8_t tex_rainbow_32[];
+    extern "C" const uint8_t tex_rainbow_32[];  
     extern "C" const uint8_t tex_rainbow_128[];
     extern "C" const uint8_t tex_rainbow_256[];
     extern "C" const uint8_t tex_rainbow_256_p[];

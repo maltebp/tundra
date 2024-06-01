@@ -117,9 +117,9 @@ namespace td::internal {
     template<typename TComponent>   
     RegistryBlock<TComponent>& Registry<TComponent>::allocate_block() {
         TD_ASSERT(
-            blocks.get_size() < (td::uint32)std::numeric_limits<decltype(RegistryBlock<TComponent>::index)>::max,
+            blocks.get_size() < (td::uint32)std::numeric_limits<decltype(RegistryBlock<TComponent>::index)>::max(),
             "Maximum number of %u blocks reached",
-            (td::uint32)std::numeric_limits<decltype(RegistryBlock<TComponent>::index)>::max
+            (td::uint32)std::numeric_limits<decltype(RegistryBlock<TComponent>::index)>::max()
         );
 
         td::uint8 new_block_index = static_cast<decltype(RegistryBlock<TComponent>::index)>(blocks.get_size());

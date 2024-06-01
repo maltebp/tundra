@@ -364,7 +364,6 @@ namespace td {
 
         setPolyFT4(primitive);
 
-        // TODO: Should there be z-depth to sprites?
         ordering_table_layer.add_to_front((OrderingTableNode*)primitive);
         
         // We use static cast to preserve the bit pattern (I believe the primitive members are
@@ -411,8 +410,6 @@ namespace td {
 
     void RenderSystem::render_model(const TransformMatrix& camera_matrix, const Model* model, OrderingTableLayer& ordering_table_layer) {
 
-        // TODO: Add radius cull distance
-
         const TransformMatrix& model_matrix = gte::compute_world_matrix(model->transform);
         TransformMatrix model_to_view_matrix = gte::multiply_transform_matrices(camera_matrix, model_matrix);
 
@@ -434,7 +431,6 @@ namespace td {
         volatile uint16 z_map_factor_3 = ordering_table_layer.get_z_map_factor_3();
         set_zsf3(z_map_factor_3);
 
-        // TODO: I think this yields the wrong value for some reason
         volatile uint16 z_map_factor_4 = ordering_table_layer.get_z_map_factor_4();
         set_zsf4(z_map_factor_4);
 
@@ -471,17 +467,15 @@ namespace td {
                     return const_cast<SVECTOR*>(reinterpret_cast<const SVECTOR*>(&vec3));
                 };
 
-                // TODO: Change this when Model uses proper td::Vec3
                 SVECTOR* mv0 = vec3_int16_as_svector(model->asset.vertices[model_part->vertex_indices[i].x - 1]);
                 SVECTOR* mv1 = vec3_int16_as_svector(model->asset.vertices[model_part->vertex_indices[i].y - 1]);
                 SVECTOR* mv2 = vec3_int16_as_svector(model->asset.vertices[model_part->vertex_indices[i].z - 1]);
             
-                /* Load the first 3 vertices of a quad to the GTE */
                 gte_ldv3(
                     mv0, mv1, mv2                 
                 );
                     
-                /* Rotation, Translation and Perspective Triple */
+                // Apply SRT and perspective transformation
                 gte_rtpt();
                 
                 // Compute normal clip for backface culling
@@ -491,12 +485,12 @@ namespace td {
                 bool face_is_backfacing = backface_sign < 0;
                 if( face_is_backfacing ) continue;
             
-                /* Calculate average Z for depth sorting */
+                // Calculate average z
                 gte_avsz3();
 
                 // Typically, you'd use gte_stotz to get the average z, but this is
                 // a 16-bit value, so many values above 2^16 would return a z-value
-                // that is actually within the near- and far-plane becaus, so we
+                // that is actually within the near- and far-plane because, so we
                 // cannot detect that they are outside the far plane
 
                 td::uint32 ordering_table_index_fixed_20_12;
@@ -518,11 +512,10 @@ namespace td {
 
                 uint16 ordering_table_index_16 = (uint16)ordering_table_index;
             
+                // Fetch the screen vertices
                 DVECTOR v0;
                 DVECTOR v1;
                 DVECTOR v2;
-
-                /* Set the projected vertices to the primitive */
                 gte_stsxy0( &v0 );
                 gte_stsxy1( &v1 );
                 gte_stsxy2( &v2 );

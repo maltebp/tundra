@@ -15,7 +15,7 @@ td_target_assets(${TD_PROJECT_NAME} ${TD_DIR_TESTS}/data
     TEXTURE tex_rainbow_32 textures/rainbow_32x32.png
     TEXTURE tex_rainbow_128 textures/rainbow_128x128.png
     TEXTURE tex_rainbow_256 textures/rainbow_256x256.png
-    TEXTURE tex_rainbow_256_p textures/rainbow_256x256_palette8.png PALETTE8
+    TEXTURE tex_rainbow_256_p textures/rainbow_256x256_palette4.png PALETTE4
 )
 
 target_link_libraries(${TD_PROJECT_NAME} PRIVATE td.base)
