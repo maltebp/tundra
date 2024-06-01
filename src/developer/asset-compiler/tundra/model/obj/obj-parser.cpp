@@ -116,8 +116,6 @@ namespace td::ac {
 			}
 			else
 			{
-				// TODO: This warning is currently annoying because it is printed every time an object is compiled (because first object tends to be empty )
-				// td::ac::input_assert_warning(current_object_part->faces.size() > 0, "Object part has no faces");
 				current_object_part = new ObjObjectPart();
 				current_object_part->material = current_material;
 				current_object_part->is_smooth_shaded = current_smooth_shading_flag;

@@ -109,7 +109,6 @@ namespace td {
                 byte flags = *(block + 1);
 
                 // This is the value that the "loop-repeat" block has (at least when set by psxavenc)
-                // TODO: This could probably be a bit more robust (test with other software)
                 if( (flags & 0b0011) == 0b0011 ) has_loop_repeat_block = true; 
                 if( flags & 0b0100 ) has_loop_start_block = true; 
 
@@ -179,12 +178,6 @@ namespace td {
     const SoundAsset& playstation_sound::load_sound(const td::byte* data) {
         TD_ASSERT(internal::is_initialized, "PlayStation sound is not initialized");
         TD_ASSERT(data != nullptr, "Pointer to sound data to load is nullptr");
-
-        // TODO: Make sure assets are packed with proper alignment, and then re-enable this
-        // TD_ASSERT(
-        //      (((uint32)data) % alignof(internal::VagHeader)) == 0,
-        //      "Sound data pointer is not aligned for VagHeader struct (alignof(VagHeader) == %d)",
-        //      alignof(internal::VagHeader));
 
         internal::VagHeader vag_header;
 

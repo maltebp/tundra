@@ -49,7 +49,6 @@ namespace td {
 
     namespace internal {
 
-        // TODO: This should really be refactors
         volatile td::Duration last_draw_sync_time;
         ITime* g_time = nullptr;
 
@@ -230,7 +229,6 @@ namespace td {
 
         for(td::Camera* camera : Camera::get_all()) {
             
-            // TODO: Queue the drawing of the camera (now drawing a second will block while waiting)
             const td::OrderingTableNode* first_ordering_table_node_to_draw =
                 camera->ordering_tables[(uint8)active_buffer].get_first_node_to_draw();
             DrawOTag((const td::uint32*)first_ordering_table_node_to_draw);
@@ -257,7 +255,6 @@ namespace td {
     void RenderSystem::set_light_color(uint8 light_index, Vec3<uint8> color) {
         TD_ASSERT(light_index < 3, "Light index must be between 0 and 2 (was %d)", light_index);
         
-        // TODO: This could be a multiplication instead
         light_colors.set_column(
             light_index,
             Vec3<Fixed16<12>>( Vec3<Fixed32<12>>{color} >> 8 ));
@@ -307,7 +304,6 @@ namespace td {
         
         TD_ASSERT(sprite->size.x > 0 && sprite->size.y > 0, "Sprite size must be larger than 0");
 
-        // OPTIMIZATION: Sprite rendering is not optimized at all (there is no specialized transform, nor transform computation for it)
 
         Vec2<Fixed32<12>> half_size {
             Fixed32<12>::from_raw_fixed_value(sprite->size.x.get_raw_value() >> 1),
@@ -326,7 +322,6 @@ namespace td {
             v3 = { half_size.x,  -half_size.y }; // Bottom right
         } 
         else {
-            // OPTIMIZATION: I am sure we can make this calculation faster
             td::Fixed32<12> c = cos(sprite->rotation);
             td::Fixed32<12> s = sin(sprite->rotation);
 
@@ -348,8 +343,6 @@ namespace td {
         v1.y = -v1.y;
         v2.y = -v2.y;
         v3.y = -v3.y;
-        
-        // OPTIMIZATION: If rotation is 0 we should draw it as a PS Sprite instead (axis-aligned)
         
         v0 += { sprite->position.x, sprite->position.y };
         v1 += { sprite->position.x, sprite->position.y };
@@ -422,8 +415,6 @@ namespace td {
         Mat3x3<Fixed16<12>> light_directions_in_model_space =
             gte::multiply(light_directions, model_rotation_matrix);
         gte_SetLightMatrix( &gte::to_gte_matrix_ref(light_directions_in_model_space) );
-        // TODO: Optimization: we could avoid doing all of this if there are no lights enabled, but
-        // I think the far most likely scenario is that at least one light is enabled.
         
         gte_SetRotMatrix( &gte::to_gte_matrix_ref(model_to_view_matrix) );
         gte_SetTransMatrix( &gte::to_gte_matrix_ref(model_to_view_matrix) );

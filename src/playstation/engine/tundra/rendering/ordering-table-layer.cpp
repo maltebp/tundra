@@ -16,7 +16,7 @@ namespace td {
     OrderingTableLayer::OrderingTableLayer(uint16 resolution, UFixed16<12> far_plane) 
         :   resolution(resolution),
             far_plane(far_plane),
-            z_map_factor_3((uint16)(UFixed32<12>{resolution} / (UFixed32<12>{far_plane} * 3)).get_raw_integer()), // TODO: This should use an explicit cast
+            z_map_factor_3((uint16)(UFixed32<12>{resolution} / (UFixed32<12>{far_plane} * 3)).get_raw_integer()),
             z_map_factor_4((uint16)(UFixed32<12>{resolution} / (UFixed32<12>{far_plane} * 4)).get_raw_integer()),
             ordering_table(resolution)
     {
@@ -55,8 +55,6 @@ namespace td {
 
         uint32 node_after_front_address = front_node->next_node_ptr;
         
-        // TODO: This approach will not work once the primitive buffer allocates buffer
-        // memory dynamically, and thus may not allocate this in sequence
         byte* allocation_ptr = (byte*)primitive_buffer.allocate(1);
         
         byte* allocation_end = (byte*)FntSort(

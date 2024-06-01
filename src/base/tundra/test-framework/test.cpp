@@ -17,9 +17,6 @@ namespace td {
     Test::Test(const char* name, TestFunction function) 
         :   name(name), function(function)
     { 
-        // TODO: More validation on name
-        // TD_ASSERT(name != "", "Test name must not be empty");
-        
         *(tests + num_tests) = this;
         num_tests++;
     }

@@ -37,7 +37,6 @@ namespace td::gte {
             case td::TransformType::Dynamic:
                 return compute_world_matrix(static_cast<const DynamicTransform*>(transform));
             default:
-                // TODO: This should fail when Release is enabled
                 TD_ASSERT(false, "Unknown TransformType");
                 break;
         }
@@ -64,10 +63,6 @@ namespace td::gte {
         transform->dirty_flags = DynamicTransform::DirtyFlags::None;
 
         return transform->cached_world_matrix;
-
-        // TODO: I believe this can be heavily optimized:
-        //  - No reason to rotate an axis, if angle is 0 (right now we rotate all)
-        //  - We can probably avoid some "matrix register uploads" (e.g. store intermediate in result matrix)
     }
 
     extern TransformMatrix compute_world_matrix(
@@ -121,7 +116,6 @@ namespace td::gte {
         MATRIX* raw_matrix = const_cast<MATRIX*>(reinterpret_cast<const MATRIX*>(&m));
 
         // We cannot simply reinterpret, because we go from 16-bit to 32-bit
-        // OPTIMIZATION: The assembly implementation could simply read a 16-bit vector instead
         VECTOR raw_vector { v.x.get_raw_value(), v.y.get_raw_value(), v.z.get_raw_value() };
         
         Vec3<Fixed32<12>> result;
@@ -152,7 +146,6 @@ namespace td::gte {
 
 
     extern Mat3x3<Fixed16<12>> extract_rotation_matrix(const TransformMatrix& transform_matrix) {
-        // TODO: This could probably be optimized
 
         Mat3x3<Fixed16<12>> rotation_matrix;
 

@@ -51,7 +51,6 @@ namespace td {
         
         new_child->parent = this;
         
-        // OPTIMIZATION: We could change only the flags that are actually relevant
         new_child->dirty_flags = DirtyFlags::All;
         new_child->mark_descendants_dirty(DirtyFlags::All);
     }
@@ -141,9 +140,6 @@ namespace td {
         this->translation += translation;
         dirty_flags |= DirtyFlags::Translation;
 
-        // OPTIMIZATION: (for all set/add): We can avoid marking descendants
-        // if we already have marked them once (we should be able to determine this
-        // based on whether we're marked outselves?)
         mark_descendants_dirty(DirtyFlags::Translation);
     }
 

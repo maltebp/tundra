@@ -48,9 +48,6 @@ namespace td {
         void initialize() {
             TD_ASSERT(!is_initialized, "Time system is already initialized");
 
-            // TODO: Check that ResetGraph is called first
-            // WARNING: THIS REQUIRES ResetGraph to be called first
-
             is_initialized = true;
 
             uint16 timer_2_settings = 0;

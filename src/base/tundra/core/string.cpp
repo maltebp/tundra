@@ -237,7 +237,6 @@ namespace td {
 
     template<>
     String to_string<long long>(const long long& value) {
-        // TODO: Implement this properly
         TD_ASSERT(false, "to_string<long long> is not implemented (PlayStation does not support printing in lld format apparently)");
         return string_util::create_from_format("%lld", value);
     }
