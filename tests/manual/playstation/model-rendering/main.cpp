@@ -184,7 +184,7 @@ extern void initialize(td::EngineSystems& engine_systems) {
         td::Entity* e = td::Entity::create();
         td::Sprite* sprite = e->add_component<td::Sprite>(LAYER_FOREGROUND);
         sprite->texture = ball_texture;
-        sprite->color = color;
+        sprite->color = {1, 2, 3};
         sprite->position = position;
         sprite->size = size;
     };
