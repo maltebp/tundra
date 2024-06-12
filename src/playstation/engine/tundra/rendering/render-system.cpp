@@ -182,10 +182,13 @@ namespace td {
         }
 
         // Flush
+        last_frame_duration = time.get_duration_since_start() - last_frame_start;
         DrawSync(0);
         last_frame_draw_duration = time.get_duration_since_start() - last_frame_draw_start;
 
 	    VSync(0);
+
+        last_frame_start = time.get_duration_since_start();
         
         // The "active" render buffer is the one being displayed, and the one whose
         // ordering table and primitive buffer we are submitting to.

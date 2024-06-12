@@ -46,6 +46,8 @@ namespace td {
         // intensity of the light and the hue/saturation
         void set_light_color(uint8 light_index, Vec3<uint8> color);
 
+        Duration get_last_frame_unsynced_duration() const { return last_frame_duration; }
+
         uint32 get_num_triangles_rendered() const { return num_triangles_rendered; }
 
         Duration get_last_frame_draw_duration() const { return last_frame_draw_duration; }
@@ -75,6 +77,9 @@ namespace td {
 
         Duration last_frame_draw_duration = 0;
         Duration last_frame_draw_start = 0;
+        
+        Duration last_frame_start = 0;
+        Duration last_frame_duration = 0;
         
         // Each row is the direction of a light
         alignas(4) Mat3x3<Fixed16<12>> light_directions = {};
