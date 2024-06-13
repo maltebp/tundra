@@ -55,6 +55,17 @@ namespace td {
 
         const uint16 SCREEN_WIDTH_CLIP = (uint16)(320 * 1.25);
         const uint16 SCREEN_HEIGHT_CLIP = (uint16)(320 * 1.25);
+        
+
+        // TODO: This should really be refactors
+        volatile td::Duration last_draw_sync_time;
+        ITime* g_time = nullptr;
+
+        void draw_sync_callback() {
+            if( g_time != nullptr ) {
+                last_draw_sync_time = g_time->get_duration_since_start();
+            }
+        }
 
         SVECTOR* vec3_int16_as_svector(const ::Vec3<td::int16>& vec3) {
             return const_cast<SVECTOR*>(reinterpret_cast<const SVECTOR*>(&vec3));
@@ -165,9 +176,14 @@ namespace td {
         
         // FntLoad(font_vram_allocation.position.x, font_vram_allocation.position.y); 
         FntLoad(font_vram_allocation.position.x >> 1, font_vram_allocation.position.y);
+
+        DrawSyncCallback(internal::draw_sync_callback);
+        internal::g_time = &time;
     }
 
     void RenderSystem::render() {
+
+        td::Duration submission_start = time.get_duration_since_start();
 
         gte_SetBackColor( this->ambient_color.x, this->ambient_color.y, this->ambient_color.z );
         gte_SetColorMatrix(&gte::to_gte_matrix_ref(light_colors));
@@ -181,10 +197,15 @@ namespace td {
             this->render_camera(camera);
         }
 
+        last_frame_primitive_memory_used = primitive_buffers[(uint8)active_buffer].get_num_allocated_byte();
+
+        last_frame_submission_duration = time.get_duration_since_start() - submission_start;
+
         // Flush
         last_frame_duration = time.get_duration_since_start() - last_frame_start;
         DrawSync(0);
-        last_frame_draw_duration = time.get_duration_since_start() - last_frame_draw_start;
+        td::Duration non_volatile_duration = internal::last_draw_sync_time;
+        last_frame_draw_duration = non_volatile_duration - last_frame_draw_start;
 
 	    VSync(0);
 
@@ -248,14 +269,21 @@ namespace td {
     }
 
     void RenderSystem::render_camera(Camera* camera) {
+        last_frame_submit_model_duration = 0;
+        last_frame_submit_sprite_duration = 0;
+        last_frame_submit_text_duration = 0;
+        last_frame_compute_transform_duration = 0;
 
         TD_ASSERT(camera->transform != nullptr, "Camera's transform is nullptr");
+
+        td::Duration submit_start;
 
         // Set screen depth (basically FOV)
         gte_SetGeomScreen(camera->near_plane_distance);
 
         const TransformMatrix& camera_matrix = gte::compute_camera_matrix(camera);
 
+        submit_start = time.get_duration_since_start();
         for( Model* model : Model::get_all() ) {
 
             if( !camera->layers_to_render.contains(model->layer_index) ) continue;
@@ -264,7 +292,9 @@ namespace td {
             
             render_model(camera_matrix, model, layer);
         }
+        last_frame_submit_model_duration += time.get_duration_since_start() - submit_start;
 
+        submit_start = time.get_duration_since_start();
         for( Sprite* sprite : Sprite::get_all() ) {
 
             if( !camera->layers_to_render.contains(sprite->layer_index) ) continue;
@@ -273,7 +303,9 @@ namespace td {
             
             render_sprite(sprite, layer);
         }
+        last_frame_submit_sprite_duration += time.get_duration_since_start() - submit_start;
 
+        submit_start = time.get_duration_since_start();
         for( Text* text : Text::get_all() ) {
 
             if( !camera->layers_to_render.contains(text->layer_index) ) continue;
@@ -282,6 +314,7 @@ namespace td {
             
             render_text(text, layer);
         }
+        last_frame_submit_text_duration += time.get_duration_since_start() - submit_start;
     }
 
     void RenderSystem::render_sprite(const Sprite* sprite, OrderingTableLayer& ordering_table_layer) {
@@ -397,7 +430,10 @@ namespace td {
 
         // TODO: Add radius cull distance
 
+        td::Duration compute_transform_start = time.get_duration_since_start();
         const TransformMatrix& model_matrix = gte::compute_world_matrix(model->transform);
+        last_frame_compute_transform_duration += time.get_duration_since_start() - compute_transform_start;
+
         TransformMatrix model_to_view_matrix = gte::multiply_transform_matrices(camera_matrix, model_matrix);
 
         // Multiplying the light directions as row vectors (which they are) with the

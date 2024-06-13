@@ -52,6 +52,15 @@ namespace td {
 
         Duration get_last_frame_draw_duration() const { return last_frame_draw_duration; }
 
+        Duration get_last_frame_submission_duration() const { return last_frame_submission_duration; }
+
+        Duration get_last_frame_model_submission_duration() const { return last_frame_submit_model_duration; }
+        Duration get_last_frame_sprite_submission_duration() const { return last_frame_submit_sprite_duration; }
+        Duration get_last_frame_text_submission_duration() const { return last_frame_submit_text_duration; }
+        Duration get_last_frame_compute_transform_duration() const { return last_frame_compute_transform_duration; }
+
+        td::uint32 get_last_frame_primitive_memory_used() const { return last_frame_primitive_memory_used; }
+
     private:
 
         void render_camera(Camera* camera);    
@@ -75,11 +84,21 @@ namespace td {
 
         Vec3<uint8> ambient_color;
 
+        Duration last_frame_submission_duration = 0;
+
+        Duration last_frame_compute_transform_duration = 0;
+
+        Duration last_frame_submit_sprite_duration = 0;
+        Duration last_frame_submit_text_duration = 0;
+        Duration last_frame_submit_model_duration = 0;
+
         Duration last_frame_draw_duration = 0;
         Duration last_frame_draw_start = 0;
         
         Duration last_frame_start = 0;
         Duration last_frame_duration = 0;
+
+        td::uint32 last_frame_primitive_memory_used = 0;
         
         // Each row is the direction of a light
         alignas(4) Mat3x3<Fixed16<12>> light_directions = {};

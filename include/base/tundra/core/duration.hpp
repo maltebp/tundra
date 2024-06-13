@@ -13,8 +13,15 @@ namespace td {
 
         constexpr Duration(int64 microseconds) : microseconds(microseconds) { }
 
+        Duration(const volatile Duration& other) : microseconds(other.microseconds) { }
+        
         [[nodiscard]] constexpr Duration operator+(const Duration& other) const {
             return Duration(microseconds + other.microseconds);
+        }
+
+        // This returns void to avoid a warning (see https://stackoverflow.com/a/13869669/12037986)
+        constexpr void operator=(const Duration& other) volatile {
+            this->microseconds = other.microseconds;
         }
 
         constexpr Duration& operator+=(const Duration& other) {

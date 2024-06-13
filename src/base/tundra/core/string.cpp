@@ -38,6 +38,7 @@ namespace td {
     }
 
     String::String(const String& other) {
+        if( other.characters == nullptr ) return;
         this->size = other.size;
         this->characters = new char[this->size + 1];
         for( uint32 i = 0; i < this->size; i++ ) {

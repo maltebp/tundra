@@ -20,6 +20,8 @@
 #include <tundra/sound/playstation-sound-player.hpp>
 #include <tundra/sound/playstation-sound.hpp>
 
+#include <hwregs_c.h>
+
 namespace td {
 
     Engine::Engine(
@@ -36,7 +38,7 @@ namespace td {
 
         ResetGraph(0);
 
-        td::gte::initialize();
+        td::gte::initialize(); 
 
         // Set the origin of screen space
         gte_SetGeomOffset(320 / 2, 240/ 2);
