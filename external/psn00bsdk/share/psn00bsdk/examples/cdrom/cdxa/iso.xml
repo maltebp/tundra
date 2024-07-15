@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<iso_project>
+	<track type="data">
+		<identifiers
+			system			="PLAYSTATION"
+			volume			="CDXA"
+			volume_set		="CDXA"
+			publisher		="MEIDOTEK"
+			data_preparer	="PSN00BSDK ${PSN00BSDK_VERSION}"
+			application		="PLAYSTATION"
+			copyright		="README.TXT;1"
+		/>
+
+		<directory_tree>
+			<file name="SYSTEM.CNF"		type="data" source="${PROJECT_SOURCE_DIR}/system.cnf" />
+			<file name="CDXA.EXE"		type="data" source="cdxa.exe" />
+
+			<!-- CD-XA file, you'll have to provide your own to make this example work -->
+			<file name="XASAMPLE.XA"	type="mixed" source="${PROJECT_SOURCE_DIR}/xasample.xa"/>
+
+			<dummy sectors="1024"/>
+		</directory_tree>
+	</track>
+
+	<!--<track type="audio" source="track2.wav" />-->
+</iso_project>

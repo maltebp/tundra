@@ -14,7 +14,7 @@ namespace std {
 static constexpr int RAND_MAX = 0x7fff;
 
 /* Structure definitions */
-	
+
 struct HeapUsage {
 	size_t total;		// Total size of heap + stack
 	size_t heap;		// Amount of memory currently reserved for heap

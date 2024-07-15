@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tundra/engine/entity-system/internal/component-base.hpp"
 #include <tundra/engine/entity-system/internal/registry-block.dec.hpp>
 
 namespace td::internal {
@@ -42,6 +43,10 @@ namespace td::internal {
         static uint32 get_capacity();
         
         static Iterable get_all();
+
+        static constexpr uint32 get_overhead() {
+            return sizeof(blocks) + sizeof(free_blocks) + free_blocks.get_size() * sizeof(typename RegistryBlock<TComponent>::BlockIndex) + (sizeof(RegistryBlock<TComponent>) + sizeof(ComponentBase) * BLOCK_SIZE) * blocks.get_size() ;
+        }
 
         // TODO: Make this tweakable by user (this number is pulled out of a hat)
         static inline constexpr uint32 BLOCK_SIZE = 25; 

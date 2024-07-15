@@ -5,6 +5,9 @@
 
 namespace td::internal {
 
+    // TODO: This is temporary for statistics testing
+    extern uint32 num_total_components;
+
     // Created this class, because I realized late that I cannot avoid having
     // virtual functions, and the original base class (ComponentMetaData), cannot
     // be virtual, because I need to be able to do downcasts using static_cast.

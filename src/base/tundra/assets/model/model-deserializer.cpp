@@ -21,6 +21,7 @@ namespace td {
 	ModelAsset* ModelDeserializer::deserialize(const byte* data) const {
 		const byte* next_data = data;
 		ModelAsset* model_asset = new ModelAsset();
+		ModelAsset::memory_used += sizeof(ModelAsset);
 
 		ModelFileHeader file_header;
 		read_bytes(next_data, &file_header);
@@ -36,7 +37,12 @@ namespace td {
 		model_asset->vertices = new ::Vec3<int16>[model_asset->num_vertices];
 		model_asset->normals = new ::Vec3<int16>[model_asset->num_normals];
 		model_asset->uvs = model_asset->num_uvs > 0 ? new ::Vec2<int16>[model_asset->num_uvs] : nullptr;
-		model_asset->model_parts = new ModelPart*[model_asset->num_parts];
+		model_asset->model_parts = new ModelPart*[model_asset->num_parts];		
+
+		ModelAsset::memory_used += sizeof(::Vec3<int16>) * model_asset->num_vertices;
+		ModelAsset::memory_used += sizeof(::Vec3<int16>) * model_asset->num_normals;
+		ModelAsset::memory_used += sizeof(::Vec3<int16>) * model_asset->num_uvs;
+		ModelAsset::memory_used += sizeof(ModelPart*) * model_asset->num_parts;
 
 		for( int i = 0; i < model_asset->num_vertices; i++ ) {
 			read_bytes<::Vec3<int16>>(next_data, &model_asset->vertices[i]);
@@ -54,6 +60,8 @@ namespace td {
 
 			ModelPart* model_part = new ModelPart();
 
+			ModelAsset::memory_used += sizeof(ModelPart);
+
 			ModelFilePartHeader part_header;
 			read_bytes(next_data, &part_header);
 			
@@ -65,6 +73,9 @@ namespace td {
 			model_part->vertex_indices = new ::Vec3<uint16>[model_part->num_triangles];
 			model_part->normal_indices = new ::Vec3<uint16>[model_part->num_triangles];
 
+			ModelAsset::memory_used += sizeof(::Vec3<uint16>) * model_part->num_triangles;
+			ModelAsset::memory_used += sizeof(::Vec3<uint16>) * model_part->num_triangles;
+
 			for( int j = 0; j < part_header.num_triangles; j++ ) {
 				read_bytes(next_data, &model_part->vertex_indices[j]); 
 			}
@@ -75,6 +86,7 @@ namespace td {
 
 			if( part_header.texture_index != 0 ) {
 				model_part->uv_indices = new ::Vec3<uint16>[model_part->num_triangles];
+				ModelAsset::memory_used += sizeof(::Vec3<uint16>) * model_part->num_triangles;
 				for( int j = 0; j < part_header.num_triangles; j++ ) {
 					read_bytes(next_data, &model_part->uv_indices[j]);
 				}

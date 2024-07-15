@@ -62,7 +62,7 @@ namespace td {
 
         AssetLoader asset_loader{vram_allocator};   
 
-        EngineSystems systems {  asset_loader, time, input, sound_player,  render_system };    
+        EngineSystems systems {  asset_loader, time, input, sound_player,  render_system, vram_allocator };    
 
         initialize_callback(systems);
 

@@ -18,6 +18,8 @@ namespace td {
         // Ensures that there is allocated room for at least num_components
         static void reserve(td::uint32 num_components);
 
+        static uint32 get_total_data_memory();
+
     private:
     
         virtual void free() override final;

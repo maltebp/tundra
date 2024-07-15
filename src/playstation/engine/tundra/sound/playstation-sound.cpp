@@ -293,5 +293,9 @@ namespace td {
             channel_play_back_info.time_ending = 0;
         }
     }
+
+    uint32 playstation_sound::get_sram_used() {
+        return (uint32)playstation_sound::internal::next_sample_address;
+    }
     
 }

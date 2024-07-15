@@ -1419,7 +1419,7 @@
 #define gte_ncds() __asm__ volatile ( \
 	"nop;"					\
 	"nop;"					\
-	"cop2 0x0E80413;" )	
+	"cop2 0x0E80413;" )
 
 #define gte_ncdt() __asm__ volatile ( \
 	"nop;"					\

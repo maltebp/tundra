@@ -89,6 +89,9 @@ namespace td {
 		// Not serialized
 		const TextureAsset* texture = nullptr;
 		List<td::Vec2<uint8>> mapped_uvs;
+
+		static inline td::uint32 memory_used = 0;
+
 	};
 
 }

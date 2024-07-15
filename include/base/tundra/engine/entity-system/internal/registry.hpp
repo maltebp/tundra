@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tundra/core/limits.hpp"
+#include "tundra/engine/entity-system/internal/component-base.hpp"
 #include "tundra/engine/entity-system/internal/registry-block.dec.hpp"
 #include <limits>
 #include <tundra/engine/entity-system/internal/registry.dec.hpp>
@@ -32,6 +33,8 @@ namespace td::internal {
         component->reference_count = 0;
         component->next = component;
         component->block_index = block.index;
+
+        ::td::internal::num_total_components++;
         
         return component;
     }
@@ -62,6 +65,8 @@ namespace td::internal {
             free_blocks.add(owning_block.index);
         }
         owning_block.free_component(component);
+
+        ::td::internal::num_total_components--;
     }   
 
     template<typename TComponent>

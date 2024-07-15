@@ -20,4 +20,6 @@ namespace td::playstation_sound {
 
     void stop_music();
 
+    uint32 get_sram_used();
+
 }

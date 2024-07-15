@@ -135,7 +135,7 @@ typedef struct _SpuCommonAttr {
 	SPU_CH_ADSR2(ch) = (rr) | ((sr) << 6) | (1 << 14) \
 )
 
-#define 	SpuSetKey(enable, voice_bit) \
+#define SpuSetKey(enable, voice_bit) \
 	((enable) ? ( \
 		SPU_KEY_ON1 = (uint16_t) (voice_bit), \
 		SPU_KEY_ON2 = (uint16_t) ((voice_bit) >> 16) \

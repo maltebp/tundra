@@ -7,6 +7,8 @@
 
 namespace td::internal {
 
+    uint32 num_total_components = 0;
+
     [[nodiscard]] uint8 ComponentBase::get_reference_count() const {
         return reference_count;
     }

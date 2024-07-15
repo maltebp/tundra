@@ -89,4 +89,12 @@ namespace td {
 
     GridAllocator& VramAllocator::get_global_allocator() { return global_allocator; }
 
+    uint32 VramAllocator::get_allocated_bytes() const {
+        uint32 allocated_bytes = global_allocator.get_num_bytes_allocated();
+        for( td::uint32 i = 0; i < texture_pages.get_size(); i++ ) {
+            allocated_bytes -= (texture_pages[i].allocator.width * texture_pages[i].allocator.height - texture_pages[i].allocator.get_num_bytes_allocated());
+        }
+        return allocated_bytes;
+    }
+
 }

@@ -28,6 +28,8 @@ namespace td {
 
         GridAllocator& get_global_allocator();
 
+        uint32 get_allocated_bytes() const;
+
         // TODO: Make these const
         Vec2<uint16> frame_buffer_1_position;
         Vec2<uint16> frame_buffer_2_position;

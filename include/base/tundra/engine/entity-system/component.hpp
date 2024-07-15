@@ -10,6 +10,11 @@
 namespace td {
 
     template<typename TDerived, typename TBase>
+    uint32 Component<TDerived, TBase>::get_total_data_memory() {
+        return internal::Registry<TDerived>::get_num_allocated_components() * (sizeof(TDerived) - sizeof(Component<TDerived, TBase>));
+    }
+
+    template<typename TDerived, typename TBase>
     void Component<TDerived, TBase>::destroy() {
         TD_ASSERT(TBase::is_alive(), "Component is not alive when destroyed");
         TD_ASSERT(TBase::is_allocated(), "Component is not allocated");           
