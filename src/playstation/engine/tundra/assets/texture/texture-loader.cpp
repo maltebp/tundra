@@ -97,8 +97,8 @@ namespace td {
 
         asset->load_info->texture_page_id = internal::get_texture_page(tim.mode, 1, (uint16)pixels_vram_rect.x, (uint16)pixels_vram_rect.y);
 
-        asset->pixels_width = (uint8)tim.prect->w;
-        asset->pixels_height = (uint8)tim.prect->h;
+        asset->pixels_width = (uint16)tim.prect->w;
+        asset->pixels_height = (uint16)tim.prect->h;
 
         if( asset->mode == TextureMode::Palette4Bit ) {
             asset->pixels_width <<= 2;

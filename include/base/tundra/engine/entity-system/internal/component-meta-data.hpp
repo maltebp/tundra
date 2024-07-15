@@ -47,7 +47,7 @@ namespace td::internal {
         
         union {
             ComponentBase* next;
-            HoleData hole_data;
+            HoleData hole_data; 
         };
 
         template<typename TComponent>

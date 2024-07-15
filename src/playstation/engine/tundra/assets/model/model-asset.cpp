@@ -26,8 +26,9 @@ namespace td {
 
             Vec2<uint8> mapped_uv {
                 (uint8)td::round(Fixed32<12>{uv.x} * (texture->pixels_width - 1)).get_raw_integer(),
-                (uint8)td::round(Fixed32<12>{uv.y} * (texture->pixels_width - 1)).get_raw_integer(),
+                (uint8)td::round(Fixed32<12>{uv.y} * (texture->pixels_height - 1)).get_raw_integer(),
             };
+            
             // Making them relative to texture page 
             mapped_uv += {
                 texture->load_info->texture_page_offset.x,
