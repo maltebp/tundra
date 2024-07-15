@@ -64,7 +64,7 @@ namespace td {
         TD_ASSERT(transform != nullptr, "Camera transform has been destroyed");
         TD_ASSERT(target != transform->get_translation(), "Cannot look at target when it is the same as position");
 
-        // TODO: Is this normalization necessary? (I don't think so)
+        // OPTIMIZATION: Is this normalization necessary? (I don't think so)
         Vec3<Fixed16<12>> direction_to_target = gte::normalize(target - transform->get_translation());
         TD_ASSERT(direction_to_target.x != 0 || direction_to_target.z != 0, "Camera cannot look at target directly above it");
         

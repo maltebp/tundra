@@ -50,7 +50,10 @@ namespace td {
     }
 
     void OrderingTableLayer::add_font_to_front(PrimitiveBuffer& primitive_buffer, int32 x, int32 y, const td::String& text) {
-        
+        // This approach does not fit nicely into how the renderer is set up,
+        // but our hands are tied because of the debug font API. This API should
+        // be replaced with our own.
+
         if( text.get_size() == 0 ) return;
 
         uint32 node_after_front_address = front_node->next_node_ptr;

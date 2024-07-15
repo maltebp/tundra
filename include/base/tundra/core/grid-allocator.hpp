@@ -6,11 +6,9 @@
 
 namespace td {
 
-    // Currently it only supports allocated and not deallocating (so its more 
+    // Currently it only supports allocating and not deallocating (so its more 
     // of a packer really)
-    // OPTIMIZATION: This needs a more proper algorithm (right now, it is just for
-    // allocating once at start-up)
-    // TODO: Rename to Box or Allocator2D or similar (Grid sounds like it can store fixed sizes only)
+    // OPTIMIZATION: This needs a more proper algorithm (right now, it is just for allocating once at start-up)
     class GridAllocator {
     public:
 

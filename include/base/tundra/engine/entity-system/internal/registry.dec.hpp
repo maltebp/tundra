@@ -6,7 +6,6 @@ namespace td::internal {
 
     // TODO: Rename to ComponentRegistry 
     // TODO: Registry should be refactored to a non-static class instead of this approach
-    // This was a quick hack to allow us to iterator static registry in a foreach loop
     template<typename TComponent>
     class Registry {    
     public:
@@ -21,7 +20,6 @@ namespace td::internal {
         template<typename ... TArgs>
         static TComponent* create_component(TArgs&& ... args);
 
-        // TODO: Exists because I was too lazy to refactor (refactor this)
         static void destroy_component(TComponent* component);
 
         static void free_component(TComponent* component);

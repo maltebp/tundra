@@ -54,7 +54,6 @@ namespace td {
 
         constexpr void set_row(uint32 row_index, const Vec3<T>& row_values);
 
-        // TODO: We could have a reference version of this
         constexpr Vec3<T> get_row(uint32 row_index) const;
 
         constexpr void set_column(uint32 column_index, const Vec3<T>& column_values);
@@ -71,8 +70,7 @@ namespace td {
             };
         }
 
-        // TODO: Left out a bunch of operations (add, subtract, etc), so implement
-        // those when I have the time
+        // TODO: Impelement other operations when I have time (add, subtract, etc.)
 
         T m00, m01, m02; // Row 1
         T m10, m11, m12; // Row 2

@@ -144,7 +144,6 @@ namespace td {
 
     template<typename T>
     [[nodiscard]] constexpr Vec3<T> Vec3<T>::cross(const Vec3<T>& other) const {
-        // TODO: For Fixed16 I think it might be faster to subtract in the intermediate format
         return Vec3{
             y * other.z - z * other.y,
             z * other.x - x * other.z,
@@ -152,7 +151,6 @@ namespace td {
         };
     }
 
-    // TODO: Move declaration to vec3.dec.hpp once string.hpp has a string.dec.hpp
     template<typename T>
     String to_string(const Vec3<T>& v) {
         return string_util::create_from_format(

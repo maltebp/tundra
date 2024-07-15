@@ -174,7 +174,6 @@ namespace td {
 
             [[nodiscard]] constexpr static TDerived get_half_pi() { return TDerived{ to_fixed(1.57079632679490) }; }
 
-            // TODO: Require that the Fixed point can even fit this
             [[nodiscard]] constexpr static TDerived get_two_pi() { return TDerived{ to_fixed(6.28318530717959) };
         }
 
@@ -362,7 +361,7 @@ namespace td {
             const uint64 positive_value = (uint64)(abs<TStoreType>(raw_value));
             
             // We keep intermediary results in uint64, but we will only print uint32.uint32, because
-            // the psn00bsdk implementation of printf does not support larger integrals.
+            // the psn00bsdk implementation of printf does not support printing uint64
             // TODO: All calculations does not need this high precision so they could be optimized
 
             uint64 whole_part = (uint64)(positive_value >> TNumFractionBits); 

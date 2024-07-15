@@ -211,7 +211,6 @@ namespace td {
         last_frame_draw_start = time.get_duration_since_start();
         for(td::Camera* camera : Camera::get_all()) {
             
-            // TODO: Queue the drawing of the camera (now drawing a second will block while waiting)
             const td::OrderingTableNode* first_ordering_table_node_to_draw =
                 camera->ordering_tables[(uint8)active_buffer].get_first_node_to_draw();
             DrawOTag((const td::uint32*)first_ordering_table_node_to_draw);
@@ -238,10 +237,10 @@ namespace td {
     void RenderSystem::set_light_color(uint8 light_index, Vec3<uint8> color) {
         TD_ASSERT(light_index < 3, "Light index must be between 0 and 2 (was %d)", light_index);
         
-        // TODO: This could be a multiplication instead
         light_colors.set_column(
             light_index,
-            Vec3<Fixed16<12>>( Vec3<Fixed32<12>>{color} >> 8 ));
+            Vec3<Fixed16<12>>( Vec3<Fixed32<12>>{color} / 256 )
+        );
     }
 
     void RenderSystem::render_camera(Camera* camera) {
@@ -345,7 +344,6 @@ namespace td {
 
         setPolyFT4(primitive);
 
-        // TODO: Should there be z-depth to sprites?
         ordering_table_layer.add_to_front((OrderingTableNode*)primitive);
         
         // We use static cast to preserve the bit pattern (I believe the primitive members are
@@ -392,7 +390,7 @@ namespace td {
 
     void RenderSystem::render_model(const TransformMatrix& camera_matrix, const Model* model, OrderingTableLayer& ordering_table_layer) {
 
-        // TODO: Add radius cull distance
+        // OPTIMIZATION: Add radius cull distance
 
         const TransformMatrix& model_matrix = gte::compute_world_matrix(model->transform);
         TransformMatrix model_to_view_matrix = gte::multiply_transform_matrices(camera_matrix, model_matrix);
@@ -406,7 +404,7 @@ namespace td {
         Mat3x3<Fixed16<12>> light_directions_in_model_space =
             gte::multiply(light_directions, model_rotation_matrix);
         gte_SetLightMatrix( &gte::to_gte_matrix_ref(light_directions_in_model_space) );
-        // TODO: Optimization: we could avoid doing all of this if there are no lights enabled, but
+        // OPTIMIZATION: we could avoid doing all of this if there are no lights enabled, but
         // I think the far most likely scenario is that at least one light is enabled.
         
         gte_SetRotMatrix( &gte::to_gte_matrix_ref(model_to_view_matrix) );
@@ -415,7 +413,6 @@ namespace td {
         volatile uint16 z_map_factor_3 = ordering_table_layer.get_z_map_factor_3();
         set_zsf3(z_map_factor_3);
 
-        // TODO: I think this yields the wrong value for some reason
         volatile uint16 z_map_factor_4 = ordering_table_layer.get_z_map_factor_4();
         set_zsf4(z_map_factor_4);
 

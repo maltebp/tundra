@@ -65,7 +65,7 @@ namespace td::gte {
 
         return transform->cached_world_matrix;
 
-        // TODO: I believe this can be heavily optimized:
+        // OPTIMIZATION: I believe this can be heavily optimized:
         //  - No reason to rotate an axis, if angle is 0 (right now we rotate all)
         //  - We can probably avoid some "matrix register uploads" (e.g. store intermediate in result matrix)
     }
@@ -152,7 +152,7 @@ namespace td::gte {
 
 
     extern Mat3x3<Fixed16<12>> extract_rotation_matrix(const TransformMatrix& transform_matrix) {
-        // TODO: This could probably be optimized
+        // OPTIMIZATION: This could probably be optimized
 
         Mat3x3<Fixed16<12>> rotation_matrix;
 

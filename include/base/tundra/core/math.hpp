@@ -128,7 +128,6 @@ namespace td {
     [[nodiscard]] constexpr TFixed revolutions_to_radians(TFixed num_revolutions) 
         noexcept requires(std::is_base_of<internal::FixedNonTemplateBase, TFixed>::value) 
     {
-        // TODO: Test that TFixed can even represent value
         return num_revolutions * TFixed::get_two_pi();
     }
 
