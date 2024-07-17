@@ -219,7 +219,7 @@ my_component->value = 42;
 #### Deleting component/entity
 
 ```c++
-my_component->destroy(); // Destroys on this component
+my_component->destroy(); // Only destroys this component
 entity->destroy(); // Also destroys all components on entity
 ```
 
@@ -267,13 +267,165 @@ if( ref == nullptr ) {
 
 
 
-### Renderer
+### Transforms
 
-### Models
+In Tundra, the entity system has no inherent knowledge of the concept of transforms. Instead, transforms are just regular components. Meaning that an entity can have an arbitrary number of transforms.
 
-### Sprites
+#### Transform types
 
-### Text
+There are 2 types of transforms:
+
+- **`DynamicTransform`**: Can have a parent and children, and can be changed after constructing (92 bytes). Useful for moving objects (e.g. player)
+- **`StaticTransform`**: Cannot have a parent nor children, and it must given its matrix at construction (44 bytes). Useful for environment (e.g. a tree or rock).
+
+Both transforms inherit the abstract `Transform` class. Other components that needs a transform (such as a `Model`) require an `Transform` in its constructor.
+
+*Example:*
+
+```c++
+td::Entity* entity = td::Entity::create();
+td::DynamicTransform* transform_1 = entity->add_component<td::DynamicTransform>();
+td::DynamicTransform* transform_2 = entity->add_component<td::DynamicTransform>();
+td::StaticTransform* transform_3 = entity->add_component<td::StaticTransform>(..);
+
+transform_1->add_child(transform_2);
+```
+
+
+
+#### Transform matrices
+
+To retrieve the *local-to-world* matrix, or the `TransformMatrix`, of a transform and use it to transform a vector you may use the hardware accelerated computation functions:
+
+```c++
+#include <tundra/gte/compute-transform.hpp>
+
+td::Transform* transform = /* ... */;
+
+td::TransformMatrix world_matrix = td::gte::compute_world_matrix(transform);
+
+td::Vec3<td::Fixed16<12>> v = /* ... */;
+Vec3<Fixed32<12>> v_world = td::gte::apply_transform_matrix(world_matrix, v);
+```
+
+`DynamicTransform` caches its transform matrix, meaning it will only be calculated when needed and only recomputed if it has changed (various optimizations are done here to limit what is recomputed).
+
+The `StaticTransform` stores its matrix directly, and thus involves no computation. This can also be fetched directly.
+
+The header also contains other transform matrix functions, including multiplication of matrices, extraction of rotation matrices and computation of the inverse transform matrix.
+
+### Rendering
+
+The engine automatically runs the rendering logic after the `update(..)` function has been called. You utilize the rendering features by
+
+- Adjusting lighting settings in the `RenderSystem` accessed via the `EngineSystems` (ambient lighting and 3 directional lights are available)
+- Setup a `Camera` component along with *layer settings*
+- Create *renderable components* that are either  `Model`, `Sprite` and `Text`
+
+#### Camera
+
+To render anything you must create at least one `Camera` component, which is assigned a `Transform` at construction. For every camera, every renderable component is rendered in relation to the camera's transform position and view direction. The camera's view direction is the camera's local negative z-axis (engine uses *right-handed* coordinate system).
+
+```c++
+auto layer_settings = // ... See below
+    
+td::Entity* camera_entity = td::Entity::create();
+
+td::DynamicTransform* camera_transform = 
+    camera_entity->add_component<td::DynamicTransform>();
+
+td::Camera* camera = 
+    camera_entity->add_component<td::Camera>(camera_transform, layer_settings);
+```
+
+The renderer automatically picks up every camera, so there is no need to register it with the renderer.
+
+You can manually manipulate the camera's transform to change its view direction, but you can also use the `look_at` function:
+
+```c++
+camera->transform->set_translation({1, 0, 1})
+camera->look_at({0, 0, 0 });
+```
+
+#### Layers
+
+All renderable components are assigned to a *layer*, which is just an integer ID, and a camera has a list of layers that it renders.
+
+**Note:** Because you currently cannot set which part of the framebuffer that a camera renders to, the multiple camera functionality is not all that useful (e.g. you cannot do split screen or a rearview camera).
+
+Every camera can setup its own depth settings for every: how far it renders and the resolution of the depth (number of distinct depth values in the depth range). Increasing the resolution, increases the memory overhead of the camera (2 bytes per value). 
+
+*Example:*
+
+```c++
+const td::uint32 LAYER_UI = 0;
+const td::uint32 LAYER_WORLD = 1;
+const td::uint32 LAYER_GROUND = 2;
+
+td::List<td::CameraLayerSettings> layer_settings;
+layer_settings.add({LAYER_UI, 1});
+layer_settings.add({LAYER_WORLD, 2048});
+layer_settings.add({LAYER_GROUND, 128});
+
+camera_entity->add_component<td::Camera>(
+    camera_transform, 
+    layer_settings
+);
+```
+
+#### Models
+
+Models are instances of 3D `ModelAsset`s, including various instance settings such as a transform and tint.
+
+```c++
+td::Entity* entity = td::Entity::create();
+
+td::Transform* transform = /* .. */;
+td::uint32* layer = /* .. */;
+td::ModelAsset* model_asset = /* .. */;
+
+td::Model* model = entity->add_component<td::Model>(
+    model_asset,
+    layer, 
+    transform
+);
+```
+
+#### Sprites
+
+Sprites are instances `TextureAsset`'s' in screen space including various instance settings such as position, rotation, size and tint.
+
+```c++
+td::uint32* layer = /* .. */;
+td::TextureAsset* texture = /* .. */;
+
+td::Entity* e = td::Entity::create();
+td::Sprite* sprite = e->add_component<td::Sprite>(layer);
+sprite->texture = texture;
+sprite->size = { 32, 32 };
+sprite->position = { 64, 64 };
+```
+
+Screen space is 320x240 with (0, 0) being top left and (320,240) being bottom right.
+
+**Note:** I never got around to implement 2D transforms for Tundra.
+
+#### Text
+
+Tundra does not have proper UI text support, but it exposes *psn00bsdk*'s  *debug font* API via the component system.
+
+```c++
+td::uint32* layer = /* .. */;
+
+td::Entity* entity = td::Entity::create();
+td::Text* text_component = entity->add_component<td::Text>(layer);
+text_component->text = "Hello word!";
+text_component->position = { 64, 64};
+```
+
+The text is limited in that you cannot change the text's font, size, color or rotation.
+
+
 
 ### Sound
 
