@@ -1,7 +1,7 @@
 # Tundra
 Tundra is the **runtime** part of a general-purpose 3D engine for the **original PlayStation** console (PlayStation 1 / PSX), along with a few CLI tools to ease development and use of the engine. It uses C++20 and [psn00bsdk](https://github.com/Lameguy64/PSn00bSDK) as its underlying SDK, but currently it only supports Windows.
 
-The engine was created as part of my Master's thesis, and has been used to create the game [Color Cannon Coop ](https://jesperpapiorgmailcom.itch.io/colorcannoncoop)at Nordic Game Jam 2024. As such, the engine is somewhat limited and cuts some corners that provided little value for that project.
+The engine was created as part of my Master's thesis, and has been used to create the game [Color Cannon Coop ](https://jesperpapiorgmailcom.itch.io/colorcannoncoop)at Nordic Game Jam 2024. As such, the engine is limited in features, has many things I would do differently and contains some hacky solutions.
 
 This repository is not under further development, as I'm planning on rebooting the project under a new one. This will be linked to here, once that is started.
 
@@ -25,7 +25,7 @@ This repository is not under further development, as I'm planning on rebooting t
 
 This engine was created as the core part of my Master's thesis in MSc in Games (technology track) at IT University of Copenhagen in 2024. 
 
-In practice, I primarily desired to spend my time on developing an engine. Formally, however, the motivation was that there seem to be no general-purpose game engines for the PlayStation out there (to my knowledge), which seem to be because of the technical limitations of the console. But I'm not entirely convinced that is reason enough for one to not to exist, and so I formally sought to answer the following hypothesis:
+In practice, I primarily desired to spend my time on developing an engine. Formally, however, the motivation was that there seem to be no general-purpose game engines for the original PlayStation out there (to my knowledge), which seem to be because of the technical limitations of the console. But I'm not entirely convinced that is reason enough for one to not to exist, and so I formally sought to answer the following hypothesis:
 
 > What are the technical capabilities of a general-purpose 3D game-engine for the original PlaySta-
 > tion?
@@ -479,12 +479,175 @@ void update(td::EngineSystems& engine_systems, const td::FrameTime& frame_time) 
 
 ### Utility
 
-- Fixed point
-- List
-- String
-- Input/output
-- Asserts
-- Matrices vectors
+The engine contains various utility, some of which covers the lack of an STL implementation. All of these utility classes exists in `<tundra/core/...>` headers
+
+
+
+#### Fixed-point class
+
+Header: `<tundra/core/fixed.hpp>`
+
+The PlayStation does not have hardware support for floating point numbers and instead uses [fixed point numbers](https://en.wikipedia.org/wiki/Fixed-point_arithmetic). Tundra has a some types two template types to represent such numbers: a 16-bit type `Fixed16<TNumFractionBits>` and a 32-bit type `Fixed32<TNumFractionBits>`.
+
+The most common value for `TNumFractionBits` is 12, as that is what is used by the PlayStation hardware.
+
+They support most of the operators you will need such as addition, subtraction, multiplication and casts in a type-safe manner.
+
+##### Constructing
+
+Integers (both constant expressions and non-constant expressions) can implicitly be cast to a fixed-pointer number:
+
+```
+int i = /* value from somewhere */;
+td::Fixed16<12> f = 15;
+td::Fixed32<12> f = i;
+```
+
+This cast incurs a single bit-shift.
+
+You can construct a fixed-point number from a `double` value that is a constant expression, such as a `double` literal using the `td::to_fixed`:
+
+```c++
+td::Fixed32<12> f = td::to_fixed(12.5);
+```
+
+This is a `consteval` API that ensures the constant expression double is converted to a fixed-point type at compile time.
+
+##### Math
+
+The `<tundra/core/math.hpp>` includes various math functions that operates on the fixed-point types, including `sin`, `cos`, `abs` and so on. These implementations are from [fpm](https://github.com/MikeLankamp/fpm/blob/master/include/fpm/math.hpp) repository.
+
+#### List
+
+Header: `<tundra/core/list.hpp>`
+
+Just a simple *dynamic array* implementation with geometric growth. This is the only container provided by engine.
+
+```c++
+td::List<int> l;
+l.reserve(16);
+l.add(10);
+bool was_removed = l.remove(12);
+int index = l.index_of(10);
+bool contains = l.contains(42);
+l.clear();
+```
+
+#### String
+
+*Header: `<tundra/core/string.hpp>`*
+
+A dynamic character array implementation very similar to `std::string`.
+
+``` c++
+td::String s = "Hello, ";
+td::String s2 = "World!";
+td::String s3 = s1 + S2;
+```
+
+##### From format
+
+Using the header `<tundra/core/string-util.hpp>`, you can create a `td::String` from a string format (like `printf`):
+
+```c++
+td::String s = td::string_util::create_from_format("(%d, %d)", 10, 15);
+```
+
+##### To string
+
+You can convert various primitives and types to a `td::String` using the specializations and overloads `td::to_string<T>`:
+
+```c++
+td::String s1 = td::to_string(10);
+
+td::Fixed16<12> f = td::to_fixed(4.5);
+td::String s2 = td::to_string(f);
+```
+
+You can implement a specialization for this function for you own types as well:
+
+```c++
+struct MyStruct {
+	int i, j;
+};
+
+td::String td::to_string(const MyStruct& my_struct) {
+	return td::string_util::create_from_format("(%d, %d)", i, j);
+}
+```
+
+##### Debug log
+
+To utilize `String` for printing, you can use the `TD_DEBUG_LOG` macro from `<tundra/core/log.hpp>` header. This uses `printf`-like formatting, but it can also print `Strings` and types that has a `td::to_string` implementation using the  `%s` format:
+
+```c++
+TD_DEBUG_LOG("%d", 42);
+
+td::String s = "Hello world";
+TD_DEBUGLOG("%s", s);
+
+td::Fixed32<12> f = /* .. */;
+TD_DEBUG_LOG("%s", f);
+```
+
+Debug logs are automatically compiled out when doing a *Release* build.
+
+#### Debug asserts
+
+*Header: `<tundra/core/assert.hpp>`*
+
+Asserts whether a given expression is true, and if not, it will print the given message and halt the program:
+
+```c++
+int i = / * ... */;
+int j = / * ... */;
+TD_ASSERT(i == j, "%d does not equal %d", i, j);
+```
+
+Unfortunately, I did not get around to support the same functionality as with `TD_DEBUG_LOG`, so you must manually convert non-primitive objects and `td::String` to a C-strings:
+
+```c++
+td::String s = "Hello world";
+TD_ASSERT(false, "%s", s.get_c_string());
+
+td::Fixed32<12> f = /* .. */;
+TD_ASSERT(false, "%s", td::to_string(f).get_c_string());
+```
+
+#### Matrices and vectors
+
+*Headers: `<tundra/core/vec/vec3.hpp>`, `<tundra/core/vec/vec2.hpp>`, `<tundra/core/mat/mat3x3.hpp>`*
+
+The engine contains some very simple template types for 2D and 3D vectors and 3x3 matrices that supports some simple addition, subtraction and comparison operations.
+
+```c++
+td::Vec3<int>`v1 { 1, 2, 3 };
+td::Vec3<int>`v2 { 4 };
+td::Vec3<int> v3 = v1 + v2;
+
+td::Vec2<td::Fixed32<12>> v4;
+
+td::Mat3x3<td::Fixed16<12>> m {
+    1, 2, 3,
+    4, 5, 6,
+    7, 8, 9
+};
+```
+
+##### Hardware acceleration
+
+*Header: `<tundra/gte/operations.hpp>`*
+
+A few *hardware accelerated* operations exists for specific combinations of `Vec3` and `Mat3x3` using `Fixed32` and `Fixed16` as template types, including multiplication, normalization and creation of a rotation matrix.
+
+Example:
+
+```c++
+Mat3x3<Fixed16<12>> m1;
+Mat3x3<Fixed16<12>> m2;
+
+Mat3x3<Fixed16<12>> m3 = td::gte::multiply(m1, m2);
+```
 
 
 
