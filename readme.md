@@ -21,8 +21,6 @@ One small game made with the engine is [Color Cannon Coop](https://jesperpapiorg
 
 
 
-
-
 ## **Thesis**
 
 This engine was created as the core part of my Master's thesis in MSc in Games (technology track) at IT University of Copenhagen in 2024. 
@@ -33,6 +31,10 @@ In practice, I primarily desired to spend my time on developing an engine. Forma
 > tion?
 
 The final report can be found in the root of the repository ([](thesis.pdf).
+
+
+
+## Acknowledgements
 
 
 
