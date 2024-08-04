@@ -1,9 +1,11 @@
 # Tundra
-Tundra is the **runtime** part of a general-purpose 3D engine for the **original PlayStation** console (PlayStation 1 / PSX), along with a few CLI tools to ease development and use of the engine. It uses C++20 and [psn00bsdk](https://github.com/Lameguy64/PSn00bSDK) as its underlying SDK, but currently it only supports Windows.
+Tundra is the **runtime** part of a general-purpose 3D engine for the **first generation of PlayStation consoles** (PlayStation 1 / PSX), along with a few CLI tools to ease development and use of the engine. It uses C++20 and [psn00bsdk](https://github.com/Lameguy64/PSn00bSDK) as its underlying SDK, but currently it only supports Windows.
 
-The engine was created as part of my Master's thesis, and has been used to create the game [Color Cannon Coop ](https://jesperpapiorgmailcom.itch.io/colorcannoncoop)at Nordic Game Jam 2024. As such, the engine is limited in features, has many things I would do differently and contains some hacky solutions.
+The engine was created as part of my Master's thesis, and as such, the engine is limited in features, has multiple hacky solutions and there are many things I would do differently. This repository is not under further development, as I'm planning on rebooting the project. The new repository will be linked to here. 
 
-This repository is not under further development, as I'm planning on rebooting the project under a new one. This will be linked to here, once that is started.
+While it *was* and *can be* used for developing a game with, doing so you will likely run into unknown bugs, weird behavior or missing features that I cannot promise to fix or help out with. So use it at your own discretion.
+
+One small game made with the engine is [Color Cannon Coop](https://jesperpapiorgmailcom.itch.io/colorcannoncoop) made at *Nordic Game Jam 2024*.
 
 
 
@@ -62,26 +64,126 @@ The final report can be found in the root of the repository ([](thesis.pdf).
 
 ### Missing features and limitations
 
+- No physics system
+- No animations
+- No concept of a "scenes"
 - The entire game is packed into a single binary that is fully loaded at startup, which means
   - The entire game (including assets) is limited to 2 megabytes
   - All assets have to be loaded into RAM, even those that are just loaded into video and sound RAM.
-  - There is no audio streaming, significantly limiting the potential of music
-
+  - There is no audio streaming, significantly limiting the size potential of music
 - No advanced audio support (no stereo, no spatial sounds, no procedural sound effects)
-- No concept of a "scene system"
-- The renderer is not particularly optimized, and has only trivial culling mechanisms (e.g. big levels with a lot of geometry out of view still incur a big performance cost).
-- No support for other controllers than original
+- The renderer is not particularly optimized, and only utilizes trivial culling mechanisms.
 - No C++ standard template library (STL)
+- No support for other controllers than original (only digital mode)
 
 
 
 ## How to use
 
-### Setup game
-
-To use the engine for a game, setup the game with the [Tundra game template](https://github.com/maltebp/tundra-template). See the repository, for how to use the template.
 
 
+### Game setup
+
+The engine utilizes [Visual Studio Code](https://apps.microsoft.com/detail/xp9khm4bk9fz7q?hl=en-US&gl=US) (or a fork, such as [VSCodium](https://vscodium.com/)) and the emulator [PCSX Redux](https://github.com/grumpycoders/pcsx-redux) for its workflows, and a game project is setup using the [Tundra game template](https://github.com/maltebp/tundra-template).
+
+#### Setup tools
+
+**VS Code**
+
+1. Install [Visual Studio code](https://code.visualstudio.com/Docs/setup/setup-overview)
+   1. Install [Native Debug](https://marketplace.visualstudio.com/items?itemName=webfreak.debug) extension
+   2. Install [clangd](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extension
+   3. Optional: Install [CMake](https://marketplace.visualstudio.com/items?itemName=twxs.cmake) extension (for syntax highlighting in CMake files used for project configurations)
+2. Download [PCSX Redux](https://distrib.app/pub/org/pcsx-redux/project/dev-win-x64) (topmost) - it does not matter to the engine where you put it
+   1. Open the emulator
+   2. Press escape to show the top bar and open *Configuration > Emulation*
+   3. Toggle *Enable Debugger* **on**
+   4. Toggle *Enable GDB Server* **on**
+   5. Toggle *Dynarec CPU* **off**
+
+#### Setup game project
+
+1. Download the [Tundra game template](https://github.com/maltebp/tundra-template) (download as Zip and extract it or fork it the repository)
+2. Rename the folder to your game project (no spaces)
+   - This just changes the name of your ISO files (and the name of your game project folder for your own convenience).
+
+The project template contains simple white cube assets, which it renders and rotates. 
+
+#### Project structure
+
+- `assets/` is where you put your raw asset files (.png, .obj, .wav)
+  - Currently, contains the simple white cube model
+  - How you structure this is up to you
+- `src/` is where you put your source code
+  - Currently it sets up a camera, loads the cube model asset, constructs an entity with a `Model` component with the cube model, rotates it continuously and displays a `Hello. world!` text.
+- `sources.cmake` should include all the source files (`.cpp`) that must be included in the game
+- `assets.cmake` is where you include and configure your assets (see the [Assets section](#Assets))
+- Other (you should not change content of these):
+  - `tools/` contains the build scripts
+  - `external/` contains the built engine
+
+#### Building the game
+
+The game is built from a *command-line interface* (CLI) using batch scripts
+
+- Open you terminal (e.g. Command Prompt)
+- Navigate to your game project folder
+- Run `tools\build\generate.bat`
+  - This is only needed if you have added a new source file to `sources.cmake` or a new asset to `assets.cmake`
+- Run `tools\build\build.bat <config>` where `<config>` is either `debug` or `release` (`release` has full code optimization and removes all assertions).
+
+#### Running and debugging the game in *emulator*
+
+You run the game in the emulator through Visual Studio Code:
+
+- Build your game (see [Building the game](#Building the game))
+- Open *PCSX Redux*
+- In Visual Studio Code, open the *Run and Debug* side-panel (press `Ctrl + Shift + D` )
+- Select either `Game (Redux, Debug)` and `Game (Redux, Release)`
+
+Game should now start in the emulator, and Visual Studio Code has a debugger attached.
+
+**Disclaimer: **The debugger is a bit wonky and unstable, so use at your own discretion (e.g. you cannot set breakpoints while it is running, you cannot always see the callstack and it may break at a different line than where you have put your breakpoint).
+
+#### Running and debugging on *hardware*
+
+Running it on *hardware* is a bit more complicated and a bit unstable workflow, and is therefor not fully described here. But in short:
+
+- You must have a memory card with [Unirom](https://unirom.github.io/) installed
+  - Or a modchipped PlayStation and a CD with Unirom installed
+- A [USB to PlayStation's serial cable](https://www.schnappy.xyz/?building_a_serial_psx_cable)
+- Download [NOTPSXSerial](https://github.com/JonathanDotCel/NOTPSXSerial) (`nops`) to connect to PlayStation
+- To debug you
+  - Connect PlayStation and PC using serial cable
+  - Start *Unirom* on the PlayStation
+  - Run `nops` in terminal: `nops /fast /gdb 127.0.0.1:3334 COM3 /m`
+  - In Visual Studio Code (with your project open) run the `Game (Hardware, Debug)` or `Game (Hardware, Release)` configurations.
+
+You can also burn the game the onto a physical disk, by using the image file, which is automatically built in the build-step and to be found as `build/<project_name>.bin` and `build/<project_name>.cue` (this require you to modchip or softmod your hardware).
+
+
+
+### General code pointers
+
+- Types are in `PascalCase`, functions, members, namespaces and variables are in `lower_case_snake_case`, and macros are in `CAPITALIZED_SNAKE_CASE`
+
+- All Tundra types and functions exist in the `td` namespace
+
+- All Tundra macros start with `TD_`
+
+- Everything in `td::internal` and headers in an `internal` folder is not intended to be used by the user
+
+- All Tundra headers exist in `<tundra/...>`
+
+- There is no particular pattern in subfolders in `<tundra/...>`
+
+- Headers may be split into three parts, with each parts including the ones above:
+
+  - `header.fwd.hpp`: contains only forward declarations of types and global functions
+  - `header.dec.hpp`: contains *definition* of types (structs and classes), but only *declarations* of member functions
+  - `header.hpp`: contains full definition of class methods (unless they exist in a `.cpp` file)
+
+  Compilation times may improve drastically, if you only include what you need, instead of including `header.hpp` every time.
 
 ### Setup and game loop
 
@@ -651,9 +753,135 @@ Mat3x3<Fixed16<12>> m3 = td::gte::multiply(m1, m2);
 
 
 
-## Setup and build
+## Development on the engine
+
+This contains information on how to develop the engine, which is an unlikely use-case as the repository is discontinued. But for preservation, and in case some one wants to fork it and make some changes, I put a guide for it here.
+
+### Setup
+
+Development on the engine requires the same tools (VS Code and emulator) as for developing games, so see the [Setup tools](#Setup-tools) section for this.
+
+You must also install [Visual Studio 2022](https://visualstudio.microsoft.com/). 
+
+Besides that, you only need to clone the repository - all other dependencies, including *CMake*, SDK and debugger, are included in the repository.
+
+### Project structure
+
+The engine's projects, source code and tests are split in three *layers*:
+
+- `playstation`: runs on the PlayStation (e.g. has dependencies on the PlayStation)
+- `developer`: runs on the developers platform (e.g. tools such as the model compiler)
+- `base`: used for both the developers and PlayStation layers (i.e. cross-platform)
+
+`playstation` and `developer` does not depend on each other, but both depends on `base`.
+
+The *physical layout* of the engine mostly follows [The Pitchfork Layout](https://joholl.github.io/pitchfork-website/):
+
+- `include`: Contains all the API headers (i.e. the ones that the game will include)
+  - This is split into `base`, `developer` and `playstation`
+  - These headers cannot include anything from `src`
+  - Anything in `include/base/core/` must not include anything outside that folder
+- `src`: Contains all the source files and header files that are not part of the engine API
+  - Can include headers from `include`
+- `tests`: contains test source code and data
+  - `tests/data/`: assets used for tests
+  - `tests/automated/`: source code for tests that can be run and validated automatically (e.g. unit tests) using the custom testing framework
+    - One folder for each layer
+  - `tests/manual/`: more complex tests that must be run and validated manually (i.e. sandbox-like projects)
+    - One folder for each layer
+- `tools`:
+  - `build`: Contains the CMake project files for each of the projects (instead of putting them in `src`) as well as batch scripts for generating and building the different projects. There is a folder for each of the  three components (`base`, `developer`, `playstation`)
+  - `cmake`: Contains some CMake used across CMake projects
+- `external`: contains all the external dependencies for the engine, including both tools and libraries
+- `.vscode`: it is intentional that this is included in the repository as it contains debugging configurations and *clangd* settings (for syntax highlighting)
+
+### 
+
+### Build
+
+The engine is built with *batch* scripts through a terminal (like the game):
+
+1. Open the `tundra` repository folder in your terminal
+2. Build the developer layer (only contains *asset compiler* required for tests):
+   1. Run `tools\build\developer\generate`
+   2. Run `tools\build\developer\build debug`
+   3. Run `tools\build\developer\build release`
+3. Build the engine 
+   1. Run `tools\build\playstation\generate`
+   2. Run `tools\build\playstation\build debug`
+   3. Run `tools\build\playstation\build release`
+
+#### Deploy (full build)
+
+You can "deploy" the engine, which will build everything and generate an output folder with all the required libraries, headers and dependencies that a game needs:
+
+1. Open the `tundra` folder in your terminal
+2. Run `tools\build\deploy`
+3. Output is put in `build\deploy\`
 
 
+
+### Development environment
+
+#### `playstation`
+
+Developing the `playstation` layer, you must use *Visual Studio Code* which utilizes the *clangd* extension as a language server to provide syntax highlighting, code correction and suggestions.
+
+#### `developer`
+
+Developing the `developer` layer (currently only *asset compiler*), you must use *Visual Studio* and open the `build\developer\td.developer.sln`.
+
+### Running tests
+
+**Note:** The *base* layer contains many tests, but these are not run on their own. They are executed either on `developer` (Windows) or `playstation` (emulator or hardware) when running the tests for either layer.
+
+#### `playstation`
+
+1. Build the `playstation` projects (see above)
+2. Open *PCSX Redux*
+3. Open repository in *Visual Studio Code*
+4. Open *Run and Debug* panel (`Ctrl + Shift + D`)
+5. Select debug configuration:
+   - `Automated Tests (<Redux|Hardware>, <Debug|Release>)`
+     - Runs the automated tests on either hardware or in emulator (`Redux`). To run on hardware, see [Running and debugging on hardware](#Running-and-debugging-on-hardware)
+   - `Tests: <Manual Test> (<Redux|Hardware>, Debug)`
+     - Runs one of the manual tests (will produce some visual output in the emulator). Only `Debug` configuration exists for these for simplicity.
+6. Press `Start Debugging` (green play button), or press `F5`
+
+#### `developer`
+
+1. Build the `developer` projects (see above)
+2. Open `build\developer\td.developer.sln` solution in *Visual Studio*
+3. Build solution (`Build > Build Solution`)
+4. Run the `td.developer.tests.automated` project
+
+**Note:** No manual tests exists for this layer at the moment.
+
+#### Sandbox project
+
+**Note:** You may want to setup a personal sandbox project where you can write ad-hoc tests to test changes made to the engine. You can do this using the Tundra game template (see the [Game Setup](#Game-setup) section), and update the engine using the guide below.
+
+### Update engine in game 
+
+To update the engine of the template repository, or a copy of it (i.e. a game or sandbox project), you must do the following:
+
+- Setup the engine repository path for the game project (only once):
+
+  - Create the file `<game_project>\tools\update-tundra\source-path`
+  - In the file, paste the *full* path to the `tundra` repository (e.g. `C:\Users\malte\projects\tundra`)
+
+- [Build and *deploy* the Tundra engine](#Deploy-(full-build))
+
+- Update the game's engine:
+
+  - Open game project folder in terminal
+  - Run `tools\update-tundra\update`
+
+- Re-generate and re-build your game
+
+  
 
 ## Benchmarks
+
+
 
