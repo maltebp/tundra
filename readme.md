@@ -30,13 +30,29 @@ In practice, I primarily desired to spend my time on developing an engine. Forma
 > What are the technical capabilities of a general-purpose 3D game-engine for the original PlaySta-
 > tion?
 
-The final report can be found in the root of the repository ([](thesis.pdf).
+The final report can be found in the root of the repository ([thesis.pdf](thesis.pdf)).
 
 
 
 ## Acknowledgements
 
+The development of this work has relied on the aid of various people:
 
+- [PSX.Dev Discord server](https://discord.gg/QByKPpH) for answering questions (inparticular *Nicolas Noble*, *spicyjpeg*, stenzek and Melchior)
+- The PSX community in general for keeping this console alive and developing projects, tools and sharing knowledge which has been very essential for this project
+- Jesper, Freddy and Noah for helping me testing out the engine at *Nordic Game Jam 2024*
+- *Mike 'gwald' Garcia* and *Martin 'nocash' Korth* for feedback on the project over at [psxdev.net](https://www.psxdev.net/forum/viewtopic.php?f=62&t=4144)
+
+and various projects:
+
+- [psn00bsdk](https://github.com/Lameguy64/PSn00bSDK) (by Lameguy64, Spicyjpeg and more)
+- [PCSX Redux](https://github.com/Lameguy64/PSn00bSDK) (including *PSyqo*) (by Nicolas Noble and more)
+- [NOTPSXSerial](https://github.com/JonathanDotCel/NOTPSXSerial/blob/master/LICENSE) (by JonathanDotCel, Sktichin and more)
+- [Unirom](https://unirom.github.io/) (by Nicolas Noble, JonathanDotCel, ABelliquex and more)
+- [PlayStation Specifications](https://github.com/psx-spx/psx-spx.github.io/graphs/contributors) (originally by Martin 'nocash' Korth, edited and hosted by Nicolas Noble, spicyjpeg, kraptor and more)
+- [DuckStation](https://github.com/stenzek/duckstation) (by stenzek)
+
+If you feel you have contributed, and I have left you out, I deeply apologize and will rectify it if you reach out to me.
 
 ## Features
 
