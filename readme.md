@@ -1,5 +1,5 @@
 # Tundra
-Tundra is the **runtime** part of a general-purpose 3D engine for the **first generation of PlayStation consoles** (PlayStation 1 / PSX), along with a few CLI tools to ease development and use of the engine. It uses C++20 and [psn00bsdk](https://github.com/Lameguy64/PSn00bSDK) as its underlying SDK, but currently it only supports Windows.
+Tundra is the **runtime** part of a general-purpose 3D game engine for the **first generation of PlayStation consoles** (PlayStation 1 / PSX), along with a few CLI tools to ease development and use of the engine. It uses C++20 and [psn00bsdk](https://github.com/Lameguy64/PSn00bSDK) as its underlying SDK, but currently it only supports Windows.
 
 The engine was created as part of my Master's thesis, and as such, the engine is limited in features, has multiple hacky solutions and there are many things I would do differently. This repository is not under further development, as I'm planning on rebooting the project. The new repository will be linked to here. 
 
@@ -7,25 +7,30 @@ While it *was* and *can be* used for developing a game with, doing so you will l
 
 One small game made with the engine is [Color Cannon Coop](https://jesperpapiorgmailcom.itch.io/colorcannoncoop) made at *Nordic Game Jam 2024*.
 
-
-
 ### Content
 
 - [Thesis](#Thesis)
-- [Thesis](#Thesis)
-- [Thesis](#Thesis)
+- [Acknowledgements](#Acknowledgements)
+- [Features](#Features)
 - [How to use](#How-to-use)
-  - ...
-- [Setup and build](#Setup-and-build)
+  - [Game setup](#Game-setup)
+  - [General code pointers](#General-code-pointers)
+  - [Setup and game loop](#Setup-and-game-loop)
+  - [Assets](#Assets)
+  - [Entity system](#Entity-system)
+  - [Transforms](#Transforms)
+  - [Rendering](#Rendering)
+  - [Sound](#Sound)
+  - [Input](#Input)
+  - [Utility](#Utility)
+- [Development on the engine](#Development-on-the-engine)
 - [Benchmarks](#Benchmarks)
-
-
 
 ## **Thesis**
 
-This engine was created as the core part of my Master's thesis in MSc in Games (technology track) at IT University of Copenhagen in 2024. 
+This engine was created as the core part of my Master's thesis in MSc in Games (technology track) at IT University of Copenhagen in fall of 2024. 
 
-In practice, I primarily desired to spend my time on developing an engine. Formally, however, the motivation was that there seem to be no general-purpose game engines for the original PlayStation out there (to my knowledge), which seem to be because of the technical limitations of the console. But I'm not entirely convinced that is reason enough for one to not to exist, and so I formally sought to answer the following hypothesis:
+In practice, I primarily desired to spend my time on developing an engine. Formally, however, the thesis was motivated by there not being any general-purpose game engines for the original PlayStation out there (to my knowledge). It seems this is in part because of the technical limitations of the console, but I'm not entirely convinced that is reason enough for one to not to exist, and so I sought to answer the following hypothesis:
 
 > What are the technical capabilities of a general-purpose 3D game-engine for the original PlaySta-
 > tion?
@@ -38,10 +43,10 @@ The final report can be found in the root of the repository ([thesis.pdf](thesis
 
 The development of this work has relied on the aid of various people:
 
-- [PSX.Dev Discord server](https://discord.gg/QByKPpH) for answering questions (inparticular *Nicolas Noble*, *spicyjpeg*, stenzek and Melchior)
+- [PSX.Dev Discord server](https://discord.gg/QByKPpH) for answering questions (in particular *Nicolas Noble*, *spicyjpeg*, stenzek and Melchior)
 - The PSX community in general for keeping this console alive and developing projects, tools and sharing knowledge which has been very essential for this project
-- Jesper, Freddy and Noah for helping me testing out the engine at *Nordic Game Jam 2024*
 - *Mike 'gwald' Garcia* and *Martin 'nocash' Korth* for feedback on the project over at [psxdev.net](https://www.psxdev.net/forum/viewtopic.php?f=62&t=4144)
+- Jesper, Freddy and Noah for helping me testing out the engine at *Nordic Game Jam 2024*
 
 and various projects:
 
@@ -66,7 +71,7 @@ If you feel you have contributed, and I have left you out, I deeply apologize an
 
 - Input system for original controller (not analog)
 
-- Sound system to play 23 looping and one-off sounds simultaneously plus 1 music trac
+- Sound system to play 23 looping and one-off sounds simultaneously plus 1 music track
 
 - Hardware accelerated matrices and vector classes
 
@@ -91,7 +96,7 @@ If you feel you have contributed, and I have left you out, I deeply apologize an
   - There is no audio streaming, significantly limiting the size potential of music
 - No advanced audio support (no stereo, no spatial sounds, no procedural sound effects)
 - The renderer is not particularly optimized, and only utilizes trivial culling mechanisms.
-- No C++ standard template library (STL)
+- No C++ standard template library (STL), and only limited custom substitutes
 - No support for other controllers than original (only digital mode)
 
 
@@ -109,15 +114,18 @@ The engine utilizes [Visual Studio Code](https://apps.microsoft.com/detail/xp9kh
 **VS Code**
 
 1. Install [Visual Studio code](https://code.visualstudio.com/Docs/setup/setup-overview)
-   1. Install [Native Debug](https://marketplace.visualstudio.com/items?itemName=webfreak.debug) extension
-   2. Install [clangd](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extension
-   3. Optional: Install [CMake](https://marketplace.visualstudio.com/items?itemName=twxs.cmake) extension (for syntax highlighting in CMake files used for project configurations)
-2. Download [PCSX Redux](https://distrib.app/pub/org/pcsx-redux/project/dev-win-x64) (topmost) - it does not matter to the engine where you put it
-   1. Open the emulator
-   2. Press escape to show the top bar and open *Configuration > Emulation*
-   3. Toggle *Enable Debugger* **on**
-   4. Toggle *Enable GDB Server* **on**
-   5. Toggle *Dynarec CPU* **off**
+2. Install [Native Debug](https://marketplace.visualstudio.com/items?itemName=webfreak.debug) extension
+3. Install [clangd](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extension
+4. Optional: Install [CMake](https://marketplace.visualstudio.com/items?itemName=twxs.cmake) extension (for syntax highlighting in CMake files used for project configurations)
+
+**PCSX Redux**
+
+1. Download [PCSX Redux](https://distrib.app/pub/org/pcsx-redux/project/dev-win-x64) (topmost) - it does not matter to the engine where you put it
+2. Open the emulator
+3. Press escape to show the top bar and open *Configuration > Emulation*
+4. Toggle *Enable Debugger* **on**
+5. Toggle *Enable GDB Server* **on**
+6. Toggle *Dynarec CPU* **off**
 
 #### Setup game project
 
@@ -134,11 +142,10 @@ The project template contains simple white cube assets, which it renders and rot
   - How you structure this is up to you
 - `src/` is where you put your source code
   - Currently it sets up a camera, loads the cube model asset, constructs an entity with a `Model` component with the cube model, rotates it continuously and displays a `Hello. world!` text.
-- `sources.cmake` should include all the source files (`.cpp`) that must be included in the game
-- `assets.cmake` is where you include and configure your assets (see the [Assets section](#Assets))
-- Other (you should not change content of these):
-  - `tools/` contains the build scripts
-  - `external/` contains the built engine
+- `sources.cmake` is a list of all source files (`.cpp`) that must be included in the game
+- `assets.cmake` is a list of all asset files and their configurations (see the [Assets section](#Assets))
+- `tools/` contains the build scripts
+- `external/` contains the built engine
 
 #### Building the game
 
@@ -147,7 +154,7 @@ The game is built from a *command-line interface* (CLI) using batch scripts
 - Open you terminal (e.g. Command Prompt)
 - Navigate to your game project folder
 - Run `tools\build\generate.bat`
-  - This is only needed if you have added a new source file to `sources.cmake` or a new asset to `assets.cmake`
+  - This is only needed if you have never built before or added a new source file to `sources.cmake` or a new asset to `assets.cmake`
 - Run `tools\build\build.bat <config>` where `<config>` is either `debug` or `release` (`release` has full code optimization and removes all assertions).
 
 #### Running and debugging the game in *emulator*
@@ -169,7 +176,7 @@ Running it on *hardware* is a bit more complicated and a bit unstable workflow, 
 
 - You must have a memory card with [Unirom](https://unirom.github.io/) installed
   - Or a modchipped PlayStation and a CD with Unirom installed
-- A [USB to PlayStation's serial cable](https://www.schnappy.xyz/?building_a_serial_psx_cable)
+- A [USB to PlayStation's serial cable](https://www.schnappy.xyz/?building_a_serial_psx_cable) (which must be custom-made)
 - Download [NOTPSXSerial](https://github.com/JonathanDotCel/NOTPSXSerial) (`nops`) to connect to PlayStation
 - To debug you
   - Connect PlayStation and PC using serial cable
@@ -220,34 +227,34 @@ void update(td::EngineSystems& engine_systems, const td::FrameTime& frame_time) 
 
 The `engine_systems` arguments holds references to all the engine systems (asset loader, time, input, sound player).
 
+**Note:** These are already defined in the Tundra game template.
+
 ### Assets
 
 The engine supports automatic compilation and inclusion of raw assets (`.png`, `.obj`, `.wav`) to formats that the engine can load and use. 
 
 #### Include asset
 
-Assets are added in CMake using the `td_target_assets` like so:
+Assets are added in the `assets.cmake` file like so:
 
 ```cmake
-td_target_assets(<target> <path to asset directory> 
+set(ASSETS
 	<asset>
 	...
 	<asset>
 )
 ```
 
-**Note:** in the game template, this is done slightly different.
-
 Each `<asset>` is of the format:
 
 ```cmake
-<type> <code name> <path> <param> ... <param>
+<type> <code-name> <path> <param> ... <param>
 ```
 
 where
 
 - `type`: type of the asset, is either `MODEL`, `TEXTURE` or `SOUND`
-- `code`: the name of the global variable in code pointing to the asset data
+- `code-name`: the name of the global variable in code pointing to the asset data
 - `path`: path to the asset, relative to the asset directory
 - `param`: optional parameters on the asset, depending on the asset type (see assets types below)
 
@@ -267,9 +274,9 @@ The asset must then be loaded using the `AssetLoader`:
 extern void initialize(td::EngineSystems& engine_systems) {
     td::AssetLoader& asset_loader = engine_systems.asset_loader;
     
-    td::ModelAsset* model = asset_loader.load_model(<model asset>);
-    td::TextureAsset* texture = asset_loader.load_texture(<texture asset>);
-    td::SoundAsset* sound = asset_loader.load_sound(<model asset>);
+    td::ModelAsset* model = asset_loader.load_model(<code name>);
+    td::TextureAsset* texture = asset_loader.load_texture(<code name>);
+    td::SoundAsset* sound = asset_loader.load_sound(<code name>);
 }
 ```
 
@@ -313,11 +320,7 @@ The game object system consists of two concepts: *components* and *entities*.
 - *Component*: customizable data type (through inheritance) to which arbitrary systems can apply behavior through iteration.
 - *Entity*: a group of component.
 
-The relevant headers are:
-
-- `<tundra/engine/entity-system/component.hpp>`
-- `<tundra/engine/entity-system/entity.hpp>`
-- `<tundra/engine/entity-system/component-ref.hpp>`
+The relevant headers are  found in: `<tundra/engine/entity-system/..>`
 
 #### Defining custom component
 
@@ -359,7 +362,7 @@ This provides flexibility, as it allows any system to apply any logic to any num
 
 #### Component references
 
-Entity and component memory addresses are stable, so you can safely store their pointers. But the system also has a *reference count* mechanism, that allows you to avoid dangling pointers by using the `ComponentRef` class. The `ComponentRef` will automatically be `nullptr` if the component that it references is destroyed.
+Entity and component memory addresses are stable, so you can safely store their pointers. But the system also has a *reference count* mechanism, that allows you to avoid [dangling pointers](https://en.wikipedia.org/wiki/Dangling_pointer) by using the `ComponentRef` class. The `ComponentRef` will automatically be `nullptr` if the component that it references is destroyed.
 
 ```c++
 #include <tundra/engine/entity-system/component-ref.hpp>
@@ -440,7 +443,7 @@ The engine automatically runs the rendering logic after the `update(..)` functio
 
 - Adjusting lighting settings in the `RenderSystem` accessed via the `EngineSystems` (ambient lighting and 3 directional lights are available)
 - Setup a `Camera` component along with *layer settings*
-- Create *renderable components* that are either  `Model`, `Sprite` and `Text`
+- Create *renderable components* that are either Model`, `Sprite` and `Text`
 
 #### Camera
 
@@ -473,7 +476,7 @@ All renderable components are assigned to a *layer*, which is just an integer ID
 
 **Note:** Because you currently cannot set which part of the framebuffer that a camera renders to, the multiple camera functionality is not all that useful (e.g. you cannot do split screen or a rearview camera).
 
-Every camera can setup its own depth settings for every: how far it renders and the resolution of the depth (number of distinct depth values in the depth range). Increasing the resolution, increases the memory overhead of the camera (2 bytes per value). 
+Every camera can setup its own depth settings for every layer: how far it renders and the resolution of the depth (number of distinct depth values in the depth range). Increasing the resolution, increases the memory overhead of the camera (2 bytes per value). 
 
 *Example:*
 
@@ -528,11 +531,9 @@ sprite->position = { 64, 64 };
 
 Screen space is 320x240 with (0, 0) being top left and (320,240) being bottom right.
 
-**Note:** I never got around to implement 2D transforms for Tundra.
-
 #### Text
 
-Tundra does not have proper UI text support, but it exposes *psn00bsdk*'s  *debug font* API via the component system.
+Tundra does not have proper UI text support, but it exposes *psn00bsdk*'s *debug font* API via the component system.
 
 ```c++
 td::uint32* layer = /* .. */;
@@ -544,8 +545,6 @@ text_component->position = { 64, 64};
 ```
 
 The text is limited in that you cannot change the text's font, size, color or rotation.
-
-
 
 ### Sound
 
@@ -617,7 +616,7 @@ They support most of the operators you will need such as addition, subtraction, 
 
 Integers (both constant expressions and non-constant expressions) can implicitly be cast to a fixed-pointer number:
 
-```
+```c++
 int i = /* value from somewhere */;
 td::Fixed16<12> f = 15;
 td::Fixed32<12> f = i;
@@ -698,7 +697,7 @@ td::String td::to_string(const MyStruct& my_struct) {
 
 ##### Debug log
 
-To utilize `String` for printing, you can use the `TD_DEBUG_LOG` macro from `<tundra/core/log.hpp>` header. This uses `printf`-like formatting, but it can also print `Strings` and types that has a `td::to_string` implementation using the  `%s` format:
+To utilize `String` for printing, you can use the `TD_DEBUG_LOG` macro from `<tundra/core/log.hpp>` header. This uses `printf`-like formatting, but it can also print `String` objeccts and types that has a `td::to_string` implementation using the  `%s` format:
 
 ```c++
 TD_DEBUG_LOG("%d", 42);
@@ -799,7 +798,7 @@ The *physical layout* of the engine mostly follows [The Pitchfork Layout](https:
   - This is split into `base`, `developer` and `playstation`
   - These headers cannot include anything from `src`
   - Anything in `include/base/core/` must not include anything outside that folder
-- `src`: Contains all the source files and header files that are not part of the engine API
+- `src`: Contains all the source and header files that are not part of the engine API
   - Can include headers from `include`
 - `tests`: contains test source code and data
   - `tests/data/`: assets used for tests
@@ -813,7 +812,7 @@ The *physical layout* of the engine mostly follows [The Pitchfork Layout](https:
 - `external`: contains all the external dependencies for the engine, including both tools and libraries
 - `.vscode`: it is intentional that this is included in the repository as it contains debugging configurations and *clangd* settings (for syntax highlighting)
 
-### 
+
 
 ### Build
 
@@ -901,5 +900,28 @@ To update the engine of the template repository, or a copy of it (i.e. a game or
 
 ## Benchmarks
 
+The GIF shows a demo of a short 15-seconds benchmarking game. 
 
+![](data/benchmark-demo.gif)
+
+### **Statistics**
+
+The statistics are measured on an actual PlayStation model SCPH-7502 (PAL). They just gives a rough overview, and it is not a "real" game nor is it optimized, but the benchmark hints at what the engine is capable of.
+
+- Runs at 25 FPS (common framerate for PSX games)
+- 32 - 43 *model components* processed every frame
+- 297 - 812 triangles rendered every frame
+- 110 - 160 components simulated
+- Render stage (submitting to GPU) takes 18.7 - 30.7 ms
+- Rasterizing (GPU) takes 10.2 - 13.3 ms (runs in parallel with rest of frame)
+- Simulation stage (movement, collision etc.) takes 5.2 - 7.8 ms
+- Uses a total 250 KiB memory, including 121 KiB code and assets (rest is heap)
+- 500 KiB VRAM used (~50%)
+- 268 KiB SRAM used (~50%)
+
+**Note:** The engine has few culling mechanism meaning even the invisible geometry incurs a significant cost.
+
+### Asset credit
+
+The demo uses assets from the [Space Kit](https://kenney.nl/assets/space-kit) by Kenney, along with some custom-made assets.
 
