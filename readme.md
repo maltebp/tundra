@@ -7,6 +7,8 @@ While it *was* and *can be* used for developing a game with, doing so you will l
 
 One small game made with the engine is [Color Cannon Coop](https://jesperpapiorgmailcom.itch.io/colorcannoncoop) made at *Nordic Game Jam 2024*.
 
+![Color Cannon Co-op (GIF)](data/color-cannon-coop.gif)
+
 ### Content
 
 - [Thesis](#Thesis)
